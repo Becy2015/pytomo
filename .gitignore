@@ -1,0 +1,12 @@
+*~
+.*.swp
+*.pyc
+
+logs
+results
+databases
+
+*.spec
+MANIFEST
+warn*.txt
+
