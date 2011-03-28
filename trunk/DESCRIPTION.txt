@@ -1,3 +1,4 @@
+======
 PYTOMO
 ======
 
@@ -11,7 +12,7 @@ PYTOMO
 Description
 -----------
 
-Pytomo is a Python based tomographic tool to perform analysis of Youtube video
+Pytomo is a Python based tomographic tool to perform analysis of YouTube video
 download rates. We first select an initial list of videos that we would like to
 start the analysis with. For the videos in this list the Pytomo tool first finds
 the IP address of the cache servers on which these videos are located. The cache
@@ -114,7 +115,7 @@ lib_youtube_download.py
 ^^^^^^^^^^^^^^^^^^^^^^^
 Module to download youtube video for a limited amount of time and calculate the 
 different statistics needed for the analysis. It has the FileDownloader class 
-and the Youtube InfoExtractor class. The following functions defined in this module are used to get the statistics of the download.  
+and the YouTube InfoExtractor class. The following functions defined in this module are used to get the statistics of the download.  
 
 **Usage**
     Terminal:
@@ -166,7 +167,7 @@ Module to generate the RTT times of a ping.
 lib_cache_url.py
 ^^^^^^^^^^^^^^^^
 Module to retrieve the related videos from a file with a list of 
-Youtube links and to store it for next round of the crawl.  
+YouTube links and to store it for next round of the crawl.  
 
 **Usage**
     Terminal: 
@@ -180,7 +181,7 @@ Youtube links and to store it for next round of the crawl.
 
 **Arguments**
     **url_file_in:** 
-        File with a list of URLs to crawl (only Youtube is implemented).
+        File with a list of URLs to crawl (only YouTube is implemented).
     **max_per_page:**
         Number of links to consider per page(only the first MAX_PER_PAGE 
         related video links will be considered).
@@ -198,9 +199,9 @@ Youtube links and to store it for next round of the crawl.
     **get_all_links(url):**
         Returns a list of all links from the url.
     **get_youtube_links(url, max_per_page):**
-        Returns a set of links that direct to Youtube. All the
+        Returns a set of links that direct to YouTube. All the
     **trunk_url(url):**
-        Returns the interesting part of a Youtube url(the url with
+        Returns the interesting part of a YouTube url(the url with
         only the video ID).
     **get_related_urls(url, max_per_page, max_per_url):**
         Return a set of max_per_url links from max_per_page randomly
@@ -211,7 +212,7 @@ Youtube links and to store it for next round of the crawl.
        
 lib_youtube_api.py
 ^^^^^^^^^^^^^^^^^^
-Function to get the most popular Youtube videos according to the time frame.
+Function to get the most popular YouTube videos according to the time frame.
  
 **Usage**
     Not meant to be called directly. But provides one function as discussed 
@@ -262,7 +263,7 @@ dns
 ~~~
 This is the `DNS Python Package`_ (Version : 1.9.2) that is used to obtain the nameservers for
 the machine and also to send DNS queries to the nameservers to obtain the
-IP addresses of the Youtube cache servers.
+IP addresses of the YouTube cache servers.
 
 logs/
 ~~~~~
@@ -275,7 +276,7 @@ The columns of the database are as follows:
         
 * Timestamp -  A timestamp indicating the time of inserting the row.
 * Service 	- The website on which the analysis is performed.
-                    	  Example: Youtube, Megavideo.
+                    	  Example: YouTube, Megavideo.
 * Url 		- The url of the webpage.
 * CacheUrl 	- The Url of the cache server hosting the video.
 * IP 		- The IP address of the cache server from which the 
@@ -315,10 +316,10 @@ accumulated_buffer size, accumulated_playback , current_remaining buffer]
 External Links
 --------------
 
-1. `Youtube Download`_.
+1. `YouTube Download`_.
 2. `Kaa Metadata Python Package`_.
 3. `DNS Python Package`_
 
-.. _Youtube Download: http://rg3.github.com/youtube-dl/
+.. _YouTube Download: http://rg3.github.com/youtube-dl/
 .. _Kaa Metadata Python Package: http://packages.debian.org/sid/python-kaa-metadata
 .. _DNS Python Package: http://pypi.python.org/pypi/dnspython
