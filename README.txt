@@ -5,15 +5,6 @@ PYTOMO
 Pytomo is a YouTube crawler designed to figure out network information out of
 YouTube video download.
 
-Installation-free
------------------
-In order to provide installation-free package, we provide binary executables
-for Linux (32 and 64bits), Windows, and Mac OS X.
-The binaries files were generated with Pyinstaller_ (version 1.5RC1).
-
-If you have Python installed, you can directly run the pytomo script in bin
-directory.
-
 Usage
 -----
 pytomo [-r max_rounds] [-u max_crawled_url] [-p max_per_url] 
@@ -41,6 +32,14 @@ pytomo [-r max_rounds] [-u max_crawled_url] [-p max_per_url]
                             'CRITICAL' (default 'DEBUG')
       --http-proxy=PROXIES  in case of http proxy to reach Internet (default None)
 
+Installation-free
+-----------------
+In order to provide installation-free package, we provide binary executables
+for Linux (32 and 64bits), Windows, and Mac OS X.
+The binaries files were generated with Pyinstaller_ (version 1.5RC1).
+
+If you have Python installed, you can directly run the pytomo script in bin
+directory.
 
 External Resources
 ------------------
