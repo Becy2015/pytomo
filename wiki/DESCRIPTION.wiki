@@ -1,15 +1,12 @@
-PYTOMO
-======
+#labels Featured,Phase-Implementation
+=PYTOMO=
 
-:Author: Louis Plissonneau, Parikshit Juluri, Mickaël Meulle
-:Version: $Revision: 0.1.0 $
-:Copyright: GPLv2
+  * Author: Louis Plissonneau, Parikshit Juluri, Mickaël Meulle
+  * Version: $Revision: 0.1.0 $
+  * Copyright: GPLv2
 
-.. contents:: Table of Contents
-.. section-numbering:: :depth: 3
 
-Description
------------
+=Description=
 
 Pytomo is a Python based tomographic tool to perform analysis of Youtube video
 download rates. We first select an initial list of videos that we would like to
@@ -19,33 +16,26 @@ server is pinged to obtain the RTT times. Then we try to download the video for
 a limited amount of time to calculate the different statistics of the download.
 
 
-Usage of the files  
-------------------
+=Usage of the files=
 
-url_file.txt
-~~~~~~~~~~~~
-    The file that from which consists of the initial links that are to be used
-    by the crawler.
-     
-Setup.py
-~~~~~~~~
+==Setup.py==
+
     The setup file used to create the python package.
 
-README.txt
-~~~~~~~~~~
-    This file.
+==DESCRIPTION.txt==
 
-pytomo/
-~~~~~~~
-    This folder contains the pytomo package. The contents of it are listed
-    below.
+    This file in RestructuredText.
 
-start_pytomo.py: 
-^^^^^^^^^^^^^^^^^
+==pytomo/==
+
+    This folder contains the pytomo package. The contents of it are listed below.
+
+===start_pytomo.py===
+
            
 The top-most module that is used to run the Pytomo tool.
         
-**Usage**:
+*Usage*:
     Terminal: 
         python start_pytomo.py
     Interactive python:
@@ -53,42 +43,42 @@ The top-most module that is used to run the Pytomo tool.
         import config_pytomo
         start_pytomo.main()
                 
-**Functions**.:
+*Functions*:
     
-    **compute_stats(url)**
+    *compute_stats(url)*
         Return a list of the statistics related to the url.The
         contents of the list are : (url, cache_url, current_stats)
         where current_stats is a list containing: [Ping_times, 
         download_statistics, DNS resolver used]
                 
-    **format_stats(stats)**
+    *format_stats(stats)*
         Functions used to format the stats obtained from compute_stats function
 	so that they can be inserted into the sqlite3 database. The stats are 
         converted into a tuple. The arguments to this function is the list 
         returned by compute_stats().
 
-    **check_out_files(file_pattern, directory, timestamp):**
+    *check_out_files(file_pattern, directory, timestamp)*
        Returns a full path of the file used for the output. It checks if the 
        path exists, if not then the file is created in the path if possible 
        else it is created in the default user directory.
 
-    **do_crawl(result_stream=sys.stdout, timestamp=None):**
+    *do_crawl(result_stream=sys.stdout, timestamp=None)*
        Crawls the urls given by the url_file.txt(present in the package), The 
        crawl is performed upto MAX_ROUNDS or MAX_VISITED_URLS
     
-    **main(argv=None)**
+    *main(argv=None)*
         This is the program wrapper for the start_pytomo module. Is 
         is mainly used to setup and initialize the logging and 
         other startup parameters.
 
-config_pytomo.py
-^^^^^^^^^^^^^^^^
+===config_pytomo.py===
+
 
 File containing the various parameters and constants that are used for the 
 analysis. The following parameters determine the nature of the crawl.
 
-* INPUT_URL_FILE = The file that has the initial list of urls.
-* MAX_ROUNDS =  Maximum number of crawl rounds to performed.
+  * INPUT_URL_FILE = The file that has the initial list of urls.
+  * MAX_ROUNDS =  Maximum number of crawl rounds to performed.
 * MAX_CRAWLED_URLS = Max number of urls to be visited.
 * MAX_PER_URL =  Max number of related videos to be selected  from each url.
 * MAX_PER_PAGE = Max number of related videos to be considered for selection from each page
