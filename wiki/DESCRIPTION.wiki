@@ -1,4 +1,4 @@
-#labels Featured,Phase-Implementation
+#labels Phase-Implementation
 =PYTOMO=
 
   * Author: Louis Plissonneau, Parikshit Juluri, Mickaël Meulle
