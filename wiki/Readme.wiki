@@ -3,7 +3,7 @@
 
 = Introduction =
 
-Pytomo is a YouTube crawler designed to figure out network information out of YouTube video download.
+Pytomo is a `YouTube` crawler designed to figure out network information out of `YouTube` video download.
 
 = Usage =
 
@@ -38,26 +38,22 @@ pytomo [-r max_rounds] [-u max_crawled_url] [-p max_per_url]
 
 = Installation-free =
 
-In order to provide installation-free package, we provide binary executables
-for Linux (32 and 64bits), Windows, and Mac OS X.
+In order to provide installation-free package, we provide binary executables for Linux (32 and 64bits), Windows, and Mac OS X.
 The binaries files were generated with Pyinstaller (version 1.5RC1).
 
-If you have Python installed, you can directly run the pytomo script in bin
-directory.
+If you have Python installed, you can directly run the pytomo script in bin directory.
 
 = External Resources =
 
 We based the lib_youtube_download on `YouTube Download` script: we simplified it at most and include only the classes we needed (and only YouTube video retrieval).
 
-The dns module is taken from the `DNS Python Package`: we just modified rdata
-so that Pyinstaller include all needed modules.
+The dns module is taken from the `DNS Python Package`: we just modified rdata so that Pyinstaller include all needed modules.
 
-The extraction of metadata out of video files is an adaptation of `Kaa Metadata Python Package`: it has been modified in order to be independent of Kaa-base
-(thus pure Python and portable).
+The extraction of metadata out of video files is an adaptation of `Kaa Metadata Python Package`: it has been modified in order to be independent of Kaa-base (thus pure Python and portable).
 
 == External Links ==
 
-  # YouTube Download: http://rg3.github.com/youtube-dl/
-  # Kaa Metadata Python Package: http://packages.debian.org/sid/python-kaa-metadata
-  # DNS Python Package: http://pypi.python.org/pypi/dnspython
-  # Pyinstaller: http://www.pyinstaller.org/
+  # `YouTube Download`: http://rg3.github.com/youtube-dl/
+  # `Kaa Metadata Python Package`: http://packages.debian.org/sid/python-kaa-metadata
+  # `DNS Python Package`: http://pypi.python.org/pypi/dnspython
+  # `Pyinstaller`: http://www.pyinstaller.org/
