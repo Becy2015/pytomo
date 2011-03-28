@@ -331,33 +331,32 @@ ul.auto-toc {
 <ul class="auto-toc simple">
 <li><a class="reference internal" href="#description" id="id2">1&nbsp;&nbsp;&nbsp;Description</a></li>
 <li><a class="reference internal" href="#usage-of-the-files" id="id3">2&nbsp;&nbsp;&nbsp;Usage of the files</a><ul class="auto-toc">
-<li><a class="reference internal" href="#url-file-txt" id="id4">2.1&nbsp;&nbsp;&nbsp;url_file.txt</a></li>
-<li><a class="reference internal" href="#setup-py" id="id5">2.2&nbsp;&nbsp;&nbsp;Setup.py</a></li>
-<li><a class="reference internal" href="#readme-txt" id="id6">2.3&nbsp;&nbsp;&nbsp;README.txt</a></li>
-<li><a class="reference internal" href="#id1" id="id7">2.4&nbsp;&nbsp;&nbsp;pytomo/</a><ul class="auto-toc">
-<li><a class="reference internal" href="#start-pytomo-py" id="id8">2.4.1&nbsp;&nbsp;&nbsp;start_pytomo.py:</a></li>
-<li><a class="reference internal" href="#config-pytomo-py" id="id9">2.4.2&nbsp;&nbsp;&nbsp;config_pytomo.py</a></li>
-<li><a class="reference internal" href="#lib-youtube-download-py" id="id10">2.4.3&nbsp;&nbsp;&nbsp;lib_youtube_download.py</a></li>
-<li><a class="reference internal" href="#lib-dns-py" id="id11">2.4.4&nbsp;&nbsp;&nbsp;lib_dns.py</a></li>
-<li><a class="reference internal" href="#lib-ping-py" id="id12">2.4.5&nbsp;&nbsp;&nbsp;lib_ping.py</a></li>
-<li><a class="reference internal" href="#lib-cache-url-py" id="id13">2.4.6&nbsp;&nbsp;&nbsp;lib_cache_url.py</a></li>
-<li><a class="reference internal" href="#lib-youtube-api-py" id="id14">2.4.7&nbsp;&nbsp;&nbsp;lib_youtube_api.py</a></li>
-<li><a class="reference internal" href="#lib-database-py" id="id15">2.4.8&nbsp;&nbsp;&nbsp;lib_database.py</a></li>
+<li><a class="reference internal" href="#setup-py" id="id4">2.1&nbsp;&nbsp;&nbsp;setup.py</a></li>
+<li><a class="reference internal" href="#readme-txt" id="id5">2.2&nbsp;&nbsp;&nbsp;README.txt</a></li>
+<li><a class="reference internal" href="#id1" id="id6">2.3&nbsp;&nbsp;&nbsp;pytomo/</a><ul class="auto-toc">
+<li><a class="reference internal" href="#start-pytomo-py" id="id7">2.3.1&nbsp;&nbsp;&nbsp;start_pytomo.py:</a></li>
+<li><a class="reference internal" href="#config-pytomo-py" id="id8">2.3.2&nbsp;&nbsp;&nbsp;config_pytomo.py</a></li>
+<li><a class="reference internal" href="#lib-youtube-download-py" id="id9">2.3.3&nbsp;&nbsp;&nbsp;lib_youtube_download.py</a></li>
+<li><a class="reference internal" href="#lib-dns-py" id="id10">2.3.4&nbsp;&nbsp;&nbsp;lib_dns.py</a></li>
+<li><a class="reference internal" href="#lib-ping-py" id="id11">2.3.5&nbsp;&nbsp;&nbsp;lib_ping.py</a></li>
+<li><a class="reference internal" href="#lib-cache-url-py" id="id12">2.3.6&nbsp;&nbsp;&nbsp;lib_cache_url.py</a></li>
+<li><a class="reference internal" href="#lib-youtube-api-py" id="id13">2.3.7&nbsp;&nbsp;&nbsp;lib_youtube_api.py</a></li>
+<li><a class="reference internal" href="#lib-database-py" id="id14">2.3.8&nbsp;&nbsp;&nbsp;lib_database.py</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#kaa-metadata" id="id16">2.5&nbsp;&nbsp;&nbsp;kaa_metadata</a></li>
-<li><a class="reference internal" href="#dns" id="id17">2.6&nbsp;&nbsp;&nbsp;dns</a></li>
-<li><a class="reference internal" href="#logs" id="id18">2.7&nbsp;&nbsp;&nbsp;logs/</a></li>
-<li><a class="reference internal" href="#databases" id="id19">2.8&nbsp;&nbsp;&nbsp;databases/</a></li>
-<li><a class="reference internal" href="#results" id="id20">2.9&nbsp;&nbsp;&nbsp;results/</a></li>
+<li><a class="reference internal" href="#kaa-metadata" id="id15">2.4&nbsp;&nbsp;&nbsp;kaa_metadata</a></li>
+<li><a class="reference internal" href="#dns" id="id16">2.5&nbsp;&nbsp;&nbsp;dns</a></li>
+<li><a class="reference internal" href="#logs" id="id17">2.6&nbsp;&nbsp;&nbsp;logs/</a></li>
+<li><a class="reference internal" href="#databases" id="id18">2.7&nbsp;&nbsp;&nbsp;databases/</a></li>
+<li><a class="reference internal" href="#results" id="id19">2.8&nbsp;&nbsp;&nbsp;results/</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#external-links" id="id21">3&nbsp;&nbsp;&nbsp;External Links</a></li>
+<li><a class="reference internal" href="#external-links" id="id20">3&nbsp;&nbsp;&nbsp;External Links</a></li>
 </ul>
 </div>
 <div class="section" id="description">
 <h1><a class="toc-backref" href="#id2">1&nbsp;&nbsp;&nbsp;Description</a></h1>
-<p>Pytomo is a Python based tomographic tool to perform analysis of Youtube video
+<p>Pytomo is a Python based tomographic tool to perform analysis of YouTube video
 download rates. We first select an initial list of videos that we would like to
 start the analysis with. For the videos in this list the Pytomo tool first finds
 the IP address of the cache servers on which these videos are located. The cache
@@ -366,29 +365,23 @@ a limited amount of time to calculate the different statistics of the download.<
 </div>
 <div class="section" id="usage-of-the-files">
 <h1><a class="toc-backref" href="#id3">2&nbsp;&nbsp;&nbsp;Usage of the files</a></h1>
-<div class="section" id="url-file-txt">
-<h2><a class="toc-backref" href="#id4">2.1&nbsp;&nbsp;&nbsp;url_file.txt</a></h2>
-<blockquote>
-The file that from which consists of the initial links that are to be used
-by the crawler.</blockquote>
-</div>
 <div class="section" id="setup-py">
-<h2><a class="toc-backref" href="#id5">2.2&nbsp;&nbsp;&nbsp;Setup.py</a></h2>
+<h2><a class="toc-backref" href="#id4">2.1&nbsp;&nbsp;&nbsp;setup.py</a></h2>
 <blockquote>
 The setup file used to create the python package.</blockquote>
 </div>
 <div class="section" id="readme-txt">
-<h2><a class="toc-backref" href="#id6">2.3&nbsp;&nbsp;&nbsp;README.txt</a></h2>
+<h2><a class="toc-backref" href="#id5">2.2&nbsp;&nbsp;&nbsp;README.txt</a></h2>
 <blockquote>
 This file.</blockquote>
 </div>
 <div class="section" id="id1">
-<h2><a class="toc-backref" href="#id7">2.4&nbsp;&nbsp;&nbsp;pytomo/</a></h2>
+<h2><a class="toc-backref" href="#id6">2.3&nbsp;&nbsp;&nbsp;pytomo/</a></h2>
 <blockquote>
 This folder contains the pytomo package. The contents of it are listed
 below.</blockquote>
 <div class="section" id="start-pytomo-py">
-<h3><a class="toc-backref" href="#id8">2.4.1&nbsp;&nbsp;&nbsp;start_pytomo.py:</a></h3>
+<h3><a class="toc-backref" href="#id7">2.3.1&nbsp;&nbsp;&nbsp;start_pytomo.py:</a></h3>
 <p>The top-most module that is used to run the Pytomo tool.</p>
 <dl class="docutils">
 <dt><strong>Usage</strong>:</dt>
@@ -430,7 +423,7 @@ other startup parameters.</dd>
 </blockquote>
 </div>
 <div class="section" id="config-pytomo-py">
-<h3><a class="toc-backref" href="#id9">2.4.2&nbsp;&nbsp;&nbsp;config_pytomo.py</a></h3>
+<h3><a class="toc-backref" href="#id8">2.3.2&nbsp;&nbsp;&nbsp;config_pytomo.py</a></h3>
 <p>File containing the various parameters and constants that are used for the
 analysis. The following parameters determine the nature of the crawl.</p>
 <ul>
@@ -442,7 +435,8 @@ analysis. The following parameters determine the nature of the crawl.</p>
 </li>
 <li><p class="first">MAX_PER_URL =  Max number of related videos to be selected  from each url.</p>
 </li>
-<li><p class="first">MAX_PER_PAGE = Max number of related videos to be considered for selection from each page</p>
+<li><p class="first">MAX_PER_PAGE = Max number of related videos to be considered for selection
+from each page</p>
 </li>
 <li><dl class="first docutils">
 <dt>EXTRA_NAME_SERVERS = A list containing the name of the resolver and its IP</dt>
@@ -486,10 +480,12 @@ address of the youtube cache</p>
 </ul>
 </div>
 <div class="section" id="lib-youtube-download-py">
-<h3><a class="toc-backref" href="#id10">2.4.3&nbsp;&nbsp;&nbsp;lib_youtube_download.py</a></h3>
+<h3><a class="toc-backref" href="#id9">2.3.3&nbsp;&nbsp;&nbsp;lib_youtube_download.py</a></h3>
 <p>Module to download youtube video for a limited amount of time and calculate the
-different statistics needed for the analysis. It has the FileDownloader class
-and the Youtube InfoExtractor class. The following functions defined in this module are used to get the statistics of the download.</p>
+different statistics needed for the analysis.
+It has the FileDownloader class and the YouTube InfoExtractor class.
+The following functions defined in this module are used to get the statistics
+of the download.</p>
 <dl class="docutils">
 <dt><strong>Usage</strong></dt>
 <dd><dl class="first last docutils">
@@ -512,7 +508,7 @@ current_remaining buffer]</dd>
 </dl>
 </div>
 <div class="section" id="lib-dns-py">
-<h3><a class="toc-backref" href="#id11">2.4.4&nbsp;&nbsp;&nbsp;lib_dns.py</a></h3>
+<h3><a class="toc-backref" href="#id10">2.3.4&nbsp;&nbsp;&nbsp;lib_dns.py</a></h3>
 <p>Module to retrieve the IP address of a URL out of a set of
 nameservers(default nameservers and the ones provided in the
 config_pytomo file as EXTRA_NAME_SERVERS)</p>
@@ -533,7 +529,7 @@ used.</dd>
 </blockquote>
 </div>
 <div class="section" id="lib-ping-py">
-<h3><a class="toc-backref" href="#id12">2.4.5&nbsp;&nbsp;&nbsp;lib_ping.py</a></h3>
+<h3><a class="toc-backref" href="#id11">2.3.5&nbsp;&nbsp;&nbsp;lib_ping.py</a></h3>
 <p>Module to generate the RTT times of a ping.</p>
 <dl class="docutils">
 <dt><strong>Usage</strong></dt>
@@ -549,9 +545,9 @@ designed to work with Windows and Linux systems.</dd>
 </dl>
 </div>
 <div class="section" id="lib-cache-url-py">
-<h3><a class="toc-backref" href="#id13">2.4.6&nbsp;&nbsp;&nbsp;lib_cache_url.py</a></h3>
+<h3><a class="toc-backref" href="#id12">2.3.6&nbsp;&nbsp;&nbsp;lib_cache_url.py</a></h3>
 <p>Module to retrieve the related videos from a file with a list of
-Youtube links and to store it for next round of the crawl.</p>
+YouTube links and to store it for next round of the crawl.</p>
 <dl class="docutils">
 <dt><strong>Usage</strong></dt>
 <dd><dl class="first last docutils">
@@ -570,7 +566,7 @@ max_per_url=5, out_file_name=None, pickle_output=False])</div>
 <dt><strong>Arguments</strong></dt>
 <dd><dl class="first last docutils">
 <dt><strong>url_file_in:</strong></dt>
-<dd>File with a list of URLs to crawl (only Youtube is implemented).</dd>
+<dd>File with a list of URLs to crawl (only YouTube is implemented).</dd>
 <dt><strong>max_per_page:</strong></dt>
 <dd>Number of links to consider per page(only the first MAX_PER_PAGE
 related video links will be considered).</dd>
@@ -590,9 +586,9 @@ file</dd>
 <dt><strong>get_all_links(url):</strong></dt>
 <dd>Returns a list of all links from the url.</dd>
 <dt><strong>get_youtube_links(url, max_per_page):</strong></dt>
-<dd>Returns a set of links that direct to Youtube. All the</dd>
+<dd>Returns a set of links that direct to YouTube. All the</dd>
 <dt><strong>trunk_url(url):</strong></dt>
-<dd>Returns the interesting part of a Youtube url(the url with
+<dd>Returns the interesting part of a YouTube url(the url with
 only the video ID).</dd>
 <dt><strong>get_related_urls(url, max_per_page, max_per_url):</strong></dt>
 <dd>Return a set of max_per_url links from max_per_page randomly
@@ -605,8 +601,8 @@ videos.</dd>
 </dl>
 </div>
 <div class="section" id="lib-youtube-api-py">
-<h3><a class="toc-backref" href="#id14">2.4.7&nbsp;&nbsp;&nbsp;lib_youtube_api.py</a></h3>
-<p>Function to get the most popular Youtube videos according to the time frame.</p>
+<h3><a class="toc-backref" href="#id13">2.3.7&nbsp;&nbsp;&nbsp;lib_youtube_api.py</a></h3>
+<p>Function to get the most popular YouTube videos according to the time frame.</p>
 <dl class="docutils">
 <dt><strong>Usage</strong></dt>
 <dd>Not meant to be called directly. But provides one function as discussed
@@ -625,7 +621,7 @@ no particular order).</dd>
 </dl>
 </div>
 <div class="section" id="lib-database-py">
-<h3><a class="toc-backref" href="#id15">2.4.8&nbsp;&nbsp;&nbsp;lib_database.py</a></h3>
+<h3><a class="toc-backref" href="#id14">2.3.8&nbsp;&nbsp;&nbsp;lib_database.py</a></h3>
 <p>Module that creates and manages the database for th Pytomo results. It has
 a PytomoDatabase class.The columns of the database are listed in the docstring
 of the module.</p>
@@ -651,24 +647,24 @@ The PytomoDatabase class has the following functions:</p>
 </div>
 </div>
 <div class="section" id="kaa-metadata">
-<h2><a class="toc-backref" href="#id16">2.5&nbsp;&nbsp;&nbsp;kaa_metadata</a></h2>
+<h2><a class="toc-backref" href="#id15">2.4&nbsp;&nbsp;&nbsp;kaa_metadata</a></h2>
 <p>This is a stripped down version of the <a class="reference external" href="http://packages.debian.org/sid/python-kaa-metadata">Kaa Metadata Python Package</a> (Version :
 '0.7.7').The package has been modified to be used with the
 lib_youtube_download.py module so that we can obtain the metadata of the video.
 The main modification was to make it independent of kaa_base.</p>
 </div>
 <div class="section" id="dns">
-<h2><a class="toc-backref" href="#id17">2.6&nbsp;&nbsp;&nbsp;dns</a></h2>
+<h2><a class="toc-backref" href="#id16">2.5&nbsp;&nbsp;&nbsp;dns</a></h2>
 <p>This is the <a class="reference external" href="http://pypi.python.org/pypi/dnspython">DNS Python Package</a> (Version : 1.9.2) that is used to obtain the nameservers for
 the machine and also to send DNS queries to the nameservers to obtain the
-IP addresses of the Youtube cache servers.</p>
+IP addresses of the YouTube cache servers.</p>
 </div>
 <div class="section" id="logs">
-<h2><a class="toc-backref" href="#id18">2.7&nbsp;&nbsp;&nbsp;logs/</a></h2>
+<h2><a class="toc-backref" href="#id17">2.6&nbsp;&nbsp;&nbsp;logs/</a></h2>
 <p>This folder contains the log files generated by the logger. These files contain the log details generated during the crawl run.</p>
 </div>
 <div class="section" id="databases">
-<h2><a class="toc-backref" href="#id19">2.8&nbsp;&nbsp;&nbsp;databases/</a></h2>
+<h2><a class="toc-backref" href="#id18">2.7&nbsp;&nbsp;&nbsp;databases/</a></h2>
 <p>This folder contains the database files used to store the results.
 The columns of the database are as follows:</p>
 <ul>
@@ -676,7 +672,7 @@ The columns of the database are as follows:</p>
 </li>
 <li><dl class="first docutils">
 <dt>Service       - The website on which the analysis is performed.</dt>
-<dd><p class="first last">Example: Youtube, Megavideo.</p>
+<dd><p class="first last">Example: YouTube, Megavideo.</p>
 </dd>
 </dl>
 </li>
@@ -748,7 +744,7 @@ Example Google DNS, Local DNS</p>
 </ul>
 </div>
 <div class="section" id="results">
-<h2><a class="toc-backref" href="#id20">2.9&nbsp;&nbsp;&nbsp;results/</a></h2>
+<h2><a class="toc-backref" href="#id19">2.8&nbsp;&nbsp;&nbsp;results/</a></h2>
 <p>This folder contains the result files. The results in these file are listed in
 text format. It is a list containing [Video url, Cache url, IP address of cache
 server, Ping RTT times to the Cache server, Download stats, Name_IP_address of
@@ -758,9 +754,9 @@ accumulated_buffer size, accumulated_playback , current_remaining buffer]</p>
 </div>
 </div>
 <div class="section" id="external-links">
-<h1><a class="toc-backref" href="#id21">3&nbsp;&nbsp;&nbsp;External Links</a></h1>
+<h1><a class="toc-backref" href="#id20">3&nbsp;&nbsp;&nbsp;External Links</a></h1>
 <ol class="arabic simple">
-<li><a class="reference external" href="http://rg3.github.com/youtube-dl/">Youtube Download</a>.</li>
+<li><a class="reference external" href="http://rg3.github.com/youtube-dl/">YouTube Download</a>.</li>
 <li><a class="reference external" href="http://packages.debian.org/sid/python-kaa-metadata">Kaa Metadata Python Package</a>.</li>
 <li><a class="reference external" href="http://pypi.python.org/pypi/dnspython">DNS Python Package</a></li>
 </ol>

@@ -23,12 +23,7 @@ a limited amount of time to calculate the different statistics of the download.
 Usage of the files  
 ------------------
 
-url_file.txt
-~~~~~~~~~~~~
-    The file that from which consists of the initial links that are to be used
-    by the crawler.
-     
-Setup.py
+setup.py
 ~~~~~~~~
     The setup file used to create the python package.
 
@@ -64,7 +59,7 @@ The top-most module that is used to run the Pytomo tool.
                 
     **format_stats(stats)**
         Functions used to format the stats obtained from compute_stats function
-	so that they can be inserted into the sqlite3 database. The stats are 
+        so that they can be inserted into the sqlite3 database. The stats are 
         converted into a tuple. The arguments to this function is the list 
         returned by compute_stats().
 
@@ -92,7 +87,8 @@ analysis. The following parameters determine the nature of the crawl.
 * MAX_ROUNDS =  Maximum number of crawl rounds to performed.
 * MAX_CRAWLED_URLS = Max number of urls to be visited.
 * MAX_PER_URL =  Max number of related videos to be selected  from each url.
-* MAX_PER_PAGE = Max number of related videos to be considered for selection from each page
+* MAX_PER_PAGE = Max number of related videos to be considered for selection
+  from each page
 * EXTRA_NAME_SERVERS = A list containing the name of the resolver and its IP
                         address. This resolver will be used to get the IP 
                         address of the youtube cache
@@ -114,8 +110,10 @@ analysis. The following parameters determine the nature of the crawl.
 lib_youtube_download.py
 ^^^^^^^^^^^^^^^^^^^^^^^
 Module to download youtube video for a limited amount of time and calculate the 
-different statistics needed for the analysis. It has the FileDownloader class 
-and the YouTube InfoExtractor class. The following functions defined in this module are used to get the statistics of the download.  
+different statistics needed for the analysis.
+It has the FileDownloader class and the YouTube InfoExtractor class. 
+The following functions defined in this module are used to get the statistics
+of the download.  
 
 **Usage**
     Terminal:
