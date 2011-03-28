@@ -24,40 +24,66 @@ import platform
 
 import pytomo.config_pytomo as config_pytomo
 
-RTT_PATTERN_LINUX = (
-    r"rtt min/avg/max/mdev = (\d+.\d+)/(\d+.\d+)/(\d+.\d+)/\d+.\d+ ms")
+RTT_MATCH_LINUX = r"rtt min/avg/max/mdev = "
+RTT_PATTERN_LINUX = r"(\d+.\d+)/(\d+.\d+)/(\d+.\d+)/\d+.\d+ ms"
+PING_OPTION_LINUX = '-c'
+
+RTT_MATCH_WINDOWS = r"Minimum = "
 RTT_PATTERN_WINDOWS = (
     r"Minimum = (\d+)ms, Maximum = (\d+)ms, Average = (\d+)ms")
+PING_OPTION_WINDOWS = '-n'
 
-RTT_MATCH_WINDOWS = "Minimum = "
-RTT_MATCH_LINUX = "rtt min/avg/max/mdev = "
+RTT_MATCH_DARWIN = "round-trip min/avg/max/stddev = "
+RTT_PATTERN_DARWIN = RTT_PATTERN_LINUX
+PING_OPTION_DARWIN = PING_OPTION_LINUX
+
+def configure_ping_options(ping_packets=config_pytomo.PING_PACKETS):
+    "Store in config_pytomo module the global informations on platform"
+    current_system = platform.system()
+    if current_system == 'Linux':
+        config_pytomo.ping_option_nb_pkts = ' '.join((PING_OPTION_LINUX,
+                                                      str(ping_packets)))
+        config_pytomo.rtt_match = RTT_MATCH_LINUX
+        config_pytomo.rtt_pattern = ''.join((RTT_MATCH_LINUX,
+                                             RTT_PATTERN_LINUX))
+    elif (current_system == 'Microsoft' or current_system == 'Windows'):
+        config_pytomo.ping_option_nb_pkts = ' '.join((PING_OPTION_WINDOWS,
+                                                      str(ping_packets)))
+        config_pytomo.rtt_match = RTT_MATCH_WINDOWS
+        config_pytomo.rtt_pattern = ''.join((RTT_MATCH_WINDOWS,
+                                             RTT_PATTERN_WINDOWS))
+    elif current_system == 'Darwin':
+        config_pytomo.ping_option_nb_pkts = ' '.join((PING_OPTION_DARWIN,
+                                                      str(ping_packets)))
+        config_pytomo.rtt_match = RTT_MATCH_DARWIN
+        config_pytomo.rtt_pattern = ''.join((RTT_MATCH_DARWIN,
+                                             RTT_PATTERN_DARWIN))
+    else:
+        config_pytomo.LOG.warn("Ping option is not known on your system: %s"
+                               % current_system)
+        return None
+    config_pytomo.SYSTEM = current_system
+    return current_system
 
 def ping_ip(ip_address, ping_packets=config_pytomo.PING_PACKETS):
     "Return a list of the min, avg, max and mdev ping values"
-    current_system = platform.system()
-    if current_system == 'Linux':
-        ping_option_nb_pkts = '-c %d' % ping_packets
-        rtt_match = RTT_MATCH_LINUX
-        rtt_pattern = RTT_PATTERN_LINUX
-    elif (current_system == 'Microsoft' or current_system == 'Windows'):
-        ping_option_nb_pkts = '-n %d' % ping_packets
-        rtt_match = RTT_MATCH_WINDOWS
-        rtt_pattern = RTT_PATTERN_WINDOWS
-    else:
-        config_pytomo.LOG.warn("Ping option is not known on your system")
-        ping_option_nb_pkts = ''
-    my_cmd = 'ping %s %s' % (ping_option_nb_pkts, ip_address)
+    if not config_pytomo.SYSTEM:
+        current_system = configure_ping_options(ping_packets)
+        if not current_system:
+            config_pytomo.LOG.warn("Not able to process ping on your system")
+            return None
+    my_cmd = 'ping %s %s' % (config_pytomo.ping_option_nb_pkts, ip_address)
     ping_result = os.popen(my_cmd)
     rtt_stats = None
     # instead of grep which is less portable
     for rtt_line in ping_result:
-        if rtt_match in rtt_line:
+        if config_pytomo.rtt_match in rtt_line:
             rtt_stats = rtt_line.strip()
             break
     if not rtt_stats:
         config_pytomo.LOG.info("No RTT stats found")
         return None
-    rtt_times = re.search(rtt_pattern, rtt_stats)
+    rtt_times = re.search(config_pytomo.rtt_pattern, rtt_stats)
     if rtt_times:
         rtt_values = rtt_times.groups()
         config_pytomo.LOG.debug(
