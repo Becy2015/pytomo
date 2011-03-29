@@ -126,6 +126,7 @@ def do_crawl(result_stream=sys.stdout, db_file=None, timestamp=None):
     config_pytomo.LOG.critical('Start crawl')
     if not timestamp:
         timestamp = strftime("%Y-%m-%d.%H_%M_%S")
+    data_base = None
     if db_file:
         config_pytomo.DATABASE_TIMESTAMP = db_file
         trans_table = maketrans('.-', '__')
@@ -158,7 +159,7 @@ def do_crawl(result_stream=sys.stdout, db_file=None, timestamp=None):
             stats = compute_stats(url)
             if stats:
                 pprint(stats, stream=result_stream)
-                if db_file:
+                if data_base:
                     for row in format_stats(stats):
                         data_base.insert_record(row)
                 crawled_urls.add(url)
@@ -168,6 +169,8 @@ def do_crawl(result_stream=sys.stdout, db_file=None, timestamp=None):
         input_links = lib_cache_url.get_next_round_urls(input_links,
                                                         max_per_page,
                                                         max_per_url)
+    if data_base:
+        data_base.close_handle()
     config_pytomo.LOG.warn("Crawl finished\n" + config_pytomo.SEP_LINE)
 
 def convert_debug_level(option, opt_str, value, parser):

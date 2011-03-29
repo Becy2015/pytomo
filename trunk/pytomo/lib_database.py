@@ -50,6 +50,7 @@ class PytomoDatabase:
     """
 
     _table_name = None
+    created = None
 
     def __init__(self, database_file=config_pytomo.DATABASE_TIMESTAMP):
         "Initialize the database object"
@@ -57,13 +58,16 @@ class PytomoDatabase:
         if not config_pytomo.LOG:
             self.logger_db()
         try:
-            self.py_conn = sqlite3.connect(database_file)
-        except sqlite3.OperationalError, mes:
-            config_pytomo.LOG.error("unable to connect to the database: %s"
-                                    % mes)
-            exit(-1)
-        config_pytomo.LOG.info("Created connection to data base" +
-                               "Database: %s" % database_file)
+            # isolation_level in order to auto-commit
+            self.py_conn = sqlite3.connect(database_file, isolation_level=None)
+        except sqlite3.Error, mes:
+            config_pytomo.LOG.exception("Unable to connect to the database: %s"
+                                        % database_file)
+            self.created = False
+            return
+        config_pytomo.LOG.info(' '.join(("Created connection to data base",
+                                         "Database: %s" % database_file)))
+        self.created = True
         self.py_cursor = self.py_conn.cursor()
 
     def create_pytomo_table(self, table=config_pytomo.TABLE_TIMESTAMP):
@@ -71,6 +75,10 @@ class PytomoDatabase:
         # why a tuple?
         # Using Python's string operations makes it insecure (vulnerable
         # to SQL injection attack). Use of tuples makes it secure.
+        if not self.created:
+            config_pytomo.LOG.warn('Database could not be created\n'
+                                   'Table creation aborted')
+            return
         table_name = (table,)
         self._table_name = table
         cmd = ''.join(( "CREATE TABLE ", table,
@@ -84,28 +92,35 @@ class PytomoDatabase:
                       )"""))
         try:
             self.py_cursor.execute(cmd)
-            config_pytomo.LOG.info("Creating table : %s" % table_name)
-        except sqlite3.OperationalError, mes:
+        except sqlite3.Error, mes:
             config_pytomo.LOG.info("Table %s already exists: %s"
                                    % (table_name, mes))
-        self.py_conn.commit()
+        else:
+            config_pytomo.LOG.info("Creating table : %s" % table_name)
 
     def insert_record(self, row):
         "Function to insert a record"
+        if not self.created:
+            config_pytomo.LOG.warn('Database could not be created\n'
+                                   'Insertion aborted')
+            return
         cmd = ''.join(("INSERT INTO ", self._table_name,
                        " VALUES(current_timestamp",
                        ',?' * config_pytomo.NB_FIELDS, ')'))
         try:
             self.py_cursor.execute(cmd, row)
-        except sqlite3.OperationalError, mes:
+        except sqlite3.Error, mes:
             config_pytomo.LOG.error('unable to add row: %s with error: %s'
                                     % (row, mes))
         else:
             config_pytomo.LOG.debug('row added to table')
-            self.py_conn.commit()
 
     def fetch_all(self):
         "Function to print all the records of the table"
+        if not self.created:
+            config_pytomo.LOG.warn('Database could not be created\n'
+                                   'Fetch aborted')
+            return
         cmd = ' '.join(("SELECT * FROM", self._table_name))
         self.py_cursor.execute(cmd)
         for record in self.py_cursor:
@@ -113,7 +128,10 @@ class PytomoDatabase:
 
     def close_handle(self):
         "Closes the connection to the database"
-        self.py_conn.commit()
+        if not self.created:
+            config_pytomo.LOG.warn('Database could not be created\n'
+                                   'Close aborted')
+            return
         self.py_conn.close()
 
     @staticmethod
