@@ -62,12 +62,12 @@ register('video/avi', ('wav','avi'), 'video.riff')
 register('video/vcd', ('cue',), 'video.vcd')
 
 # Disc parsers
-register('audio/cd', EXTENSION_DEVICE, 'disc.audio')
-register('video/dvd', EXTENSION_DEVICE, 'disc.dvd')
-register('video/dvd', EXTENSION_DIRECTORY, 'disc.dvd')
-register('video/dvd', ('iso',), 'disc.dvd')
-register('video/vcd', EXTENSION_DEVICE, 'disc.vcd')
-register('cd/unknown', EXTENSION_DEVICE, 'disc.data')
+#register('audio/cd', EXTENSION_DEVICE, 'disc.audio')
+#register('video/dvd', EXTENSION_DEVICE, 'disc.dvd')
+#register('video/dvd', EXTENSION_DIRECTORY, 'disc.dvd')
+#register('video/dvd', ('iso',), 'disc.dvd')
+#register('video/vcd', EXTENSION_DEVICE, 'disc.vcd')
+#register('cd/unknown', EXTENSION_DEVICE, 'disc.data')
 
 # Image parsers
 if 0:
@@ -83,8 +83,8 @@ else:
     register('image/tiff', ('tif','tiff'), 'image.tiff')
 
 # Games parsers
-register('games/gameboy', ('gba', 'gb', 'gbc'), 'games.gameboy')
-register('games/snes', ('smc', 'sfc', 'fig'), 'games.snes')
+#register('games/gameboy', ('gba', 'gb', 'gbc'), 'games.gameboy')
+#register('games/snes', ('smc', 'sfc', 'fig'), 'games.snes')
 
 # Misc parsers
 register('directory', EXTENSION_DIRECTORY, 'misc.directory')

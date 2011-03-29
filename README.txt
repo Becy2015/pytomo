@@ -38,8 +38,8 @@ In order to provide installation-free package, we provide binary executables
 for Linux (32 and 64bits), Windows, and Mac OS X.
 The binaries files were generated with Pyinstaller_ (version 1.5RC1).
 
-If you have Python installed, you can directly run the pytomo script in bin
-directory.
+If you have Python installed, you can directly run the start_crawl.py script at
+root or the pytomo script in bin directory.
 
 External Resources
 ------------------

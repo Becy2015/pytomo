@@ -36,7 +36,8 @@ import locale
 try:
     ENCODING = locale.getdefaultlocale()[1]
     ''.encode(ENCODING)
-except (UnicodeError, TypeError):
+# added ValueError for Mac binary
+except (UnicodeError, TypeError, ValueError):
     ENCODING = 'latin-1'
 
 
