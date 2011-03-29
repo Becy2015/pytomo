@@ -1,5 +1,6 @@
-include README.txt
+include README.txt README.html
 include DESCRIPTION.txt DESCRIPTION.html
+include pytomo.man
 
 include pytomo*.spec
  

@@ -8,17 +8,9 @@ NNAAMMEE
        Pytomo  is a YouTube crawler designed to figure out network information
        out of YouTube video download.
 
-IINNSSTTAALLLLAATTIIOONN--FFRREEEE
-       In order to provide installation-free package, we provide  binary  exe‐
-       cutables  for  Linux (32 and 64bits), Windows, and Mac OS X.  The bina‐
-       ries files were generated with _P_y_i_n_s_t_a_l_l_e_r (version 1.5RC1).
-
-       If you have Python installed, you can directly run the pytomo script in
-       bin directory.
-
 UUSSAAGGEE
        pytomo  [-r  max_rounds]  [-u  max_crawled_url]  [-p  max_per_url]  [-P
-       max_per_page] [-t time_frame] [-n ping_packets] [-D download_time]  [-B
+       max_per_page]  [-t time_frame] [-n ping_packets] [-D download_time] [-B
        buffering_video_duration] [-M min_playout_buffer_size] [-L log_level]:
 
        Options:
@@ -41,6 +33,14 @@ UUSSAAGGEE
                                from: 'DEBUG', 'INFO', 'WARNING', 'ERROR' and
                                'CRITICAL' (default 'DEBUG')
          --http-proxy=PROXIES  in case of http proxy to reach Internet (default None)
+
+IINNSSTTAALLLLAATTIIOONN--FFRREEEE
+       In order to provide installation-free package, we provide  binary  exe‐
+       cutables  for  Linux (32 and 64bits), Windows, and Mac OS X.  The bina‐
+       ries files were generated with _P_y_i_n_s_t_a_l_l_e_r (version 1.5RC1).
+
+       If you have Python installed, you can directly run  the  start_crawl.py
+       script at root or the pytomo script in bin directory.
 
 EEXXTTEERRNNAALL RREESSOOUURRCCEESS
        We  based  the lib_youtube_download on _Y_o_u_T_u_b_e _D_o_w_n_l_o_a_d script: we sim‐

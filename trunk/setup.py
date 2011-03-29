@@ -18,29 +18,40 @@ python2.5 Build.py ~/streaming/pytomo/Pytomo/pytomo_named.spec
 
 """
 
-from distutils.core import setup
+import distutils.core
 
-VERSION = "0.1.1"
+distutils.core.USAGE = """NO SETUP IS NEEDED TO LAUNCH THE PROGRAM.
 
-LICENSE = "GPLv2"
+This setup is only used to generate the source distribution: './setup.py sdist'
+[other setup commands are described in './setup.py --help']
+
+Use './start_crawl.py' to start the crawl.
+You can check the options with 'start_crawl.py -h'.
+You can configure options in the command line of start_crawl.py or in the
+pytomo/config_pytomo.py file.
+"""
+
+VERSION = '0.1.2'
+
+LICENSE = 'GPLv2'
 
 KWARGS = {
-    'name': "Pytomo",
+    'name': 'Pytomo',
     'version': VERSION,
-    'description': "Python tomography tool",
-    'author': "Louis Plissonneau",
-    'author_email': "louis.plissonneau@gmail.com",
-    'url': "http://code.google.com/p/pytomo",
+    'description': 'Python tomography tool',
+    'author': 'Louis Plissonneau',
+    'author_email': 'louis.plissonneau@gmail.com',
+    'url': 'http://code.google.com/p/pytomo',
     'packages': ['pytomo','pytomo/dns', 'pytomo/dns/rdtypes',
                  'pytomo/dns/rdtypes/ANY', 'pytomo/dns/rdtypes/IN',
                  'pytomo/kaa_metadata', 'pytomo/kaa_metadata/audio',
-                 'pytomo/kaa_metadata/disc', 'pytomo/kaa_metadata/image',
-                 'pytomo/kaa_metadata/video', 'pytomo/kaa_metadata/games',
+                 'pytomo/kaa_metadata/image', 'pytomo/kaa_metadata/video',
                  'pytomo/kaa_metadata/misc'],
-    'scripts': ["bin/pytomo"],
+    'scripts': ['bin/pytomo', 'start_crawl.py'],
     'long_description': open('README.txt').read(),
-    'platforms': ["Linux", "Windows"],
+    'platforms': ['Linux', 'Windows'],
     'license': LICENSE,
 }
 
-setup(**KWARGS)
+distutils.core.setup(**KWARGS)
+
