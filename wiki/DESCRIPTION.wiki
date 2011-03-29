@@ -20,22 +20,22 @@ a limited amount of time to calculate the different statistics of the download.
 
 ==Setup.py==
 
-    The setup file used to create the python package.
+The setup file used to create the python package.
 
 ==DESCRIPTION.txt==
 
-    This file in RestructuredText.
+This file in RestructuredText.
 
 ==pytomo/==
 
-    This folder contains the pytomo package. The contents of it are listed below.
+This folder contains the pytomo package. The contents of it are listed below.
 
 ===startpytomo.py===
 
            
 The top-most module that is used to run the Pytomo tool.
         
-*Usage*:
+====Usage====:
     Terminal: 
         python startpytomo.py
     Interactive python:
@@ -43,33 +43,31 @@ The top-most module that is used to run the Pytomo tool.
         import configpytomo
         startpytomo.main()
                 
-*Functions*:
+====Functions====:
     
-    *computestats(url)*
-        Return a list of the statistics related to the url.The
-        contents of the list are : (url, cacheurl, currentstats)
-        where currentstats is a list containing: [Pingtimes, 
-        downloadstatistics, DNS resolver used]
-                
-    *formatstats(stats)*
-        Functions used to format the stats obtained from computestats function
-        so that they can be inserted into the sqlite3 database. The stats are 
-        converted into a tuple. The arguments to this function is the list 
-        returned by computestats().
+  * *computestats(url)*: Return a list of the statistics related to the url.The
+    contents of the list are : (url, cacheurl, currentstats) where currentstats
+    is a list containing: [Pingtimes, downloadstatistics, DNS resolver used]
 
-    *checkoutfiles(filepattern, directory, timestamp)*
-       Returns a full path of the file used for the output. It checks if the 
-       path exists, if not then the file is created in the path if possible 
-       else it is created in the default user directory.
+*formatstats(stats)*
+Functions used to format the stats obtained from computestats function
+so that they can be inserted into the sqlite3 database. The stats are 
+converted into a tuple. The arguments to this function is the list 
+returned by computestats().
 
-    *docrawl(resultstream=sys.stdout, timestamp=None)*
-       Crawls the urls given by the urlfile.txt(present in the package), The 
-       crawl is performed upto MAXROUNDS or MAXVISITEDURLS
-    
-    *main(argv=None)*
-        This is the program wrapper for the startpytomo module. Is 
-        is mainly used to setup and initialize the logging and 
-        other startup parameters.
+*checkoutfiles(filepattern, directory, timestamp)*
+Returns a full path of the file used for the output. It checks if the 
+path exists, if not then the file is created in the path if possible 
+else it is created in the default user directory.
+
+*docrawl(resultstream=sys.stdout, timestamp=None)*
+Crawls the urls given by the urlfile.txt(present in the package), The 
+crawl is performed upto MAXROUNDS or MAXVISITEDURLS
+
+*main(argv=None)*
+This is the program wrapper for the startpytomo module. Is 
+is mainly used to setup and initialize the logging and 
+other startup parameters.
 
 ===configpytomo.py===
 
