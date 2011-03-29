@@ -20,7 +20,7 @@ python2.5 Build.py ~/streaming/pytomo/Pytomo/pytomo_named.spec
 
 from distutils.core import setup
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 LICENSE = "GPLv2"
 
