@@ -2,12 +2,12 @@
 """Global launcher for the pytomo package
 """
 
-from os.path import abspath, dirname, sep
+from os.path import abspath, sep
 from sys import path
 
 # assumes the standard distribution paths
 PACKAGE_NAME = 'pytomo'
-PACKAGE_DIR = dirname(abspath(path[0]))
+PACKAGE_DIR = abspath(path[0])
 PACKAGE_SOURCES = sep.join((PACKAGE_DIR, PACKAGE_NAME))
 
 if PACKAGE_DIR not in path:
