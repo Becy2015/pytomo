@@ -49,9 +49,10 @@ KWARGS = {
                  'pytomo/kaa_metadata/misc'],
     'scripts': ['bin/pytomo', 'start_crawl.py'],
     'long_description': open('README.txt').read(),
-    'platforms': ['Linux', 'Windows'],
+    'platforms': ['Linux', 'Windows', 'Mac'],
     'license': LICENSE,
 }
+
 
 distutils.core.setup(**KWARGS)
 
