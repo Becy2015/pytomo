@@ -85,7 +85,7 @@ File containing the various parameters and constants that are used for the analy
 
 ===lib_youtube_download.py===
 
-Module to download youtube video for a limited amount of time and calculate the different statistics needed for the analysis. It has the FileDownloader class and the Youtube InfoExtractor class. The following functions defined in this module are used to get the statistics of the download.  
+Module to download youtube video for a limited amount of time and calculate the different statistics needed for the analysis. It has the !FileDownloader class and the !YoutubeInfoExtractor class. The following functions defined in this module are used to get the statistics of the download.  
 
 *Usage*
     Terminal:
@@ -261,7 +261,7 @@ The columns of the database are as follows:
     
 ==results/==
 
-This folder contains the result files. The results in these file are listed in text format. It is a list containing [Video url, Cache url, IP address of cache server, Ping RTT times to the Cache server, Download stats, Name - IP address of the DNS resolver] where Download stats = [downloadtime, data duration, datalength, video encodingrate, size of video in bytes, Nb.of interruptions, accumulated buffer-size, accumulated playback , current remaining buffer]
+This folder contains the result files. The results in these file are listed in text format. It is a list containing [Video url, Cache url, IP address of cache server, Ping RTT times to the Cache server, Download stats, Name - IP address of the !DNS resolver] where Download stats =! [downloadtime, data duration, datalength, video encodingrate, size of video in bytes, Nb.of interruptions, accumulated buffer-size, accumulated playback , current remaining buffer]
  
 
 ==External Links==
