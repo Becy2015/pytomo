@@ -4,6 +4,8 @@
   * Version: 0.1.0 
   * Copyright: GPLv2
 
+Table of Contents
+ <wiki:toc max_depth="1" />
 
 =Description=
 
@@ -129,7 +131,7 @@ Module to generate the RTT times of a ping.This module has been configured to wo
             
 *Functions*
     * * configure_ping_options(ping_packets = config_pytomo.PING_PACKETS ):* Function that generate the Regular Expression to match the RTT patterns on different operating systems.
-    * *ping_ip(ipaddress, [pingpackets=config_pytomo.PINGPACKETS]):*
+    * *ping_ip(ipaddress, [pingpackets=config_pytomo.PING_PACKETS]):*
         Returns a list of the min, avg and max ping values. Currently 
         designed to work with Windows, Mac and Linux systems.
                    
@@ -140,7 +142,7 @@ Youtube links and to store it for next round of the crawl.
 
 *Usage*
     Terminal: 
-        lib_cache_url.py [-w out_file] [-p 10] [-u 2] [-V] url_file_in
+        lib_cache_url.py *[*-w out_file*]* *[*-p 10*]* *[*-u 2*]* *[*-V*]* url_file_in
                 
     Interactive python:
 {{{
