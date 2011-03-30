@@ -129,7 +129,7 @@ Module to generate the RTT times of a ping.This module has been configured to wo
             
 *Functions*
     * * configure_ping_options(ping_packets = config_pytomo.PING_PACKETS ):* Function that generate the Regular Expression to match the RTT patterns on different operating systems.
-    * *ping_ip(ipaddress, [pingpackets=configpytomo.PINGPACKETS]):*
+    * *ping_ip(ipaddress, [pingpackets=config_pytomo.PINGPACKETS]):*
         Returns a list of the min, avg and max ping values. Currently 
         designed to work with Windows, Mac and Linux systems.
                    
@@ -144,34 +144,32 @@ Youtube links and to store it for next round of the crawl.
                 
     Interactive python:
 {{{
-         import libcacheurl
+         import lib_cache_url
          urlfilein = 'urlfile.txt'
-         libcacheurl.getnextroundurls(urlfilein, [maxperpage=20,
-             maxperurl=5, outfilename=None, pickleoutput=False])
+         lib_cache_url.get_next_round_urls(url_file_in, [max_per_page=20, max_per_url=5])
 }}}
 *Arguments*
    * *url_file_in:* 
         File with a list of URLs to crawl (only Youtube is implemented).
    * *max_per_page:*
-        Number of links to consider per page(only the first MAXPERPAGE 
+        Number of links to consider per page(only the first max_per_page 
         related video links will be considered).
    * *max_per_url:* 
-        Number of links to select per page (MAXPERURL links 
-        will be randomly selected out of the MAXPERPAGE
-        considered).
+        Number of links to select per page (max_per_url links 
+        will be randomly selected out of the max_per_page      considered).
    
 *Functions*
    * *get_all_links(url):*
         Returns a list of all links from the url.
    * *get_youtube_links(url, max_per_page):*
-        Returns a set of links that direct to Youtube. All the
+        Returns a set of links that direct to Youtube.
    * *trunk_url(url):*
         Returns the interesting part of a Youtube url(the url with
         only the video ID).
    * *get_related_urls(url, [max_per_page=20, max_per_url=5]):*
         Return a set of max_per_url links from max_per_page randomly
         chosen related urls (other links are ignored).
-   * *get_next_round_urls(inputlinks, maxperpage=20, maxperurl=5):*
+   * *get_next_round_urls(input_links, max_per_page=20, max_per_url=5):*
         Return a tuple of the set of input urls and a set of related url of videos.
        
 ===lib_youtube_api.py===
@@ -195,12 +193,12 @@ no particular order).
 Module that creates and manages the database for th Pytomo results. It has PytomoDatabase class.The columns of the database are listed in the docstring of the module.
 
 *Usage*
-    Not meant to be called directly but the PytomoDatabase class is to be used.
+    Not meant to be called directly but the !PytomoDatabase class is to be used.
 
 *Functions*
-The PytomoDatabase class has the following functions:
+The !PytomoDatabase class has the following functions:
 
-   * *create_pytomo_table(self, table=configpytomo.TABLETIMESTAMP):*
+   * *create_pytomo_table(self, table=configpytomo.TABLE_TIME_STAMP):*
         Function to create a table.
 
    * *insert_record(self, row):*
