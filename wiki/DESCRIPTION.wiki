@@ -1,4 +1,3 @@
-#labels Phase-Implementation
 =PYTOMO=
 
   * Author: Louis Plissonneau, Parikshit Juluri, Mickaël Meulle
@@ -8,12 +7,7 @@
 
 =Description=
 
-Pytomo is a Python based tomographic tool to perform analysis of Youtube video
-download rates. We first select an initial list of videos that we would like to
-start the analysis with. For the videos in this list the Pytomo tool first finds
-the IP address of the cache servers on which these videos are located. The cache
-server is pinged to obtain the RTT times. Then we try to download the video for
-a limited amount of time to calculate the different statistics of the download.
+Pytomo is a Python based tomographic tool to perform analysis of Youtube video download rates. We first select an initial list of videos that we would like to start the analysis with. For the videos in this list the Pytomo tool first finds the IP address of the cache servers on which these videos are located. The cache server is pinged to obtain the RTT times. Then we try to download the video for a limited amount of time to calculate the different statistics of the download.
 
 
 =Usage of the files=
@@ -25,6 +19,10 @@ The setup file used to create the python package.
 ==DESCRIPTION.txt==
 
 This file in RestructuredText.
+
+==start_crawl.py==
+
+This is the global launcher for the Pytomo tool.
 
 ==pytomo/==
 
@@ -48,63 +46,62 @@ The top-most module that is used to run the Pytomo tool.
 }}}     
 ====Functions====
     
-  * *computestats(url)*: Return a list of the statistics related to the url. The contents of the list are : (url, cache_url, current_stats) where currentstats is a list containing: [Ping_times, download_statistics, DNS resolver used]
+  * *computestats(url)* Return a list of the statistics related to the url. The contents of the list are : (url, cache_url, current_stats) where current_stats is a list containing: [Ping_times, download_statistics, DNS resolver used]
 
-  * *formatstats(stats)* Functions used to format the stats obtained from compute_stats function so that they can be inserted into the sqlite3 database. The stats are converted into a tuple. The arguments to this function is the list returned by computestats().
+  * *formatstats(stats)* Functions used to format the stats obtained from compute_stats function so that they can be inserted into the sqlite3 database. The stats are converted into a tuple. The arguments to this function is the list returned by compute_stats().
+
+  * *md5sum(input_file)* Function to generate the standard md5 of the 
+file. Done to cope with the large file values taken from Python distribution.
 
   * *checkoutfiles(filepattern, directory, timestamp)* Returns a full path of the file used for the output. It checks if the path exists, if not then the file is created in the path if possible else it is created in the default user directory.
 
-  * *docrawl(resultstream=sys.stdout, timestamp=None)* Crawls the urls given by the urlfile.txt(present in the package). The crawl is performed upto MAXROUNDS or MAXVISITEDURLS
+  * *docrawl(resultstream=sys.stdout, db_file=None, timestamp=None)* Crawls the urls given by the urlfile.txt(present in the package). The crawl is performed upto MAXROUNDS or MAXVISITEDURLS. The statistcal resuluts obtained are inserted into the db_file.
 
   * *main(argv=None)* This is the program wrapper for the startpytomo module. Is is mainly used to setup and initialize the logging and other startup parameters.
 
 ===configpytomo.py===
 
 
-File containing the various parameters and constants that are used for the 
-analysis. The following parameters determine the nature of the crawl.
+File containing the various parameters and constants that are used for the analysis. The following parameters determine the nature of the crawl.
 
   * MAXROUNDS =  Maximum number of crawl rounds to performed.
-  * MAXCRAWLEDURLS = Max number of urls to be visited.
-  * MAXPERURL =  Max number of related videos to be selected  from each url.
-  * MAXPERPAGE = Max number of related videos to be considered for selection from each page
-  * EXTRANAMESERVERS = A list containing the name of the resolver and its IP address. This resolver will be used to get the IP address of the youtube cache.
-  * PINGPACKETS = Nb, of ping packets to be sent.
-  * DOWNLOADTIME = The duration for which the video must be downloaded.
-  * BUFFERINGVIDEODURATION = The duration for which the video is to be
+  * MAX_CRAWLED_URLS = Max number of urls to be visited.
+  * MAX_PER_URL =  Max number of related videos to be selected  from each url.
+  * MAX_PER_PAGE = Max number of related videos to be considered for selection from each page
+  * EXTRA_NAME_SERVERS = A list containing the name of the resolver and its IP address. This resolver will be used to get the IP address of the youtube cache.
+  * PING_PACKETS = Nb, of ping packets to be sent.
+  * DOWNLOAD_TIME = The duration for which the video must be downloaded.
+  * BUFFERING_VIDEO_DURATION = The duration for which the video is to be
                                buffer.
-  * MINPLAYOUTBUFFERSIZE = The size of the buffer for the video stream.
-  * RESULTDIR = The directory to store the text results.
-  * RESULTFILE = The file to store the text results.
-  * DATABASEDIR = The directory to store the result database.
+  * MIN_PLAYOUT_BUFFER_SIZE = The size of the buffer for the video stream.
+  * RESULT_DIR = The directory to store the text results.
+  * RESULT_FILE = The file to store the text results.
+  * DATABASE_DIR = The directory to store the result database.
   * DATABASE = The name of the result database
   * TABLE = The name of the result table.
   * LOGDIR = The directory to store the log files. 
   * LOGFILE = The file to store the logs.
   * LOGLEVEL = Parameter to set the log level(choose from DEBUG, INFO,               WARNING,ERROR and CRITICAL)
 
-===libyoutubedownload.py===
+===lib_youtube_download.py===
 
-Module to download youtube video for a limited amount of time and calculate the 
-different statistics needed for the analysis. It has the FileDownloader class 
-and the Youtube InfoExtractor class. The following functions defined in this module are used to get the statistics of the download.  
+Module to download youtube video for a limited amount of time and calculate the different statistics needed for the analysis. It has the FileDownloader class and the Youtube InfoExtractor class. The following functions defined in this module are used to get the statistics of the download.  
 
 *Usage*
     Terminal:
-        python libyoutubedownload.py url
-
+{{{
+        python lib_youtube_download.py url
+}}}
 *Functions*
-    *getyoutubecacheurl(url):*
+   * *getyoutubecacheurl(url):*
         Return the cache url of the youtube video.
 
-    *getdownloadstats(ipaddressuri, downloadtime=DOWNLOADTIME):*
+   * *getdownloadstats(ipaddressuri, downloadtime=DOWNLOADTIME):*
         Returns a tuple of stats for download from an url based on ip 
         address. The tuple contains stats containing: [downloadtime, 
-        data duration, datalength, video encodingrate, size of video in bytes,
-        Nb.of interruptions, accumulatedbuffer size, accumulatedplayback ,
-        currentremaining buffer]
+        data duration, datalength, video encodingrate, size of video in  bytes, Nb.of interruptions, accumulatedbuffer size, accumulatedplayback , currentremaining buffer]
  
-===libdns.py===
+===lib_dns.py===
 
 Module to retrieve the IP address of a URL out of a set of 
 nameservers(default nameservers and the ones provided in the
@@ -116,14 +113,14 @@ configpytomo file as EXTRANAMESERVERS)
 
 *Functions*
 
-    *getdefaultnameservers():*
+    * *getdefaultnameservers():*
         Returns a list of IP addresses of default name servers.
         
-    *getipaddresses(url):*
+    * *getipaddresses(url):*
         Return a list of tuples with the IP address and the DNS resolver
         used.
 
-===libping.py===
+===lib_ping.py===
 
 Module to generate the RTT times of a ping.
     
@@ -132,7 +129,7 @@ Module to generate the RTT times of a ping.
     discussed below.
             
 *Functions*
-    *pingip(ipaddress, [pingpackets=configpytomo.PINGPACKETS]):*
+    *ping_ip(ipaddress, [pingpackets=configpytomo.PINGPACKETS]):*
         Returns a list of the min, avg and max ping values. Currently 
         designed to work with Windows and Linux systems.
                    
@@ -143,36 +140,37 @@ Youtube links and to store it for next round of the crawl.
 
 *Usage*
     Terminal: 
-        libcacheurl.py [-w outfile] [-p 10] [-u 2] [-V] urlfilein
+        lib_cache_url.py [-w outfile] [-p 10] [-u 2] [-V] urlfilein
                 
     Interactive python:
-        | import libcacheurl
-        | urlfilein = 'urlfile.txt'
-        | libcacheurl.getnextroundurls(urlfilein, [maxperpage=20,
-            maxperurl=5, outfilename=None, pickleoutput=False])
-
+{{{
+         import libcacheurl
+         urlfilein = 'urlfile.txt'
+         libcacheurl.getnextroundurls(urlfilein, [maxperpage=20,
+             maxperurl=5, outfilename=None, pickleoutput=False])
+}}}
 *Arguments*
-    *urlfilein:* 
+   * *url_file_in:* 
         File with a list of URLs to crawl (only Youtube is implemented).
-    *maxperpage:*
+    *max_per_page:*
         Number of links to consider per page(only the first MAXPERPAGE 
         related video links will be considered).
-    *maxperurl:* 
+    *max_per_url:* 
         Number of links to select per page (MAXPERURL links 
         will be randomly selected out of the MAXPERPAGE
         considered).
-    *outfilename:*
+    *out_file_name:*
         File name to store the list of related video urls.
-    *pickleoutput:* 
+    *pickle_output:* 
         Boolean to tell if the file is a pickle file or a text
-        file
+        file.
 
 *Functions*
-    *getalllinks(url):*
+    *get_all_links(url):*
         Returns a list of all links from the url.
-    *getyoutubelinks(url, maxperpage):*
+    *get_youtube_links(url, maxperpage):*
         Returns a set of links that direct to Youtube. All the
-    *trunkurl(url):*
+    *trunk_url(url):*
         Returns the interesting part of a Youtube url(the url with
         only the video ID).
     *getrelatedurls(url, maxperpage, maxperurl):*
