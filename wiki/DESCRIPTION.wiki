@@ -4,8 +4,8 @@
   * Version: 0.1.0 
   * Copyright: GPLv2
 
-Table of Contents:
- <wiki:toc max_depth="1" />
+*Table of Contents*
+<wiki:toc max_depth="1" />
 
 =Description=
 
@@ -97,18 +97,16 @@ Module to download youtube video for a limited amount of time and calculate the 
    * *getyoutubecacheurl(url):*
         Return the cache url of the youtube video.
 
-   * *getdownloadstats(ipaddressuri, downloadtime=DOWNLOADTIME):*
+   * *getdownloadstats(ip_address_uri, downloadtime=config_pytomo.DOWNLOADTIME):*
         Returns a tuple of stats for download from an url based on ip 
-        address. The tuple contains stats containing: [downloadtime, 
-        data duration, datalength, video encodingrate, size of video in  bytes, Nb.of interruptions, accumulatedbuffer size, accumulatedplayback , currentremaining buffer]
+        address. The tuple contains stats containing: `[`downloadtime, 
+        data duration, datalength, video encodingrate, size of video in  bytes, Nb.of interruptions, accumulatedbuffer size, accumulatedplayback , currentremaining buffer`]`
  
 ===lib_dns.py===
 
-Module to retrieve the IP address of a URL out of a set of 
-nameservers(default nameservers and the ones provided in the
-configpytomo file as EXTRANAMESERVERS).
+Module to retrieve the IP address of a URL out of a set of nameservers (default nameservers and the ones provided in the config_pytomo.py file as EXTRANAMESERVERS).
             
-*Usage*
+* Usage*
     Not meant to be called directly. But provides the two functions
     discussed below.
 
@@ -124,12 +122,13 @@ configpytomo file as EXTRANAMESERVERS).
 
 Module to generate the RTT times of a ping.This module has been configured to work on Linux, Windows and Mac systems.
     
- *Usage*
+ * Usage*
     Not meant to be called directly. But provides the two functions
     discussed below.
             
 *Functions*
-    * * configure_ping_options(ping_packets = config_pytomo.PING_PACKETS ):* Function that generate the Regular Expression to match the RTT patterns on different operating systems.
+    * * configure_ping_options(ping_packets = config_pytomo.PING_PACKETS ):* 
+       Function that generate the Regular Expression to match the RTT  patterns on different operating systems.
     * *ping_ip(ipaddress, [pingpackets=config_pytomo.PING_PACKETS]):*
         Returns a list of the min, avg and max ping values. Currently 
         designed to work with Windows, Mac and Linux systems.
