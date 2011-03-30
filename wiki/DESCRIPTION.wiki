@@ -117,21 +117,21 @@ configpytomo file as EXTRANAMESERVERS)
         Returns a list of IP addresses of default name servers.
         
     * *get_ip_addresses(url):*
-        Return a list of tuples with the IP address and the DNS resolver
-        used.
+           Resolves the IP address of the url and returns a list of tuples with the IP address and the DNS resolver used. Multiple nameservers are tried. The default nameservers used are Google DNS, Open DNS, the default nameserver for the machine.
 
 ===lib_ping.py===
 
-Module to generate the RTT times of a ping.
+Module to generate the RTT times of a ping.This module has been configured to work on Linux, Windows and Mac systems.
     
 *Usage*
     Not meant to be called directly. But provides the two functions
     discussed below.
             
 *Functions*
-    *ping_ip(ipaddress, [pingpackets=configpytomo.PINGPACKETS]):*
+    * * configure_ping_options(ping_packets = config_pytomo.PING_PACKETS ):* Function that generate the Regular Expression to match the RTT patterns on different operating systems.
+    * *ping_ip(ipaddress, [pingpackets=configpytomo.PINGPACKETS]):*
         Returns a list of the min, avg and max ping values. Currently 
-        designed to work with Windows and Linux systems.
+        designed to work with Windows, Mac and Linux systems.
                    
 ===lib_cache_url.py===
 
@@ -140,7 +140,7 @@ Youtube links and to store it for next round of the crawl.
 
 *Usage*
     Terminal: 
-        lib_cache_url.py [-w outfile] [-p 10] [-u 2] [-V] urlfilein
+        lib_cache_url.py [-w out_file] [-p 10] [-u 2] [-V] url_file_in
                 
     Interactive python:
 {{{
@@ -159,24 +159,19 @@ Youtube links and to store it for next round of the crawl.
         Number of links to select per page (MAXPERURL links 
         will be randomly selected out of the MAXPERPAGE
         considered).
-   * *out_file_name:*
-        File name to store the list of related video urls.
-   * *pickle_output:* 
-        Boolean to tell if the file is a pickle file or a text
-        file.
-
+   
 *Functions*
    * *get_all_links(url):*
         Returns a list of all links from the url.
-   * *get_youtube_links(url, maxperpage):*
+   * *get_youtube_links(url, max_per_page):*
         Returns a set of links that direct to Youtube. All the
    * *trunk_url(url):*
         Returns the interesting part of a Youtube url(the url with
         only the video ID).
-   * *getrelatedurls(url, maxperpage, maxperurl):*
-        Return a set of maxperurl links from maxperpage randomly
+   * *get_related_urls(url, [max_per_page=20, max_per_url=5]):*
+        Return a set of max_per_url links from max_per_page randomly
         chosen related urls (other links are ignored).
-   * *getnextroundurls(inputlinks, maxperpage=20, maxperurl=5):*
+   * *get_next_round_urls(inputlinks, maxperpage=20, maxperurl=5):*
         Return a tuple of the set of input urls and a set of related url of videos.
        
 ===lib_youtube_api.py===
@@ -188,13 +183,14 @@ Function to get the most popular Youtube videos according to the time frame.
 
 *Arguments*
     time = 'today' or 'month' or 'week' or alltime'.
-    maxresults = Total top videos needed (in  multiples of 25)
+    max_results = Total top videos needed (in  multiples of 25)
+
 *Function*
-   * *get_popular_links(time='today', maxresults=25):*
+   * *get_popular_links(time='today', [max_results=25]):*
         Returns the most popular youtube links(world-wide). The number  of videos needed is given as maxresults. (The results returned are in 
 no particular order).
 
-===libdatabase.py===
+===lib_database.py===
 
 Module that creates and manages the database for th Pytomo results. It has PytomoDatabase class.The columns of the database are listed in the docstring of the module.
 
@@ -204,26 +200,26 @@ Module that creates and manages the database for th Pytomo results. It has Pytom
 *Functions*
 The PytomoDatabase class has the following functions:
 
-   * *createpytomotable(self, table=configpytomo.TABLETIMESTAMP):*
+   * *create_pytomo_table(self, table=configpytomo.TABLETIMESTAMP):*
         Function to create a table.
 
-   * *insertrecord(self, row):*
+   * *insert_record(self, row):*
         Function to insert a record into the database.
 
-   * *fetchall(self):*
+   * *fetch_all(self):*
         Function to print all the records of the table.
 
-   * *closehandle(self)*
+   * *close_handle(self)*
         Closes the connection to the database.
 
 ==kaametadata==
 
-This is a stripped down version of the `Kaa Metadata Python Package` (Version :'0.7.7').The package has been modified to be used with the 
-libyoutubedownload.py module so that we can obtain the metadata of the video.The main modification was to make it independent of kaabase.
+This is a stripped down version of the Kaa Metadata Python Package (Version :'0.7.7').The package has been modified to be used with the 
+lib_youtube_download.py module so that we can obtain the metadata of the video.The main modification was to make it independent of kaabase.
 
 ==dns==
 
-This is the `DNS Python Package` (Version : 1.9.2) that is used to obtain the nameservers for
+This is the DNS Python Package(Version : 1.9.2) that is used to obtain the nameservers for
 the machine and also to send DNS queries to the nameservers to obtain the IP addresses of the Youtube cache servers.
 
 ==logs/==
@@ -235,14 +231,14 @@ This folder contains the log files generated by the logger. These files contain 
 This folder contains the database files used to store the results.
 The columns of the database are as follows:
         
-  * Timestamp -  A timestamp indicating the time of inserting the row.
+  * Timestamp   -  A timestamp indicating the time of inserting the row.
   * Service     - The website on which the analysis is performed.
                             Example: Youtube, Megavideo.
   * Url         - The url of the webpage.
-  * CacheUrl     - The Url of the cache server hosting the video.
-  * IP         - The IP address of the cache server from which the 
+  * CacheUrl    - The Url of the cache server hosting the video.
+  * IP          - The IP address of the cache server from which the 
                 video is downloaded.
-  * Resolver     - The DNS resolver used to get obtain the IP address 
+  * Resolver    - The DNS resolver used to get obtain the IP address 
                 of the cache server.
                             Example Google DNS, Local DNS
   * DownloadTime     - The Time taken to download the video sample
@@ -265,11 +261,11 @@ The columns of the database are as follows:
     
 ==results/==
 
-This folder contains the result files. The results in these file are listed in text format. It is a list containing [Video url, Cache url, IP address of cache server, Ping RTT times to the Cache server, Download stats, NameIPaddress of the DNS resolver] where Download stats = [downloadtime, data duration, datalength, video encodingrate, size of video in bytes, Nb.of interruptions, accumulatedbuffer size, accumulatedplayback , currentremaining buffer]
+This folder contains the result files. The results in these file are listed in text format. It is a list containing [Video url, Cache url, IP address of cache server, Ping RTT times to the Cache server, Download stats, Name - IP address of the DNS resolver] where Download stats = [downloadtime, data duration, datalength, video encodingrate, size of video in bytes, Nb.of interruptions, accumulated buffer-size, accumulated playback , current remaining buffer]
  
 
 ==External Links==
 
-# [http://rg3.github.com/youtube-dl/ Youtube Download.]
+1. [http://rg3.github.com/youtube-dl/ Youtube Download.]
 # [http://packages.debian.org/sid/python-kaa-metadata Kaa Metadata Python Package.]
 # [http://pypi.python.org/pypi/dnspython DNS Python Package.]
