@@ -73,8 +73,7 @@ File containing the various parameters and constants that are used for the analy
   * EXTRA_NAME_SERVERS = A list containing the name of the resolver and its IP address. This resolver will be used to get the IP address of the youtube cache.
   * PING_PACKETS = Nb, of ping packets to be sent.
   * DOWNLOAD_TIME = The duration for which the video must be downloaded.
-  * BUFFERING_VIDEO_DURATION = The duration for which the video is to be
-buffer.
+  * BUFFERING_VIDEO_DURATION = The duration for which the video is to be buffer.
   * MIN_PLAYOUT_BUFFER_SIZE = The size of the buffer for the video stream.
   * RESULT_DIR = The directory to store the text results.
   * RESULT_FILE = The file to store the text results.
