@@ -20,7 +20,6 @@
 from __future__ import with_statement
 import os
 import re
-import platform
 
 import pytomo.config_pytomo as config_pytomo
 
@@ -38,21 +37,21 @@ RTT_PATTERN_DARWIN = RTT_PATTERN_LINUX
 PING_OPTION_DARWIN = PING_OPTION_LINUX
 
 def configure_ping_options(ping_packets=config_pytomo.PING_PACKETS):
-    "Store in config_pytomo module the global informations on platform"
-    current_system = platform.system()
-    if current_system == 'Linux':
+    "Store in config_pytomo module the config for RTT matching"
+    if config_pytomo.SYSTEM == 'Linux':
         config_pytomo.ping_option_nb_pkts = ' '.join((PING_OPTION_LINUX,
                                                       str(ping_packets)))
         config_pytomo.rtt_match = RTT_MATCH_LINUX
         config_pytomo.rtt_pattern = ''.join((RTT_MATCH_LINUX,
                                              RTT_PATTERN_LINUX))
-    elif (current_system == 'Microsoft' or current_system == 'Windows'):
+    elif (config_pytomo.SYSTEM == 'Microsoft'
+          or config_pytomo.SYSTEM == 'Windows'):
         config_pytomo.ping_option_nb_pkts = ' '.join((PING_OPTION_WINDOWS,
                                                       str(ping_packets)))
         config_pytomo.rtt_match = RTT_MATCH_WINDOWS
         config_pytomo.rtt_pattern = ''.join((RTT_MATCH_WINDOWS,
                                              RTT_PATTERN_WINDOWS))
-    elif current_system == 'Darwin':
+    elif config_pytomo.SYSTEM == 'Darwin':
         config_pytomo.ping_option_nb_pkts = ' '.join((PING_OPTION_DARWIN,
                                                       str(ping_packets)))
         config_pytomo.rtt_match = RTT_MATCH_DARWIN
@@ -60,16 +59,15 @@ def configure_ping_options(ping_packets=config_pytomo.PING_PACKETS):
                                              RTT_PATTERN_DARWIN))
     else:
         config_pytomo.LOG.warn("Ping option is not known on your system: %s"
-                               % current_system)
+                               % config_pytomo.SYSTEM)
         return None
-    config_pytomo.SYSTEM = current_system
-    return current_system
+    config_pytomo.RTT = True
 
 def ping_ip(ip_address, ping_packets=config_pytomo.PING_PACKETS):
     "Return a list of the min, avg, max and mdev ping values"
-    if not config_pytomo.SYSTEM:
-        current_system = configure_ping_options(ping_packets)
-        if not current_system:
+    if not config_pytomo.RTT:
+        configure_ping_options(ping_packets)
+        if not config_pytomo.RTT:
             config_pytomo.LOG.warn("Not able to process ping on your system")
             return None
     my_cmd = 'ping %s %s' % (config_pytomo.ping_option_nb_pkts, ip_address)
