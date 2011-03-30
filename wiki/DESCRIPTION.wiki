@@ -270,10 +270,6 @@ This folder contains the result files. The results in these file are listed in t
 
 ==External Links==
 
-1. `Youtube Download`.
-2. `Kaa Metadata Python Package`.
-3. `DNS Python Package`
-
-[Youtube Download: http://rg3.github.com/youtube-dl/]
-.. Kaa Metadata Python Package: http://packages.debian.org/sid/python-kaa-metadata
-.. DNS Python Package: http://pypi.python.org/pypi/dnspython
+# [http://rg3.github.com/youtube-dl/ Youtube Download.]
+# [http://packages.debian.org/sid/python-kaa-metadata Kaa Metadata Python Package.]
+# [http://pypi.python.org/pypi/dnspython DNS Python Package.]
