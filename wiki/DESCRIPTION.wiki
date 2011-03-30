@@ -30,24 +30,24 @@ This file in RestructuredText.
 
 This folder contains the pytomo package. The contents of it are listed below.
 
-===startpytomo.py===
+===start_pytomo.py===
 
            
 The top-most module that is used to run the Pytomo tool.
         
 ====Usage====
     Terminal: 
-        python startpytomo.py
+        python start_pytomo.py
     Interactive python:
         import start_pytomo.main
-        import configpytomo
+        import config_pytomo
         startpytomo.main()
                 
 ====Functions====
     
-  * *computestats(url)*: Return a list of the statistics related to the url. The contents of the list are : (url, cacheurl, currentstats) where currentstats is a list containing: [Pingtimes, downloadstatistics, DNS resolver used]
+  * *computestats(url)*: Return a list of the statistics related to the url. The contents of the list are : (url, cache_url, current_stats) where currentstats is a list containing: [Ping_times, download_statistics, DNS resolver used]
 
-  * *formatstats(stats)* Functions used to format the stats obtained from computestats function so that they can be inserted into the sqlite3 database. The stats are converted into a tuple. The arguments to this function is the list returned by computestats().
+  * *formatstats(stats)* Functions used to format the stats obtained from compute_stats function so that they can be inserted into the sqlite3 database. The stats are converted into a tuple. The arguments to this function is the list returned by computestats().
 
   * *checkoutfiles(filepattern, directory, timestamp)* Returns a full path of the file used for the output. It checks if the path exists, if not then the file is created in the path if possible else it is created in the default user directory.
 
