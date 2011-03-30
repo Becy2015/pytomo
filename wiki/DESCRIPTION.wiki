@@ -235,7 +235,7 @@ The columns of the database are as follows:
   * Service     - The website on which the analysis is performed.
                             Example: Youtube, Megavideo.
   * Url         - The url of the webpage.
-  * CacheUrl    - The Url of the cache server hosting the video.
+  * `CacheUrl`    - The Url of the cache server hosting the video.
   * IP          - The IP address of the cache server from which the 
                 video is downloaded.
   * Resolver    - The DNS resolver used to get obtain the IP address 
