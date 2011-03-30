@@ -106,7 +106,7 @@ Module to download youtube video for a limited amount of time and calculate the 
 
 Module to retrieve the IP address of a URL out of a set of 
 nameservers(default nameservers and the ones provided in the
-configpytomo file as EXTRANAMESERVERS)
+configpytomo file as EXTRANAMESERVERS).
             
 *Usage*
     Not meant to be called directly. But provides the two functions
@@ -124,7 +124,7 @@ configpytomo file as EXTRANAMESERVERS)
 
 Module to generate the RTT times of a ping.This module has been configured to work on Linux, Windows and Mac systems.
     
-*Usage*
+ *Usage*
     Not meant to be called directly. But provides the two functions
     discussed below.
             
