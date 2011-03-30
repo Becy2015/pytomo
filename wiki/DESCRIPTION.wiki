@@ -46,7 +46,7 @@ The top-most module that is used to run the Pytomo tool.
 }}}     
 ====Functions====
     
-  * *compute_stats(url)* Return a list of the statistics related to the url. The contents of the list are : (url, cache_url, current_stats) where current_stats is a list containing: [Ping_times, download_statistics, DNS resolver used]
+  * *compute_stats(url)* Return a list of the statistics related to the url. The contents of the list are : (url, cache_url, current_stats) where current_stats is a list containing: [`Ping_times, download_statistics, DNS resolver used` ]
 
   * *format_stats(stats)* Functions used to format the stats obtained from compute_stats function so that they can be inserted into the sqlite3 database. The stats are converted into a tuple. The arguments to this function is the list returned by compute_stats().
 
