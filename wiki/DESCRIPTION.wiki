@@ -105,8 +105,8 @@ Module to download youtube video for a limited amount of time and calculate the 
 ===lib_dns.py===
 
 Module to retrieve the IP address of a URL out of a set of nameservers (default nameservers and the ones provided in the config_pytomo.py file as EXTRANAMESERVERS).
-            
-* Usage*
+
+*Usage*
     Not meant to be called directly. But provides the two functions
     discussed below.
 
@@ -122,7 +122,7 @@ Module to retrieve the IP address of a URL out of a set of nameservers (default 
 
 Module to generate the RTT times of a ping.This module has been configured to work on Linux, Windows and Mac systems.
     
- * Usage*
+*Usage*
     Not meant to be called directly. But provides the two functions
     discussed below.
             
