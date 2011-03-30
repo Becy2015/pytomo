@@ -46,25 +46,25 @@ The top-most module that is used to run the Pytomo tool.
 }}}     
 ====Functions====
     
-  * *computestats(url)* Return a list of the statistics related to the url. The contents of the list are : (url, cache_url, current_stats) where current_stats is a list containing: [Ping_times, download_statistics, DNS resolver used]
+  * *compute_stats(url)* Return a list of the statistics related to the url. The contents of the list are : (url, cache_url, current_stats) where current_stats is a list containing: [Ping_times, download_statistics, DNS resolver used]
 
-  * *formatstats(stats)* Functions used to format the stats obtained from compute_stats function so that they can be inserted into the sqlite3 database. The stats are converted into a tuple. The arguments to this function is the list returned by compute_stats().
+  * *format_stats(stats)* Functions used to format the stats obtained from compute_stats function so that they can be inserted into the sqlite3 database. The stats are converted into a tuple. The arguments to this function is the list returned by compute_stats().
 
-  * *md5sum(input_file)* Function to generate the standard md5 of the 
+  * *md5_sum(input_file)* Function to generate the standard md5 of the 
 file. Done to cope with the large file values taken from Python distribution.
 
-  * *checkoutfiles(filepattern, directory, timestamp)* Returns a full path of the file used for the output. It checks if the path exists, if not then the file is created in the path if possible else it is created in the default user directory.
+  * *check_out_files(filepattern, directory, timestamp)* Returns a full path of the file used for the output. It checks if the path exists, if not then the file is created in the path if possible else it is created in the default user directory.
 
-  * *docrawl(resultstream=sys.stdout, db_file=None, timestamp=None)* Crawls the urls given by the urlfile.txt(present in the package). The crawl is performed upto MAXROUNDS or MAXVISITEDURLS. The statistcal resuluts obtained are inserted into the db_file.
+  * *do_crawl(resultstream=sys.stdout, db_file=None, timestamp=None)* Crawls the urls given by the urlfile.txt(present in the package). The crawl is performed upto MAXROUNDS or MAXVISITEDURLS. The statistcal resuluts obtained are inserted into the db_file.
 
   * *main(argv=None)* This is the program wrapper for the startpytomo module. Is is mainly used to setup and initialize the logging and other startup parameters.
 
-===configpytomo.py===
+===config_pytomo.py===
 
 
 File containing the various parameters and constants that are used for the analysis. The following parameters determine the nature of the crawl.
 
-  * MAXROUNDS =  Maximum number of crawl rounds to performed.
+  * MAX_ROUNDS =  Maximum number of crawl rounds to performed.
   * MAX_CRAWLED_URLS = Max number of urls to be visited.
   * MAX_PER_URL =  Max number of related videos to be selected  from each url.
   * MAX_PER_PAGE = Max number of related videos to be considered for selection from each page
@@ -113,10 +113,10 @@ configpytomo file as EXTRANAMESERVERS)
 
 *Functions*
 
-    * *getdefaultnameservers():*
+    * *get_default_nameservers():*
         Returns a list of IP addresses of default name servers.
         
-    * *getipaddresses(url):*
+    * *get_ip_addresses(url):*
         Return a list of tuples with the IP address and the DNS resolver
         used.
 
@@ -133,7 +133,7 @@ Module to generate the RTT times of a ping.
         Returns a list of the min, avg and max ping values. Currently 
         designed to work with Windows and Linux systems.
                    
-===libcacheurl.py===
+===lib_cache_url.py===
 
 Module to retrieve the related videos from a file with a list of 
 Youtube links and to store it for next round of the crawl.  
@@ -152,88 +152,79 @@ Youtube links and to store it for next round of the crawl.
 *Arguments*
    * *url_file_in:* 
         File with a list of URLs to crawl (only Youtube is implemented).
-    *max_per_page:*
+   * *max_per_page:*
         Number of links to consider per page(only the first MAXPERPAGE 
         related video links will be considered).
-    *max_per_url:* 
+   * *max_per_url:* 
         Number of links to select per page (MAXPERURL links 
         will be randomly selected out of the MAXPERPAGE
         considered).
-    *out_file_name:*
+   * *out_file_name:*
         File name to store the list of related video urls.
-    *pickle_output:* 
+   * *pickle_output:* 
         Boolean to tell if the file is a pickle file or a text
         file.
 
 *Functions*
-    *get_all_links(url):*
+   * *get_all_links(url):*
         Returns a list of all links from the url.
-    *get_youtube_links(url, maxperpage):*
+   * *get_youtube_links(url, maxperpage):*
         Returns a set of links that direct to Youtube. All the
-    *trunk_url(url):*
+   * *trunk_url(url):*
         Returns the interesting part of a Youtube url(the url with
         only the video ID).
-    *getrelatedurls(url, maxperpage, maxperurl):*
+   * *getrelatedurls(url, maxperpage, maxperurl):*
         Return a set of maxperurl links from maxperpage randomly
         chosen related urls (other links are ignored).
-    *getnextroundurls(inputlinks, maxperpage=20, maxperurl=5):*
-        Return a tuple of the set of input urls and a set of related url of
-        videos.
+   * *getnextroundurls(inputlinks, maxperpage=20, maxperurl=5):*
+        Return a tuple of the set of input urls and a set of related url of videos.
        
-===libyoutubeapi.py===
+===lib_youtube_api.py===
 
 Function to get the most popular Youtube videos according to the time frame.
  
 *Usage*
-    Not meant to be called directly. But provides one function as discussed 
-    below.
+    Not meant to be called directly. But provides one function as discussed below.
 
 *Arguments*
     time = 'today' or 'month' or 'week' or alltime'.
     maxresults = Total top videos needed (in  multiples of 25)
 *Function*
-    *getpopularlinks(time='today', maxresults=25):*
-        Returns the most popular youtube links(world-wide). The number of 
-        videos needed is given as maxresults. (The results returned are in 
-        no particular order).
+   * *get_popular_links(time='today', maxresults=25):*
+        Returns the most popular youtube links(world-wide). The number  of videos needed is given as maxresults. (The results returned are in 
+no particular order).
 
 ===libdatabase.py===
 
-Module that creates and manages the database for th Pytomo results. It has
-a PytomoDatabase class.The columns of the database are listed in the docstring 
-of the module.
+Module that creates and manages the database for th Pytomo results. It has PytomoDatabase class.The columns of the database are listed in the docstring of the module.
 
 *Usage*
-    Not meant to be called directly but the PytomoDatabase class is to be 
-    used.
+    Not meant to be called directly but the PytomoDatabase class is to be used.
 
 *Functions*
 The PytomoDatabase class has the following functions:
 
-    *createpytomotable(self, table=configpytomo.TABLETIMESTAMP):*
+   * *createpytomotable(self, table=configpytomo.TABLETIMESTAMP):*
         Function to create a table.
 
-    *insertrecord(self, row):*
+   * *insertrecord(self, row):*
         Function to insert a record into the database.
 
-    *fetchall(self):*
+   * *fetchall(self):*
         Function to print all the records of the table.
 
-    *closehandle(self)*
+   * *closehandle(self)*
         Closes the connection to the database.
 
 ==kaametadata==
 
-This is a stripped down version of the `Kaa Metadata Python Package` (Version :
-'0.7.7').The package has been modified to be used with the 
-libyoutubedownload.py module so that we can obtain the metadata of the video.
-The main modification was to make it independent of kaabase.
+This is a stripped down version of the `Kaa Metadata Python Package` (Version :'0.7.7').The package has been modified to be used with the 
+libyoutubedownload.py module so that we can obtain the metadata of the video.The main modification was to make it independent of kaabase.
 
 ==dns==
 
 This is the `DNS Python Package` (Version : 1.9.2) that is used to obtain the nameservers for
-the machine and also to send DNS queries to the nameservers to obtain the
-IP addresses of the Youtube cache servers.
+the machine and also to send DNS queries to the nameservers to obtain the IP addresses of the Youtube cache servers.
 
 ==logs/==
 
@@ -255,8 +246,7 @@ The columns of the database are as follows:
                 of the cache server.
                             Example Google DNS, Local DNS
   * DownloadTime     - The Time taken to download the video sample
-                             (We do not download the entire video but only for a
-                               limited download time.)
+                             (We do not download the entire video but only for a limited download time.)
   * VideoDuration - The actual duration of the complete video.
   * VideoLength     - The length(in bytes) of the complete video.
   * EncodingRate     - The encoding rate of the video. 
@@ -275,12 +265,7 @@ The columns of the database are as follows:
     
 ==results/==
 
-This folder contains the result files. The results in these file are listed in
-text format. It is a list containing [Video url, Cache url, IP address of cache
-server, Ping RTT times to the Cache server, Download stats, NameIPaddress of
-the DNS resolver] where Download stats = [downloadtime, data duration, 
-datalength, video encodingrate, size of video in bytes, Nb.of interruptions,
-accumulatedbuffer size, accumulatedplayback , currentremaining buffer]
+This folder contains the result files. The results in these file are listed in text format. It is a list containing [Video url, Cache url, IP address of cache server, Ping RTT times to the Cache server, Download stats, NameIPaddress of the DNS resolver] where Download stats = [downloadtime, data duration, datalength, video encodingrate, size of video in bytes, Nb.of interruptions, accumulatedbuffer size, accumulatedplayback , currentremaining buffer]
  
 
 ==External Links==
@@ -289,6 +274,6 @@ accumulatedbuffer size, accumulatedplayback , currentremaining buffer]
 2. `Kaa Metadata Python Package`.
 3. `DNS Python Package`
 
-.. Youtube Download: http://rg3.github.com/youtube-dl/
+[Youtube Download: http://rg3.github.com/youtube-dl/]
 .. Kaa Metadata Python Package: http://packages.debian.org/sid/python-kaa-metadata
 .. DNS Python Package: http://pypi.python.org/pypi/dnspython
