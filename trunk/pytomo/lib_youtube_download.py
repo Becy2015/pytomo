@@ -142,6 +142,7 @@ class FileDownloader(object):
         self.encoding_rate = None
         self.data_len = None
         self.data_duration = None
+        self.max_instant_thp = None
         try:
             self.download_time = int(download_time)
         except ValueError:
@@ -369,7 +370,8 @@ template')
         Return the data stream
         """
         data = None
-        urllib2.install_opener(urllib2.build_opener(urllib2.ProxyHandler()))
+        urllib2.install_opener(urllib2.build_opener(urllib2.ProxyHandler(
+                                                        config_pytomo.PROXIES)))
         basic_request = urllib2.Request(url, None, STD_HEADERS)
         request = urllib2.Request(url, None, STD_HEADERS)
         count = 0
@@ -432,6 +434,26 @@ template')
             # buffering
             pass
 
+    def compute_encoding_rate(self, data_block, meta_file):
+        """Compute the encoding rate
+        if found in the temp file, close the file and set the value in the
+        object
+        """
+        meta_file.write(data_block)
+        meta_file.flush()
+        try:
+            data_duration = get_data_duration(meta_file.name)
+        except ParseError, mes:
+            config_pytomo.LOG.debug('data duration not yet found: %s'
+                                   % mes)
+            data_duration = None
+        if data_duration:
+            self.data_duration = data_duration
+            self.encoding_rate = self.data_len / data_duration
+            config_pytomo.LOG.debug("Encoding rate is: %.2fkb/s"
+                                    % (self.encoding_rate / 1e3))
+            meta_file.close()
+
     def _do_download(self, url):
         '''Module that handles the download of the file and
         calculates the time, bytes downloaded'''
@@ -442,7 +464,6 @@ template')
             return None
         # content-length in bytes
         self.data_len = float(data.info().get('Content-length', None))
-        self.max_instant_thp = None
         byte_counter = 0
         accumulated_playback = 0.0
         accumulated_buffer = 0.0
@@ -458,20 +479,7 @@ template')
             else:
                 break
             if not self.encoding_rate:
-                meta_file.write(data_block)
-                meta_file.flush()
-                try:
-                    data_duration = get_data_duration(meta_file.name)
-                except ParseError, mes:
-                    config_pytomo.LOG.debug('data duration not yet found: %s'
-                                           % mes)
-                    data_duration = None
-                if data_duration:
-                    self.data_duration = data_duration
-                    self.encoding_rate = self.data_len / data_duration
-                    config_pytomo.LOG.debug("Encoding rate is: %.2fkb/s"
-                                            % (self.encoding_rate / 1e3))
-                    meta_file.close()
+                self.compute_encoding_rate(data_block, meta_file)
             data_block_len = len(data_block)
             if data_block_len == 0:
                 break

@@ -31,7 +31,7 @@ You can configure options in the command line of start_crawl.py or in the
 pytomo/config_pytomo.py file.
 """
 
-VERSION = '0.1.2'
+VERSION = '0.1.3'
 
 LICENSE = 'GPLv2'
 
@@ -51,6 +51,16 @@ KWARGS = {
     'long_description': open('README.txt').read(),
     'platforms': ['Linux', 'Windows', 'Mac'],
     'license': LICENSE,
+    'classifiers': ['Development Status :: 4 - Beta',
+                    'Environment :: Console',
+                    'Intended Audience :: Science/Research',
+                    'Operating System :: OS Independent',
+                    'Operating System :: POSIX',
+                    'Operating System :: Microsoft',
+                    'Operating System :: MacOS :: MacOS X',
+                    'Programming Language :: Python :: 2',
+                    'Topic :: Internet',
+                   ],
 }
 
 
