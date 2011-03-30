@@ -39,7 +39,7 @@ The top-most module that is used to run the Pytomo tool.
     Terminal: 
         python startpytomo.py
     Interactive python:
-        import startpytomo.main
+        import start_pytomo.main
         import configpytomo
         startpytomo.main()
                 
