@@ -1,7 +1,7 @@
 =PYTOMO=
 
-  * Author: Louis Plissonneau, Parikshit Juluri, Mickaël Meulle
-  * Version: 0.1.0 
+  * Authors: Louis Plissonneau, Parikshit Juluri, Mickaël Meulle
+  * Version: 0.1.5 
   * Copyright: GPLv2
 
 *Table of Contents*
