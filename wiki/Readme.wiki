@@ -47,11 +47,11 @@ directory, or directly the start_crawl.py script:
 }}}
 
 In order to provide installation-free package, we provide binary stand-alone
-executables for Windows.
+*executables for Windows*.
 
 The binaries files were generated with Pyinstaller (version 1.5RC1).
 We also provide binary stand-alone executables for Linux (32 and 64bits), and
-Mac OS X, but for these OS the python call is preferred.
+Mac OS X, but for these OS the _python call is preferred_.
 
 = External Resources =
 
