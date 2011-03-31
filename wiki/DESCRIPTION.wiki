@@ -229,32 +229,23 @@ This folder contains the database files used to store the results.
 The columns of the database are as follows:
         
   * Timestamp   -  A timestamp indicating the time of inserting the row.
-  * Service     - The website on which the analysis is performed.
-                            Example: Youtube, Megavideo.
+  * Service     - The website on which the analysis is performed.Example: Youtube, Megavideo.
   * Url         - The url of the webpage.
   * !CacheUrl    - The Url of the cache server hosting the video.
-  * IP          - The IP address of the cache server from which the 
-                video is downloaded.
-  * Resolver    - The DNS resolver used to get obtain the IP address 
-                of the cache server.
-                            Example Google DNS, Local DNS
-  * !DownloadTime     - The Time taken to download the video sample
-                             (We do not download the entire video but only for a limited download time.)
+  * IP          - The IP address of the cache server from which the video is downloaded.
+  * Resolver    - The DNS resolver used to get obtain the IP address of the cache server.Example Google DNS, Local DNS
+  * !DownloadTime     - The Time taken to download the video sample (We do not download the entire video but only for a limited download time.)
   * !VideoDuration - The actual duration of the complete video.
   * !VideoLength     - The length(in bytes) of the complete video.
   * !EncodingRate     - The encoding rate of the video. 
   * !DownloadBytes - The length of the video sample(in bytes).
-  * !DownloadInterruptions -  Nb of interruptions experienced during the
-                               download.
+  * !DownloadInterruptions -  Nb of interruptions experienced during the download.
   * !BufferingDuration     -  Accumulate time spend in buffering state
   * !PlaybackDuration     - Accumulate time spend in playing state.
   * !BufferDurationAtEnd     - The buffer length at the end of download.
-  * !PingMin     - The minimum recorded ping time to the resolved IP 
-                address of the cache server.
-  * !PingAvg     - The average recorded ping time to the resolved IP 
-                address of the cache server.
-  * !PingMax     - The maximum recorded ping time to the resolved IP 
-                address of the cache server.
+  * !PingMin     - The minimum recorded ping time to the resolved IP address of the cache server.
+  * !PingAvg     - The average recorded ping time to the resolved IP address of the cache server.
+  * !PingMax     - The maximum recorded ping time to the resolved IP address of the cache server.
     
 ==results/==
 
