@@ -38,20 +38,20 @@ PING_OPTION_DARWIN = PING_OPTION_LINUX
 
 def configure_ping_options(ping_packets=config_pytomo.PING_PACKETS):
     "Store in config_pytomo module the config for RTT matching"
-    if config_pytomo.SYSTEM == 'Linux':
+    if config_pytomo.SYSTEM.lower().startswith('linux'):
         config_pytomo.ping_option_nb_pkts = ' '.join((PING_OPTION_LINUX,
                                                       str(ping_packets)))
         config_pytomo.rtt_match = RTT_MATCH_LINUX
         config_pytomo.rtt_pattern = ''.join((RTT_MATCH_LINUX,
                                              RTT_PATTERN_LINUX))
-    elif (config_pytomo.SYSTEM == 'Microsoft'
-          or config_pytomo.SYSTEM == 'Windows'):
+    elif (config_pytomo.SYSTEM.lower().startswith('microsoft')
+          or config_pytomo.SYSTEM.lower().startswith('windows')):
         config_pytomo.ping_option_nb_pkts = ' '.join((PING_OPTION_WINDOWS,
                                                       str(ping_packets)))
         config_pytomo.rtt_match = RTT_MATCH_WINDOWS
         config_pytomo.rtt_pattern = ''.join((RTT_MATCH_WINDOWS,
                                              RTT_PATTERN_WINDOWS))
-    elif config_pytomo.SYSTEM == 'Darwin':
+    elif config_pytomo.SYSTEM.lower().startswith('darwin'):
         config_pytomo.ping_option_nb_pkts = ' '.join((PING_OPTION_DARWIN,
                                                       str(ping_packets)))
         config_pytomo.rtt_match = RTT_MATCH_DARWIN

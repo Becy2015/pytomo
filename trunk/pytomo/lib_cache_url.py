@@ -32,6 +32,7 @@ import urllib
 import random
 from operator import concat
 import logging
+import socket
 
 from optparse import OptionParser
 
@@ -68,7 +69,14 @@ def get_all_links(url):
     format_page = formatter.NullFormatter()
     # create new parser object
     htmlparser = LinksExtractor(format_page)
-    data = urllib.urlopen(url, proxies=config_pytomo.PROXIES)
+    try:
+        data = urllib.urlopen(url, proxies=config_pytomo.PROXIES)
+    # socket.error is a child of IOError only in 2.6
+    except socket.error, mes:
+        config_pytomo.LOG.warn(''.join((
+            'Problem in getting links of this url: ', url,
+            '\nError message: ', mes)))
+        return []
     htmlparser.feed(data.read())
     # parse the file saving the info about links
     htmlparser.close()
@@ -99,7 +107,7 @@ def get_links(url, service, max_per_page):
     if service == 'youtube':
         links = get_youtube_links(url, max_per_page)
     elif service == 'megaupload':
-        config_pytomo.LOG.ERROR(
+        config_pytomo.LOG.error(
             'Megaupload service not implemented, got url : %s' % url)
         return []
     return links

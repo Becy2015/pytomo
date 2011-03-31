@@ -27,6 +27,9 @@ LOG_FILE = 'pytomo.log'
 # choose from: DEBUG, INFO, WARNING, ERROR and CRITICAL
 LOG_LEVEL = DEBUG
 
+# log the public IP address
+LOG_PUBLIC_IP = True
+
 ################################################################################
 # for start_pytomo.py
 
@@ -57,7 +60,7 @@ PROXIES = None
 # other DNS servers to query
 GOOGLE_PUBLIC_DNS = ('google_public_dns', '8.8.8.8')
 OPEN_DNS = ('open_dns', '208.67.220.220')
-EXTRA_NAME_SERVERS = [GOOGLE_PUBLIC_DNS, OPEN_DNS]
+EXTRA_NAME_SERVERS = [] #GOOGLE_PUBLIC_DNS, OPEN_DNS]
 
 ################################################################################
 # for lib_ping.py
