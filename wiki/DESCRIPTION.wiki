@@ -83,6 +83,7 @@ File containing the various parameters and constants that are used for the analy
   * LOGDIR = The directory to store the log files. 
   * LOGFILE = The file to store the logs.
   * LOGLEVEL = Parameter to set the log level(choose from DEBUG, INFO,               WARNING,ERROR and CRITICAL)
+  * PROXIES = The HTTP Proxy to be used.(Set from command-line at run-time by  user)
 
 ===lib_youtube_download.py===
 
@@ -100,7 +101,7 @@ Module to download youtube video for a limited amount of time and calculate the 
    * *getdownloadstats(ip_address_uri, downloadtime=config_pytomo.DOWNLOADTIME):*
         Returns a tuple of stats for download from an url based on ip 
         address. The tuple contains stats containing: `[`downloadtime, 
-        data duration, datalength, video encodingrate, size of video in  bytes, Nb.of interruptions, accumulatedbuffer size, accumulatedplayback , currentremaining buffer`]`
+        data duration, datalength, video encodingrate, size of video in  bytes, Nb.of interruptions, accumulatedbuffer size, accumulatedplayback , currentremaining buffer, Maximum Instant Througghput achieved `]`
  
 ===lib_dns.py===
 
@@ -185,7 +186,7 @@ Function to get the most popular Youtube videos according to the time frame.
 
 *Function*
    * *get_popular_links(time='today', [max_results=25]):*
-        Returns the most popular youtube links(world-wide). The number  of videos needed is given as maxresults. (The results returned are in 
+        Returns the most popular Youtube links(world-wide). The number  of videos needed is given as max_results. (The results returned are in 
 no particular order).
 
 ===lib_database.py===
