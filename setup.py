@@ -16,6 +16,12 @@ diff  ~/streaming/pytomo/Pytomo/pytomo_named.spec \
 # Run with automatic naming of exe
 python2.5 Build.py ~/streaming/pytomo/Pytomo/pytomo_named.spec
 
+# for MAC:
+import sys
+if sys.platform.startswith("darwin"):
+    app = BUNDLE(exe,
+                 name=os.path.join('dist', 'NAME.app'),
+                 version=version)
 """
 
 import distutils.core
@@ -31,7 +37,7 @@ You can configure options in the command line of start_crawl.py or in the
 pytomo/config_pytomo.py file.
 """
 
-VERSION = '0.1.4'
+VERSION = '0.1.6'
 
 LICENSE = 'GPLv2'
 

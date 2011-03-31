@@ -9,7 +9,7 @@ Usage
 -----
 pytomo [-r max_rounds] [-u max_crawled_url] [-p max_per_url] 
 [-P max_per_page] [-t time_frame] [-n ping_packets] [-D download_time] 
-[-B buffering_video_duration] [-M min_playout_buffer_size] [-L log_level]::
+[-B buffering_video_duration] [-M min_playout_buffer_size] [-x] [-L log_level]::
 
     Options:
       -h, --help            show this help message and exit
@@ -27,6 +27,8 @@ pytomo [-r max_rounds] [-u max_crawled_url] [-p max_per_url]
                             Buffering video duration (default 3.000000)
       -M MIN_PLAYOUT_BUFFER_SIZE
                             Minimum Playout Buffer Size (default 1.000000)
+      -x                    Do NOT store public IP address of the machine in the
+                            logs
       -L LOG_LEVEL          The log level setting for the Logging module.Choose
                             from: 'DEBUG', 'INFO', 'WARNING', 'ERROR' and
                             'CRITICAL' (default 'DEBUG')
