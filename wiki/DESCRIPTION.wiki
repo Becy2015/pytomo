@@ -44,7 +44,7 @@ The top-most module that is used to run the Pytomo tool.
 {{{
         import start_pytomo.main
         import config_pytomo
-        startpytomo.main()
+        start_pytomo.main()
 }}}     
 ====Functions====
     
@@ -105,7 +105,7 @@ Module to download youtube video for a limited amount of time and calculate the 
  
 ===lib_dns.py===
 
-Module to retrieve the IP address of a URL out of a set of nameservers (default nameservers and the ones provided in the config_pytomo.py file as EXTRANAMESERVERS).
+Module to retrieve the IP address of a URL out of a set of nameservers (default nameservers and the ones provided in the config_pytomo.py file as EXTRA_NAME_SERVERS).
 
 *Usage*
     Not meant to be called directly. But provides the two functions
@@ -199,7 +199,7 @@ Module that creates and manages the database for th Pytomo results. It has Pytom
 *Functions*
 The !PytomoDatabase class has the following functions:
 
-   * *create_pytomo_table(self, table=configpytomo.TABLE_TIME_STAMP):*
+   * *create_pytomo_table(self, table=configpytomo.TABLE_TIMESTAMP):*
         Function to create a table.
 
    * *insert_record(self, row):*
