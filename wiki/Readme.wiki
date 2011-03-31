@@ -1,5 +1,5 @@
 #summary Readme of the project
-#labels Featured,Phase-Requirements
+#labels Featured,Phase-Requirements,Phase-Design
 
 = Introduction =
 
