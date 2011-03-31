@@ -130,7 +130,7 @@ Module to generate the RTT times of a ping.This module has been configured to wo
 *Functions*
     * * configure_ping_options(ping_packets = config_pytomo.PING_PACKETS ):* 
        Function that generate the Regular Expression to match the RTT  patterns on different operating systems.
-    * *ping_ip(ipaddress, [pingpackets=config_pytomo.PING_PACKETS]):*
+    * *ping_ip(ipaddress, `[`pingpackets=config_pytomo.PING_PACKETS`]`):*
         Returns a list of the min, avg and max ping values. Currently 
         designed to work with Windows, Mac and Linux systems.
                    
@@ -167,7 +167,7 @@ Youtube links and to store it for next round of the crawl.
    * *trunk_url(url):*
         Returns the interesting part of a Youtube url(the url with
         only the video ID).
-   * *get_related_urls(url, [max_per_page=20, max_per_url=5]):*
+   * *get_related_urls(url, `[`max_per_page=20, max_per_url=5`]`):*
         Return a set of max_per_url links from max_per_page randomly
         chosen related urls (other links are ignored).
    * *get_next_round_urls(input_links, max_per_page=20, max_per_url=5):*
@@ -185,7 +185,7 @@ Function to get the most popular Youtube videos according to the time frame.
     max_results = Total top videos needed (in  multiples of 25)
 
 *Function*
-   * *get_popular_links(time='today', [max_results=25]):*
+   * *get_popular_links(time='today', `[`max_results=25`]`):*
         Returns the most popular Youtube links(world-wide). The number  of videos needed is given as max_results. (The results returned are in no particular order).
 
 ===lib_database.py===
