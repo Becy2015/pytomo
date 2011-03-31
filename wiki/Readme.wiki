@@ -10,7 +10,7 @@ Pytomo is a `YouTube` crawler designed to figure out network information out of 
 {{{
 pytomo [-r max_rounds] [-u max_crawled_url] [-p max_per_url] 
 [-P max_per_page] [-t time_frame] [-n ping_packets] [-D download_time] 
-[-B buffering_video_duration] [-M min_playout_buffer_size] [-L log_level]
+[-B buffering_video_duration] [-M min_playout_buffer_size] [-x] [-L log_level]
 }}}
 
 {{{
@@ -30,6 +30,8 @@ pytomo [-r max_rounds] [-u max_crawled_url] [-p max_per_url]
                             Buffering video duration (default 3.000000)
       -M MIN_PLAYOUT_BUFFER_SIZE
                             Minimum Playout Buffer Size (default 1.000000)
+      -x                    Do NOT store public IP address of the machine in the
+                            logs
       -L LOG_LEVEL          The log level setting for the Logging module.Choose
                             from: 'DEBUG', 'INFO', 'WARNING', 'ERROR' and
                             'CRITICAL' (default 'DEBUG')
@@ -38,10 +40,17 @@ pytomo [-r max_rounds] [-u max_crawled_url] [-p max_per_url]
 
 = Installation-free =
 
-In order to provide installation-free package, we provide binary executables for Linux (32 and 64bits), Windows, and Mac OS X.
-The binaries files were generated with Pyinstaller (version 1.5RC1).
+If you have Python installed, you can directly run the pytomo script in bin
+directory, or directly the start_crawl.py script:
+{{{
+    python start_crawl.py
+}}}
 
-If you have Python installed, you can directly run the pytomo script in bin directory.
+In order to provide installation-free package, we provide binary stand-alone
+executables for Windows.
+The binaries files were generated with Pyinstaller (version 1.5RC1).
+We also provide binary stand-alone executables for Linux (32 and 64bits), and
+Mac OS X, but for these OS the python call is preferred.
 
 = External Resources =
 
