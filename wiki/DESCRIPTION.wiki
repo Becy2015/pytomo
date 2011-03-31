@@ -258,7 +258,7 @@ The columns of the database are as follows:
     
 ==results/==
 
-This folder contains the result files. The results in these file are listed in text format. It is a list containing ![Video url, Cache url, IP address of cache server, Ping RTT times to the Cache server, Download stats, Name - IP address of the DNS resolver ] where Download stats = [downloadtime, data duration, datalength, video encodingrate, size of video in bytes, Nb.of interruptions, accumulated buffer-size, accumulated playback , current remaining buffer]
+This folder contains the result files. The results in these file are listed in text format. It is a list containing ![Video url, Cache url, IP address of cache server, Ping RTT times to the Cache server, Download stats, Name - IP address of the DNS resolver ] where Download stats = `[`downloadtime, data duration, datalength, video encodingrate, size of video in bytes, Nb.of interruptions, accumulated buffer-size, accumulated playback , current remaining buffer `]`
  
 
 ==External Links==
