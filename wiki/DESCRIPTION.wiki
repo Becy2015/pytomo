@@ -57,9 +57,9 @@ file. Done to cope with the large file values taken from Python distribution.
 
   * *check_out_files(filepattern, directory, timestamp)* Returns a full path of the file used for the output. It checks if the path exists, if not then the file is created in the path if possible else it is created in the default user directory.
 
-  * *do_crawl(resultstream=sys.stdout, db_file=None, timestamp=None)* Crawls the urls given by the urlfile.txt(present in the package). The crawl is performed upto MAXROUNDS or MAXVISITEDURLS. The statistcal resuluts obtained are inserted into the db_file.
+  * *do_crawl(result_stream=sys.stdout, db_file=None, timestamp=None)* Crawls the urls given by the urlfile.txt(present in the package). The crawl is performed upto MAX_ROUNDS or MAX_VISITED_URLS. The statistcal resuluts obtained are inserted into the db_file.
 
-  * *main(argv=None)* This is the program wrapper for the startpytomo module. Is is mainly used to setup and initialize the logging and other startup parameters.
+  * *main(argv=None)* This is the program wrapper for the start_pytomo module. It is mainly used to setup and initialize the logging and other startup parameters.
 
 ===config_pytomo.py===
 
@@ -80,9 +80,9 @@ File containing the various parameters and constants that are used for the analy
   * DATABASE_DIR = The directory to store the result database.
   * DATABASE = The name of the result database
   * TABLE = The name of the result table.
-  * LOGDIR = The directory to store the log files. 
-  * LOGFILE = The file to store the logs.
-  * LOGLEVEL = Parameter to set the log level(choose from DEBUG, INFO,               WARNING,ERROR and CRITICAL)
+  * LOG_DIR = The directory to store the log files. 
+  * LOG_FILE = The file to store the logs.
+  * LOG_LEVEL = Parameter to set the log level(choose from DEBUG, INFO,               WARNING,ERROR and CRITICAL)
   * PROXIES = The HTTP Proxy to be used.(Set from command-line at run-time by  user)
 
 ===lib_youtube_download.py===
@@ -95,13 +95,13 @@ Module to download youtube video for a limited amount of time and calculate the 
         python lib_youtube_download.py url
 }}}
 *Functions*
-   * *getyoutubecacheurl(url):*
+   * *get_youtube_cache_url(url):*
         Return the cache url of the youtube video.
 
-   * *getdownloadstats(ip_address_uri, downloadtime=config_pytomo.DOWNLOADTIME):*
+   * *get_download_stats(ip_address_uri, downloadtime=config_pytomo.DOWNLOADTIME):*
         Returns a tuple of stats for download from an url based on ip 
         address. The tuple contains stats containing: `[`downloadtime, 
-        data duration, datalength, video encodingrate, size of video in  bytes, Nb.of interruptions, accumulatedbuffer size, accumulatedplayback , currentremaining buffer, Maximum Instant Througghput achieved `]`
+        data duration, datalength, video encodingrate, size of video in  bytes, Nb.of interruptions, accumulatedbuffer size, accumulated playback , current remaining buffer, Maximum Instant Throughput achieved `]`
  
 ===lib_dns.py===
 
@@ -186,12 +186,11 @@ Function to get the most popular Youtube videos according to the time frame.
 
 *Function*
    * *get_popular_links(time='today', [max_results=25]):*
-        Returns the most popular Youtube links(world-wide). The number  of videos needed is given as max_results. (The results returned are in 
-no particular order).
+        Returns the most popular Youtube links(world-wide). The number  of videos needed is given as max_results. (The results returned are in no particular order).
 
 ===lib_database.py===
 
-Module that creates and manages the database for th Pytomo results. It has PytomoDatabase class.The columns of the database are listed in the docstring of the module.
+Module that creates and manages the database for th Pytomo results. It has !PytomoDatabase class.The columns of the database are listed in the docstring of the module.
 
 *Usage*
     Not meant to be called directly but the !PytomoDatabase class is to be used.
@@ -199,7 +198,7 @@ Module that creates and manages the database for th Pytomo results. It has Pytom
 *Functions*
 The !PytomoDatabase class has the following functions:
 
-   * *create_pytomo_table(self, table=configpytomo.TABLE_TIMESTAMP):*
+   * *create_pytomo_table(self, table=config_pytomo.TABLE_TIMESTAMP):*
         Function to create a table.
 
    * *insert_record(self, row):*
@@ -211,15 +210,14 @@ The !PytomoDatabase class has the following functions:
    * *close_handle(self)*
         Closes the connection to the database.
 
-==kaametadata==
+==kaa_metadata==
 
 This is a stripped down version of the Kaa Metadata Python Package (Version :'0.7.7').The package has been modified to be used with the 
 lib_youtube_download.py module so that we can obtain the metadata of the video.The main modification was to make it independent of kaabase.
 
 ==dns==
 
-This is the DNS Python Package(Version : 1.9.2) that is used to obtain the nameservers for
-the machine and also to send DNS queries to the nameservers to obtain the IP addresses of the Youtube cache servers.
+This is the DNS Python Package(Version : 1.9.2) that is used to obtain the nameservers for the machine and also to send DNS queries to the nameservers to obtain the IP addresses of the Youtube cache servers.
 
 ==logs/==
 
