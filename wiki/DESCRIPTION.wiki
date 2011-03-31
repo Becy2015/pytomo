@@ -52,8 +52,7 @@ The top-most module that is used to run the Pytomo tool.
 
   * *format_stats(stats)* Functions used to format the stats obtained from compute_stats function so that they can be inserted into the sqlite3 database. The stats are converted into a tuple. The arguments to this function is the list returned by compute_stats().
 
-  * *md5_sum(input_file)* Function to generate the standard md5 of the 
-file. Done to cope with the large file values taken from Python distribution.
+  * *md5_sum(input_file)* Function to generate the standard md5 of the file. Done to cope with the large file values taken from Python distribution.
 
   * *check_out_files(filepattern, directory, timestamp)* Returns a full path of the file used for the output. It checks if the path exists, if not then the file is created in the path if possible else it is created in the default user directory.
 
@@ -249,7 +248,7 @@ The columns of the database are as follows:
     
 ==results/==
 
-This folder contains the result files. The results in these file are listed in text format. It is a list containing ![Video url, Cache url, IP address of cache server, Ping RTT times to the Cache server, Download stats, Name - IP address of the DNS resolver ] where Download stats = `[`downloadtime, data duration, datalength, video encodingrate, size of video in bytes, Nb.of interruptions, accumulated buffer-size, accumulated playback , current remaining buffer `]`
+This folder contains the result files. The results in these file are listed in text format. It is a list containing `[Video url, Cache url, IP address of cache server, Ping RTT times to the Cache server, Download stats, Name - IP address of the DNS resolver]` where Download stats = `[`downloadtime, data duration, datalength, video encodingrate, size of video in bytes, Nb.of interruptions, accumulated buffer-size, accumulated playback , current remaining buffer `]`
  
 
 ==External Links==
