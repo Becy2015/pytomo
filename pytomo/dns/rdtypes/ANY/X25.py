@@ -13,11 +13,13 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.exception
-import dns.rdata
-import dns.tokenizer
+from __future__ import absolute_import
 
-class X25(dns.rdata.Rdata):
+from . import exception as dns_exception
+from . import rdata as dns_rdata
+from . import tokenizer as dns_tokenizer
+
+class X25(dns_rdata.Rdata):
     """X25 record
 
     @ivar address: the PSDN address
@@ -31,7 +33,7 @@ class X25(dns.rdata.Rdata):
         self.address = address
 
     def to_text(self, origin=None, relativize=True, **kw):
-        return '"%s"' % dns.rdata._escapify(self.address)
+        return '"%s"' % dns_rdata._escapify(self.address)
         
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         address = tok.get_string()
@@ -52,7 +54,7 @@ class X25(dns.rdata.Rdata):
         current += 1
         rdlen -= 1
         if l != rdlen:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         address = wire[current : current + l]
         return cls(rdclass, rdtype, address)
 

@@ -20,22 +20,25 @@ the module which implements that type.
 @type _rdata_modules: dict
 @var _module_prefix: The prefix to use when forming modules names.  The
 default is 'dns.rdtypes'.  Changing this value will break the library.
+Changed for absolute imports
 @type _module_prefix: string
 @var _hex_chunk: At most this many octets that will be represented in each
 chunk of hexstring that _hexify() produces before whitespace occurs.
 @type _hex_chunk: int"""
 
+from __future__ import absolute_import
+
 import cStringIO
 
-import dns.exception
-import dns.rdataclass
-import dns.rdatatype
-import dns.tokenizer
+from . import exception as dns_exception
+from . import rdataclass as dns_rdataclass
+from . import rdatatype as dns_rdatatype
+from . import tokenizer as dns_tokenizer
 
 if False:
     # to trick the module finder of pyinstaller
-    from dns.rdtypes.IN import *
-    from dns.rdtypes.ANY import *
+    from .rdtypes.IN import *
+    from .rdtypes.ANY import *
 
 _hex_chunksize = 32
 
@@ -45,7 +48,7 @@ def _hexify(data, chunksize=None):
 
     @param data: the binary string
     @type data: string
-    @param chunksize: the chunk size.  Default is L{dns.rdata._hex_chunksize}
+    @param chunksize: the chunk size.  Default is L{dns_rdata._hex_chunksize}
     @rtype: string
     """
 
@@ -71,7 +74,7 @@ def _base64ify(data, chunksize=None):
     @param data: the binary string
     @type data: string
     @param chunksize: the chunk size.  Default is
-    L{dns.rdata._base64_chunksize}
+    L{dns_rdata._base64_chunksize}
     @rtype: string
     """
 
@@ -147,13 +150,13 @@ class Rdata(object):
     def covers(self):
         """DNS SIG/RRSIG rdatas apply to a specific type; this type is
         returned by the covers() function.  If the rdata type is not
-        SIG or RRSIG, dns.rdatatype.NONE is returned.  This is useful when
+        SIG or RRSIG, dns_rdatatype.NONE is returned.  This is useful when
         creating rdatasets, allowing the rdataset to contain only RRSIGs
         of a particular type, e.g. RRSIG(NS).
         @rtype: int
         """
 
-        return dns.rdatatype.NONE
+        return dns_rdatatype.NONE
 
     def extended_rdatatype(self):
         """Return a 32-bit type value, the least significant 16 bits of
@@ -190,16 +193,16 @@ class Rdata(object):
         it is a good idea to call validate() when you are done making
         changes.
         """
-        dns.rdata.from_text(self.rdclass, self.rdtype, self.to_text())
+        from_text(self.rdclass, self.rdtype, self.to_text())
 
     def __repr__(self):
         covers = self.covers()
-        if covers == dns.rdatatype.NONE:
+        if covers == dns_rdatatype.NONE:
             ctext = ''
         else:
-            ctext = '(' + dns.rdatatype.to_text(covers) + ')'
-        return '<DNS ' + dns.rdataclass.to_text(self.rdclass) + ' ' + \
-               dns.rdatatype.to_text(self.rdtype) + ctext + ' rdata: ' + \
+            ctext = '(' + dns_rdatatype.to_text(covers) + ')'
+        return '<DNS ' + dns_rdataclass.to_text(self.rdclass) + ' ' + \
+               dns_rdatatype.to_text(self.rdtype) + ctext + ' rdata: ' + \
                str(self) + '>'
 
     def __str__(self):
@@ -265,12 +268,12 @@ class Rdata(object):
         @param rdtype: The rdata type
         @type rdtype: int
         @param tok: The tokenizer
-        @type tok: dns.tokenizer.Tokenizer
+        @type tok: dns_tokenizer.Tokenizer
         @param origin: The origin to use for relative names
-        @type origin: dns.name.Name
+        @type origin: dns_name.Name
         @param relativize: should names be relativized?
         @type relativize: bool
-        @rtype: dns.rdata.Rdata instance
+        @rtype: dns_rdata.Rdata instance
         """
 
         raise NotImplementedError
@@ -291,8 +294,8 @@ class Rdata(object):
         @param rdlen: The length of the wire-format rdata
         @type rdlen: int
         @param origin: The origin to use for relative names
-        @type origin: dns.name.Name
-        @rtype: dns.rdata.Rdata instance
+        @type origin: dns_name.Name
+        @rtype: dns_rdata.Rdata instance
         """
 
         raise NotImplementedError
@@ -326,7 +329,7 @@ class GenericRdata(Rdata):
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         token = tok.get()
         if not token.is_identifier() or token.value != '\#':
-            raise dns.exception.SyntaxError(r'generic rdata does not start with \#')
+            raise dns_exception.SyntaxError(r'generic rdata does not start with \#')
         length = tok.get_int()
         chunks = []
         while 1:
@@ -337,7 +340,7 @@ class GenericRdata(Rdata):
         hex = ''.join(chunks)
         data = hex.decode('hex_codec')
         if len(data) != length:
-            raise dns.exception.SyntaxError('generic rdata hex data has wrong length')
+            raise dns_exception.SyntaxError('generic rdata hex data has wrong length')
         return cls(rdclass, rdtype, data)
 
     from_text = classmethod(from_text)
@@ -354,23 +357,24 @@ class GenericRdata(Rdata):
         return cmp(self.data, other.data)
 
 _rdata_modules = {}
-_module_prefix = 'dns.rdtypes'
+_module_prefix = 'rdtypes'
 
 def get_rdata_class(rdclass, rdtype):
 
     def import_module(name):
-        mod = __import__(name)
+        # for absolute imports need more arguments: to test
+        mod = __import__(name, globals=globals(), level=1)
         components = name.split('.')
         for comp in components[1:]:
             mod = getattr(mod, comp)
         return mod
 
     mod = _rdata_modules.get((rdclass, rdtype))
-    rdclass_text = dns.rdataclass.to_text(rdclass)
-    rdtype_text = dns.rdatatype.to_text(rdtype)
+    rdclass_text = dns_rdataclass.to_text(rdclass)
+    rdtype_text = dns_rdatatype.to_text(rdtype)
     rdtype_text = rdtype_text.replace('-', '_')
     if not mod:
-        mod = _rdata_modules.get((dns.rdatatype.ANY, rdtype))
+        mod = _rdata_modules.get((dns_rdatatype.ANY, rdtype))
         if not mod:
             try:
                 mod = import_module('.'.join([_module_prefix,
@@ -380,7 +384,7 @@ def get_rdata_class(rdclass, rdtype):
                 try:
                     mod = import_module('.'.join([_module_prefix,
                                                   'ANY', rdtype_text]))
-                    _rdata_modules[(dns.rdataclass.ANY, rdtype)] = mod
+                    _rdata_modules[(dns_rdataclass.ANY, rdtype)] = mod
                 except ImportError:
                     mod = None
     if mod:
@@ -405,15 +409,15 @@ def from_text(rdclass, rdtype, tok, origin = None, relativize = True):
     @param rdtype: The rdata type
     @type rdtype: int
     @param tok: The tokenizer
-    @type tok: dns.tokenizer.Tokenizer
+    @type tok: dns_tokenizer.Tokenizer
     @param origin: The origin to use for relative names
-    @type origin: dns.name.Name
+    @type origin: dns_name.Name
     @param relativize: Should names be relativized?
     @type relativize: bool
-    @rtype: dns.rdata.Rdata instance"""
+    @rtype: dns_rdata.Rdata instance"""
 
     if isinstance(tok, str):
-        tok = dns.tokenizer.Tokenizer(tok)
+        tok = dns_tokenizer.Tokenizer(tok)
     cls = get_rdata_class(rdclass, rdtype)
     if cls != GenericRdata:
         # peek at first token
@@ -454,8 +458,8 @@ def from_wire(rdclass, rdtype, wire, current, rdlen, origin = None):
     @param rdlen: The length of the wire-format rdata
     @type rdlen: int
     @param origin: The origin to use for relative names
-    @type origin: dns.name.Name
-    @rtype: dns.rdata.Rdata instance"""
+    @type origin: dns_name.Name
+    @rtype: dns_rdata.Rdata instance"""
 
     cls = get_rdata_class(rdclass, rdtype)
     return cls.from_wire(rdclass, rdtype, wire, current, rdlen, origin)

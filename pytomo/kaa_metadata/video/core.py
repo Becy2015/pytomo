@@ -29,10 +29,13 @@
 #
 # -----------------------------------------------------------------------------
 
-from kaa_metadata.core import ParseError, Media, MEDIA_VIDEO, MEDIA_SUBTITLE, \
-     MEDIA_CHAPTER, MEDIA_AV, MEDIA_AUDIO, MEDIA_DISC, Collection
+from __future__ import absolute_import
 
-from kaa_metadata.audio.core import Audio as AudioStream
+from ..core import (ParseError, Media, MEDIA_VIDEO, MEDIA_SUBTITLE,
+                    MEDIA_CHAPTER, MEDIA_AV, MEDIA_AUDIO, MEDIA_DISC,
+                    Collection)
+
+from ..audio.core import Audio as AudioStream
 
 
 VIDEOCORE = ['length', 'encoder', 'bitrate', 'samplerate', 'codec', 'format',

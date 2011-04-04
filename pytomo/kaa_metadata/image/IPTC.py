@@ -32,13 +32,15 @@
 
 # http://www.ap.org/apserver/userguide/codes.htm
 
+from __future__ import absolute_import
+
 # python imports
 from struct import unpack
 
 # kaa imports
 #import kaa
 # use strutils instead of kaa
-import strutils as kaa
+from .. import strutils as kaa
 
 mapping = {
     'by-line title': 'title',

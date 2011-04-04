@@ -15,7 +15,9 @@
 
 """DNS Opcodes."""
 
-import dns.exception
+from __future__ import absolute_import
+
+from . import exception as dns_exception
 
 QUERY = 0
 IQUERY = 1
@@ -38,7 +40,7 @@ _by_text = {
 _by_value = dict([(y, x) for x, y in _by_text.iteritems()])
 
 
-class UnknownOpcode(dns.exception.DNSException):
+class UnknownOpcode(dns_exception.DNSException):
     """Raised if an opcode is unknown."""
     pass
 
@@ -66,7 +68,7 @@ def from_flags(flags):
     @param flags: int
     @rtype: int
     """
-    
+
     return (flags & 0x7800) >> 11
 
 def to_flags(value):
@@ -74,9 +76,9 @@ def to_flags(value):
     flags.
     @rtype: int
     """
-    
+
     return (value << 11) & 0x7800
-    
+
 def to_text(value):
     """Convert an opcode to text.
 
@@ -85,7 +87,7 @@ def to_text(value):
     @raises UnknownOpcode: the opcode is unknown
     @rtype: string
     """
-    
+
     text = _by_value.get(value)
     if text is None:
         text = str(value)
@@ -98,7 +100,7 @@ def is_update(flags):
     @type flags: int
     @rtype: bool
     """
-    
+
     if (from_flags(flags) == UPDATE):
         return True
     return False

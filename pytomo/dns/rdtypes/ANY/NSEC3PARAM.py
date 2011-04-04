@@ -13,13 +13,15 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+from __future__ import absolute_import
+
 import cStringIO
 import struct
 
-import dns.exception
-import dns.rdata
+from . import exception as dns_exception
+from . import rdata as dns_rdata
 
-class NSEC3PARAM(dns.rdata.Rdata):
+class NSEC3PARAM(dns_rdata.Rdata):
     """NSEC3PARAM record
 
     @ivar algorithm: the hash algorithm number
@@ -75,7 +77,7 @@ class NSEC3PARAM(dns.rdata.Rdata):
         current += slen
         rdlen -= slen
         if rdlen != 0:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         return cls(rdclass, rdtype, algorithm, flags, iterations, salt)
 
     from_wire = classmethod(from_wire)

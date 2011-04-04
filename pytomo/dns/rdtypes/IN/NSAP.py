@@ -13,11 +13,13 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.exception
-import dns.rdata
-import dns.tokenizer
+from __future__ import absolute_import
 
-class NSAP(dns.rdata.Rdata):
+from ... import exception as dns_exception
+from ... import rdata as dns_rdata
+#from ... import tokenizer as dns_tokenizer
+
+class NSAP(dns_rdata.Rdata):
     """NSAP record.
 
     @ivar address: a NASP
@@ -37,10 +39,10 @@ class NSAP(dns.rdata.Rdata):
         address = tok.get_string()
         t = tok.get_eol()
         if address[0:2] != '0x':
-            raise dns.exception.SyntaxError('string does not start with 0x')
+            raise dns_exception.SyntaxError('string does not start with 0x')
         address = address[2:].replace('.', '')
         if len(address) % 2 != 0:
-            raise dns.exception.SyntaxError('hexstring has odd length')
+            raise dns_exception.SyntaxError('hexstring has odd length')
         address = address.decode('hex_codec')
         return cls(rdclass, rdtype, address)
 

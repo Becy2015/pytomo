@@ -15,20 +15,22 @@
 
 """MX-like base classes."""
 
+from __future__ import absolute_import
+
 import cStringIO
 import struct
 
-import dns.exception
-import dns.rdata
-import dns.name
+from .. import exception as dns_exception
+from .. import rdata as dns_rdata
+from .. import name as dns_name
 
-class MXBase(dns.rdata.Rdata):
+class MXBase(dns_rdata.Rdata):
     """Base class for rdata that is like an MX record.
 
     @ivar preference: the preference value
     @type preference: int
     @ivar exchange: the exchange name
-    @type exchange: dns.name.Name object"""
+    @type exchange: dns_name.Name object"""
 
     __slots__ = ['preference', 'exchange']
 
@@ -63,10 +65,10 @@ class MXBase(dns.rdata.Rdata):
         (preference, ) = struct.unpack('!H', wire[current : current + 2])
         current += 2
         rdlen -= 2
-        (exchange, cused) = dns.name.from_wire(wire[: current + rdlen],
+        (exchange, cused) = dns_name.from_wire(wire[: current + rdlen],
                                                current)
         if cused != rdlen:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         if not origin is None:
             exchange = exchange.relativize(origin)
         return cls(rdclass, rdtype, preference, exchange)

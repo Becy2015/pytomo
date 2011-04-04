@@ -13,15 +13,18 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+from __future__ import absolute_import
+
 import cStringIO
 import string
 import struct
 
-import dns.exception
-import dns.rdata
-import dns.rdatatype
+from . import exception as dns_exception
+from . import rdata as dns_rdata
+#from . import rdatatype as dns_rdatatype
+from ... import name as dns_name
 
-class HIP(dns.rdata.Rdata):
+class HIP(dns_rdata.Rdata):
     """HIP record
 
     @ivar hit: the host identity tag
@@ -31,7 +34,7 @@ class HIP(dns.rdata.Rdata):
     @ivar key: the public key
     @type key: string
     @ivar servers: the rendezvous servers
-    @type servers: list of dns.name.Name objects
+    @type servers: list of dns_name.Name objects
     @see: RFC 5205"""
 
     __slots__ = ['hit', 'algorithm', 'key', 'servers']
@@ -58,14 +61,14 @@ class HIP(dns.rdata.Rdata):
         algorithm = tok.get_uint8()
         hit = tok.get_string().decode('hex-codec')
         if len(hit) > 255:
-            raise dns.exception.SyntaxError("HIT too long")
+            raise dns_exception.SyntaxError("HIT too long")
         key = tok.get_string().decode('base64-codec')
         servers = []
         while 1:
             token = tok.get()
             if token.is_eol_or_eof():
                 break
-            server = dns.name.from_text(token.value, origin)
+            server = dns_name.from_text(token.value, origin)
             server.choose_relativity(origin, relativize)
             servers.append(server)
         return cls(rdclass, rdtype, hit, algorithm, key, servers)
@@ -94,7 +97,7 @@ class HIP(dns.rdata.Rdata):
         rdlen -= lk
         servers = []
         while rdlen > 0:
-            (server, cused) = dns.name.from_wire(wire[: current + rdlen],
+            (server, cused) = dns_name.from_wire(wire[: current + rdlen],
                                                  current)
             current += cused
             rdlen -= cused

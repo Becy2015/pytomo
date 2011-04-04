@@ -13,8 +13,10 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.rdtypes.mxbase
+from __future__ import absolute_import
 
-class RT(dns.rdtypes.mxbase.UncompressedDowncasingMX):
+from .. import mxbase
+
+class RT(mxbase.UncompressedDowncasingMX):
     """RT record"""
     pass

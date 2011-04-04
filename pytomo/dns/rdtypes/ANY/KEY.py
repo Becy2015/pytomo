@@ -13,8 +13,10 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.rdtypes.keybase
+from __future__ import absolute_import
 
-class KEY(dns.rdtypes.keybase.KEYBase):
+from .. import keybase
+
+class KEY(keybase.KEYBase):
     """KEY record"""
     pass

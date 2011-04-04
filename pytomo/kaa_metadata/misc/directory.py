@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
@@ -38,11 +40,11 @@ import logging
 # kaa imports
 #import kaa
 # use strutils instead of kaa
-import strutils as kaa
+from .. import strutils as kaa
 
 # kaa_metadata imports
-import kaa_metadata.core as core
-from kaa_metadata.image.core import BinsParser
+from .. import core
+from ..image.core import BinsParser
 
 # get logging object
 log = logging.getLogger('metadata')

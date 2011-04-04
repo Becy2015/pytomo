@@ -16,6 +16,8 @@ Usage:
     * from command line:
         ./dict_cache.py url_file.txt
     * as library:
+
+
         import lib_cache_url
         url_file_in = 'url_file.txt'
         lib_cache_url.get_next_round_urls(url_file_in, max_per_page=20,
@@ -23,7 +25,7 @@ Usage:
                                           pickle_output=False)
 """
 
-from __future__ import with_statement
+from __future__ import with_statement, absolute_import
 
 import sys
 import htmllib
@@ -37,7 +39,7 @@ import socket
 from optparse import OptionParser
 
 # global config
-import pytomo.config_pytomo as config_pytomo
+from . import config_pytomo
 
 class LinksExtractor(htmllib.HTMLParser):
     "Simple HTML parser to obtain the urls from webpage"

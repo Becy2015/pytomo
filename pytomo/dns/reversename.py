@@ -16,17 +16,20 @@
 """DNS Reverse Map Names.
 
 @var ipv4_reverse_domain: The DNS IPv4 reverse-map domain, in-addr.arpa.
-@type ipv4_reverse_domain: dns.name.Name object
+@type ipv4_reverse_domain: dns_name.Name object
 @var ipv6_reverse_domain: The DNS IPv6 reverse-map domain, ip6.arpa.
-@type ipv6_reverse_domain: dns.name.Name object
+@type ipv6_reverse_domain: dns_name.Name object
 """
 
-import dns.name
-import dns.ipv6
-import dns.ipv4
+from __future__ import absolute_import
 
-ipv4_reverse_domain = dns.name.from_text('in-addr.arpa.')
-ipv6_reverse_domain = dns.name.from_text('ip6.arpa.')
+from . import name as dns_name
+from . import ipv6 as dns_ipv6
+from . import ipv4 as dns_ipv4
+from . import exception as dns_exception
+
+ipv4_reverse_domain = dns_name.from_text('in-addr.arpa.')
+ipv6_reverse_domain = dns_name.from_text('ip6.arpa.')
 
 def from_address(text):
     """Convert an IPv4 or IPv6 address in textual form into a Name object whose
@@ -34,21 +37,21 @@ def from_address(text):
     @param text: an IPv4 or IPv6 address in textual form (e.g. '127.0.0.1',
     '::1')
     @type text: str
-    @rtype: dns.name.Name object
+    @rtype: dns_name.Name object
     """
     try:
-        parts = list(dns.ipv6.inet_aton(text).encode('hex_codec'))
+        parts = list(dns_ipv6.inet_aton(text).encode('hex_codec'))
         origin = ipv6_reverse_domain
     except:
-        parts = ['%d' % ord(byte) for byte in dns.ipv4.inet_aton(text)]
+        parts = ['%d' % ord(byte) for byte in dns_ipv4.inet_aton(text)]
         origin = ipv4_reverse_domain
     parts.reverse()
-    return dns.name.from_text('.'.join(parts), origin=origin)
+    return dns_name.from_text('.'.join(parts), origin=origin)
 
 def to_address(name):
     """Convert a reverse map domain name into textual address form.
     @param name: an IPv4 or IPv6 address in reverse-map form.
-    @type name: dns.name.Name object
+    @type name: dns_name.Name object
     @rtype: str
     """
     if name.is_subdomain(ipv4_reverse_domain):
@@ -57,7 +60,7 @@ def to_address(name):
         labels.reverse()
         text = '.'.join(labels)
         # run through inet_aton() to check syntax and make pretty.
-        return dns.ipv4.inet_ntoa(dns.ipv4.inet_aton(text))
+        return dns_ipv4.inet_ntoa(dns_ipv4.inet_aton(text))
     elif name.is_subdomain(ipv6_reverse_domain):
         name = name.relativize(ipv6_reverse_domain)
         labels = list(name.labels)
@@ -70,6 +73,6 @@ def to_address(name):
             i += 4
         text = ':'.join(parts)
         # run through inet_aton() to check syntax and make pretty.
-        return dns.ipv6.inet_ntoa(dns.ipv6.inet_aton(text))
+        return dns_ipv6.inet_ntoa(dns_ipv6.inet_aton(text))
     else:
-        raise dns.exception.SyntaxError('unknown reverse-map address family')
+        raise dns_exception.SyntaxError('unknown reverse-map address family')

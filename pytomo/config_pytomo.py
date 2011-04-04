@@ -37,9 +37,9 @@ LOG_PUBLIC_IP = True
 #STATIC_URL_FILE = ''
 
 # Max number of rounds to perform
-MAX_ROUNDS = 50
+MAX_ROUNDS = 100
 # Max number of urls to visit
-MAX_CRAWLED_URLS = 10000
+MAX_CRAWLED_URLS = 500
 # Max number of realetd videos from each url
 MAX_PER_URL = 2
 # Max number of related videos from each page
@@ -60,7 +60,7 @@ PROXIES = None
 # other DNS servers to query
 GOOGLE_PUBLIC_DNS = ('google_public_dns', '8.8.8.8')
 OPEN_DNS = ('open_dns', '208.67.220.220')
-EXTRA_NAME_SERVERS = [] #GOOGLE_PUBLIC_DNS, OPEN_DNS]
+EXTRA_NAME_SERVERS = [GOOGLE_PUBLIC_DNS, OPEN_DNS]
 
 ################################################################################
 # for lib_ping.py
@@ -73,6 +73,8 @@ DOWNLOAD_TIME = 30.0
 BUFFERING_VIDEO_DURATION = 3.0
 MIN_PLAYOUT_BUFFER_SIZE = 1.0
 
+# nb of tries for extracting metadata info from video
+MAX_NB_TRIES_ENCODING = 9
 ################################################################################
 ################################################################################
 # to be set by start_pytomo.py: DO NOT CHANGE
@@ -90,6 +92,7 @@ NB_PING_VALUES = 3
 NB_DOWNLOAD_VALUES = 10
 NB_FIELDS = NB_IDENT_VALUES + NB_PING_VALUES + NB_DOWNLOAD_VALUES
 
+USER_INPUT_TIMEOUT = 4
 
 LEVEL_TO_NAME = {DEBUG: 'DEBUG',
                  INFO: 'INFO',
@@ -102,4 +105,13 @@ NAME_TO_LEVEL = {'DEBUG': DEBUG,
                  'WARNING': WARNING,
                  'ERROR': ERROR,
                  'CRITICAL': CRITICAL}
+
+################################################################################
+# black list utils
+
+BLACK_LISTED = 'das_captcha'
+
+class BlackListException(Exception):
+    "Exception in case the crawler has been blacklisted"
+    pass
 

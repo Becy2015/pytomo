@@ -15,11 +15,13 @@
 
 """TXT-like base class."""
 
-import dns.exception
-import dns.rdata
-import dns.tokenizer
+from __future__ import absolute_import
 
-class TXTBase(dns.rdata.Rdata):
+from .. import exception as dns_exception
+from .. import rdata as dns_rdata
+#from .. import tokenizer as dns_tokenizer
+
+class TXTBase(dns_rdata.Rdata):
     """Base class for rdata that is like a TXT record
 
     @ivar strings: the text strings
@@ -38,7 +40,7 @@ class TXTBase(dns.rdata.Rdata):
         txt = ''
         prefix = ''
         for s in self.strings:
-            txt += '%s"%s"' % (prefix, dns.rdata._escapify(s))
+            txt += '%s"%s"' % (prefix, dns_rdata._escapify(s))
             prefix = ' '
         return txt
 
@@ -49,12 +51,12 @@ class TXTBase(dns.rdata.Rdata):
             if token.is_eol_or_eof():
                 break
             if not (token.is_quoted_string() or token.is_identifier()):
-                raise dns.exception.SyntaxError("expected a string")
+                raise dns_exception.SyntaxError("expected a string")
             if len(token.value) > 255:
-                raise dns.exception.SyntaxError("string too long")
+                raise dns_exception.SyntaxError("string too long")
             strings.append(token.value)
         if len(strings) == 0:
-            raise dns.exception.UnexpectedEnd
+            raise dns_exception.UnexpectedEnd
         return cls(rdclass, rdtype, strings)
 
     from_text = classmethod(from_text)
@@ -74,7 +76,7 @@ class TXTBase(dns.rdata.Rdata):
             current += 1
             rdlen -= 1
             if l > rdlen:
-                raise dns.exception.FormError
+                raise dns_exception.FormError
             s = wire[current : current + l]
             current += l
             rdlen -= l

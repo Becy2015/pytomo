@@ -29,11 +29,13 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 # python imports
-import sys
+#import sys
 
 # kaa imports
-from kaa_metadata.core import ParseError, Media, MEDIA_AUDIO
+from ..core import ParseError, Media, MEDIA_AUDIO
 
 AUDIOCORE = ['channels', 'samplerate', 'length', 'encoder', 'codec', 'format',
              'samplebits', 'bitrate', 'fourcc', 'trackno', 'id', 'userdate' ]

@@ -29,22 +29,24 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
 import re
-import sys
+#import sys
 import logging
 import struct
 
 # import kaa_metadata.audio core
-from kaa_metadata.strutils import str_to_unicode
-import core
-import ID3 as ID3
+from ..strutils import str_to_unicode
+from . import core
+from . import ID3
 
 # eyeD3 imports
-from eyeD3 import tag as eyeD3_tag
-from eyeD3 import frames as eyeD3_frames
+from .eyeD3 import tag as eyeD3_tag
+from .eyeD3 import frames as eyeD3_frames
 
 
 # get logging object

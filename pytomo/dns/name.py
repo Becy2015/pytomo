@@ -16,10 +16,12 @@
 """DNS Names.
 
 @var root: The DNS root name.
-@type root: dns.name.Name object
+@type root: dns_name.Name object
 @var empty: The empty DNS name.
-@type empty: dns.name.Name object
+@type empty: dns_name.Name object
 """
+
+from __future__ import absolute_import
 
 import cStringIO
 import struct
@@ -28,7 +30,7 @@ import sys
 if sys.hexversion >= 0x02030000:
     import encodings.idna
 
-import dns.exception
+from . import exception as dns_exception
 
 NAMERELN_NONE = 0
 NAMERELN_SUPERDOMAIN = 1
@@ -36,41 +38,41 @@ NAMERELN_SUBDOMAIN = 2
 NAMERELN_EQUAL = 3
 NAMERELN_COMMONANCESTOR = 4
 
-class EmptyLabel(dns.exception.SyntaxError):
+class EmptyLabel(dns_exception.SyntaxError):
     """Raised if a label is empty."""
     pass
 
-class BadEscape(dns.exception.SyntaxError):
+class BadEscape(dns_exception.SyntaxError):
     """Raised if an escaped code in a text format name is invalid."""
     pass
 
-class BadPointer(dns.exception.FormError):
+class BadPointer(dns_exception.FormError):
     """Raised if a compression pointer points forward instead of backward."""
     pass
 
-class BadLabelType(dns.exception.FormError):
+class BadLabelType(dns_exception.FormError):
     """Raised if the label type of a wire format name is unknown."""
     pass
 
-class NeedAbsoluteNameOrOrigin(dns.exception.DNSException):
+class NeedAbsoluteNameOrOrigin(dns_exception.DNSException):
     """Raised if an attempt is made to convert a non-absolute name to
     wire when there is also a non-absolute (or missing) origin."""
     pass
 
-class NameTooLong(dns.exception.FormError):
+class NameTooLong(dns_exception.FormError):
     """Raised if a name is > 255 octets long."""
     pass
 
-class LabelTooLong(dns.exception.SyntaxError):
+class LabelTooLong(dns_exception.SyntaxError):
     """Raised if a label is > 63 octets long."""
     pass
 
-class AbsoluteConcatenation(dns.exception.DNSException):
+class AbsoluteConcatenation(dns_exception.DNSException):
     """Raised if an attempt is made to append anything other than the
     empty name to an absolute name."""
     pass
 
-class NoParent(dns.exception.DNSException):
+class NoParent(dns_exception.DNSException):
     """Raised if an attempt is made to get the parent of the root name
     or the empty name."""
     pass
@@ -128,7 +130,7 @@ def _validate_labels(labels):
 class Name(object):
     """A DNS name.
 
-    The dns.name.Name class represents a DNS name as a tuple of labels.
+    The dns_name.Name class represents a DNS name as a tuple of labels.
     Instances of the class are immutable.
 
     @ivar labels: The tuple of labels in the name. Each label is a string of
@@ -177,9 +179,9 @@ class Name(object):
         """Compare two names, returning a 3-tuple (relation, order, nlabels).
 
         I{relation} describes the relation ship beween the names,
-        and is one of: dns.name.NAMERELN_NONE,
-        dns.name.NAMERELN_SUPERDOMAIN, dns.name.NAMERELN_SUBDOMAIN,
-        dns.name.NAMERELN_EQUAL, or dns.name.NAMERELN_COMMONANCESTOR
+        and is one of: dns_name.NAMERELN_NONE,
+        dns_name.NAMERELN_SUPERDOMAIN, dns_name.NAMERELN_SUBDOMAIN,
+        dns_name.NAMERELN_EQUAL, or dns_name.NAMERELN_COMMONANCESTOR
 
         I{order} is < 0 if self < other, > 0 if self > other, and ==
         0 if self == other.  A relative name is always less than an
@@ -261,7 +263,7 @@ class Name(object):
     def canonicalize(self):
         """Return a name which is equal to the current name, but is in
         DNSSEC canonical form.
-        @rtype: dns.name.Name object
+        @rtype: dns_name.Name object
         """
 
         return Name([x.lower() for x in self.labels])
@@ -354,7 +356,7 @@ class Name(object):
 
         @param origin: If the name is relative and origin is not None, then
         origin will be appended to it.
-        @type origin: dns.name.Name object
+        @type origin: dns_name.Name object
         @raises NeedAbsoluteNameOrOrigin: All names in wire format are
         absolute.  If self is a relative name, then an origin must be supplied;
         if it is missing, then this exception is raised
@@ -383,7 +385,7 @@ class Name(object):
         @type compress: dict
         @param origin: If the name is relative and origin is not None, then
         origin will be appended to it.
-        @type origin: dns.name.Name object
+        @type origin: dns_name.Name object
         @raises NeedAbsoluteNameOrOrigin: All names in wire format are
         absolute.  If self is a relative name, then an origin must be supplied;
         if it is missing, then this exception is raised
@@ -459,16 +461,16 @@ class Name(object):
 
         l = len(self.labels)
         if depth == 0:
-            return (self, dns.name.empty)
+            return (self, empty)
         elif depth == l:
-            return (dns.name.empty, self)
+            return (empty, self)
         elif depth < 0 or depth > l:
             raise ValueError('depth must be >= 0 and <= the length of the name')
         return (Name(self[: -depth]), Name(self[-depth :]))
 
     def concatenate(self, other):
         """Return a new name which is the concatenation of self and other.
-        @rtype: dns.name.Name object
+        @rtype: dns_name.Name object
         @raises AbsoluteConcatenation: self is absolute and other is
         not the empty name
         """
@@ -482,7 +484,7 @@ class Name(object):
     def relativize(self, origin):
         """If self is a subdomain of origin, return a new name which is self
         relative to origin.  Otherwise return self.
-        @rtype: dns.name.Name object
+        @rtype: dns_name.Name object
         """
 
         if not origin is None and self.is_subdomain(origin):
@@ -493,7 +495,7 @@ class Name(object):
     def derelativize(self, origin):
         """If self is a relative name, return a new name which is the
         concatenation of self and origin.  Otherwise return self.
-        @rtype: dns.name.Name object
+        @rtype: dns_name.Name object
         """
 
         if not self.is_absolute():
@@ -506,7 +508,7 @@ class Name(object):
         origin is None, then self is returned.  Otherwise, if
         relativize is true the name is relativized, and if relativize is
         false the name is derelativized.
-        @rtype: dns.name.Name object
+        @rtype: dns_name.Name object
         """
 
         if origin:
@@ -519,7 +521,7 @@ class Name(object):
 
     def parent(self):
         """Return the parent of the name.
-        @rtype: dns.name.Name object
+        @rtype: dns_name.Name object
         @raises NoParent: the name is either the root name or the empty name,
         and thus has no parent.
         """
@@ -535,7 +537,7 @@ def from_unicode(text, origin = root):
 
     Lables are encoded in IDN ACE form.
 
-    @rtype: dns.name.Name object
+    @rtype: dns_name.Name object
     """
 
     if not isinstance(text, unicode):
@@ -594,7 +596,7 @@ def from_unicode(text, origin = root):
 
 def from_text(text, origin = root):
     """Convert text into a Name object.
-    @rtype: dns.name.Name object
+    @rtype: dns_name.Name object
     """
 
     if not isinstance(text, str):
@@ -660,12 +662,12 @@ def from_wire(message, current):
     @param current: the offset of the beginning of the name from the start
     of the message
     @type current: int
-    @raises dns.name.BadPointer: a compression pointer did not point backwards
+    @raises dns_name.BadPointer: a compression pointer did not point backwards
     in the message
-    @raises dns.name.BadLabelType: an invalid label type was encountered.
+    @raises dns_name.BadLabelType: an invalid label type was encountered.
     @returns: a tuple consisting of the name that was read and the number
     of bytes of the wire format message which were consumed reading it
-    @rtype: (dns.name.Name object, int) tuple
+    @rtype: (dns_name.Name object, int) tuple
     """
 
     if not isinstance(message, str):

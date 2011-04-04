@@ -13,11 +13,13 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+from __future__ import absolute_import
+
 import struct
 
-import dns.exception
-import dns.name
-import dns.rdata
+from ... import exception as dns_exception
+from ... import name as dns_name
+from ... import rdata as dns_rdata
 
 def _write_string(file, s):
     l = len(s)
@@ -26,7 +28,7 @@ def _write_string(file, s):
     file.write(byte)
     file.write(s)
 
-class NAPTR(dns.rdata.Rdata):
+class NAPTR(dns_rdata.Rdata):
     """NAPTR record
 
     @ivar order: order
@@ -40,12 +42,12 @@ class NAPTR(dns.rdata.Rdata):
     @ivar regexp: regular expression
     @type regexp: string
     @ivar replacement: replacement name
-    @type replacement: dns.name.Name object
+    @type replacement: dns_name.Name object
     @see: RFC 3403"""
 
     __slots__ = ['order', 'preference', 'flags', 'service', 'regexp',
                  'replacement']
-    
+
     def __init__(self, rdclass, rdtype, order, preference, flags, service,
                  regexp, replacement):
         super(NAPTR, self).__init__(rdclass, rdtype)
@@ -60,9 +62,9 @@ class NAPTR(dns.rdata.Rdata):
         replacement = self.replacement.choose_relativity(origin, relativize)
         return '%d %d "%s" "%s" "%s" %s' % \
                (self.order, self.preference,
-                dns.rdata._escapify(self.flags),
-                dns.rdata._escapify(self.service),
-                dns.rdata._escapify(self.regexp),
+                dns_rdata._escapify(self.flags),
+                dns_rdata._escapify(self.service),
+                dns_rdata._escapify(self.regexp),
                 self.replacement)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
@@ -76,7 +78,7 @@ class NAPTR(dns.rdata.Rdata):
         tok.get_eol()
         return cls(rdclass, rdtype, order, preference, flags, service,
                    regexp, replacement)
-    
+
     from_text = classmethod(from_text)
 
     def to_wire(self, file, compress = None, origin = None):
@@ -86,7 +88,7 @@ class NAPTR(dns.rdata.Rdata):
         _write_string(file, self.service)
         _write_string(file, self.regexp)
         self.replacement.to_wire(file, compress, origin)
-        
+
     def from_wire(cls, rdclass, rdtype, wire, current, rdlen, origin = None):
         (order, preference) = struct.unpack('!HH', wire[current : current + 4])
         current += 4
@@ -97,15 +99,15 @@ class NAPTR(dns.rdata.Rdata):
             current += 1
             rdlen -= 1
             if l > rdlen or rdlen < 0:
-                raise dns.exception.FormError
+                raise dns_exception.FormError
             s = wire[current : current + l]
             current += l
             rdlen -= l
             strings.append(s)
-        (replacement, cused) = dns.name.from_wire(wire[: current + rdlen],
+        (replacement, cused) = dns_name.from_wire(wire[: current + rdlen],
                                                   current)
         if cused != rdlen:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         if not origin is None:
             replacement = replacement.relativize(origin)
         return cls(rdclass, rdtype, order, preference, strings[0], strings[1],
@@ -116,7 +118,7 @@ class NAPTR(dns.rdata.Rdata):
     def choose_relativity(self, origin = None, relativize = True):
         self.replacement = self.replacement.choose_relativity(origin,
                                                               relativize)
-        
+
     def _cmp(self, other):
         sp = struct.pack("!HH", self.order, self.preference)
         op = struct.pack("!HH", other.order, other.preference)

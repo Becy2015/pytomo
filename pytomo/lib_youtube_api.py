@@ -6,20 +6,16 @@
     Returns: A list containing the list of videos.
 """
 
-from pytomo.lib_cache_url import get_all_links
-import pytomo.config_pytomo as config_pytomo
+from __future__ import absolute_import
+
+from .lib_cache_url import get_all_links
+from . import config_pytomo
 
 # Youtube webpage limitation
 MAX_VIDEO_PER_PAGE = 25
 
-def get_popular_links(time=config_pytomo.TIME_FRAME,
-                      max_results=config_pytomo.MAX_PER_PAGE):
-    """Returns the most popular youtube links (world-wide).
-    The number of videos returned is given as Total_pages.
-    (The results returned are in no particular order).
-    A set of only Youtube links from url
-    """
-    config_pytomo.LOG.debug('Getting popular links')
+def get_time_frame(time=config_pytomo.TIME_FRAME):
+    "Returns the time frame in the form accepted by youtube_api"
     if time == 'today':
         time_frame = 't'
     elif time == 'week':
@@ -32,6 +28,17 @@ def get_popular_links(time=config_pytomo.TIME_FRAME,
         config_pytomo.LOG.info('Time frame not recognised. '
                                'Assuming All time Popular videos.')
         time_frame = 'a'
+    return time_frame
+
+def get_popular_links(time=config_pytomo.TIME_FRAME,
+                      max_results=config_pytomo.MAX_PER_PAGE):
+    """Returns the most popular youtube links (world-wide).
+    The number of videos returned is given as Total_pages.
+    (The results returned are in no particular order).
+    A set of only Youtube links from url
+    """
+    config_pytomo.LOG.debug('Getting popular links')
+    time_frame = get_time_frame(time)
     if max_results > MAX_VIDEO_PER_PAGE:
         pages = int(max_results) / MAX_VIDEO_PER_PAGE
     else:

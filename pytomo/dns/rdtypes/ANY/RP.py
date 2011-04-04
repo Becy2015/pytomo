@@ -13,18 +13,20 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.exception
-import dns.rdata
-import dns.name
+from __future__ import absolute_import
 
-class RP(dns.rdata.Rdata):
+from . import exception as dns_exception
+from . import rdata as dns_rdata
+from . import name as dns_name
+
+class RP(dns_rdata.Rdata):
     """RP record
 
     @ivar mbox: The responsible person's mailbox
-    @type mbox: dns.name.Name object
+    @type mbox: dns_name.Name object
     @ivar txt: The owner name of a node with TXT records, or the root name
     if no TXT records are associated with this RP.
-    @type txt: dns.name.Name object
+    @type txt: dns_name.Name object
     @see: RFC 1183"""
 
     __slots__ = ['mbox', 'txt']
@@ -58,16 +60,16 @@ class RP(dns.rdata.Rdata):
             self.txt.to_digestable(origin)
 
     def from_wire(cls, rdclass, rdtype, wire, current, rdlen, origin = None):
-        (mbox, cused) = dns.name.from_wire(wire[: current + rdlen],
+        (mbox, cused) = dns_name.from_wire(wire[: current + rdlen],
                                            current)
         current += cused
         rdlen -= cused
         if rdlen <= 0:
-            raise dns.exception.FormError
-        (txt, cused) = dns.name.from_wire(wire[: current + rdlen],
+            raise dns_exception.FormError
+        (txt, cused) = dns_name.from_wire(wire[: current + rdlen],
                                           current)
         if cused != rdlen:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         if not origin is None:
             mbox = mbox.relativize(origin)
             txt = txt.relativize(origin)

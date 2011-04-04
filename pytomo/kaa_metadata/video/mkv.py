@@ -28,6 +28,8 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
@@ -35,7 +37,7 @@ from struct import unpack
 import logging
 
 # import kaa_metadata.video core
-import core
+from . import core
 
 # get logging object
 log = logging.getLogger('metadata')

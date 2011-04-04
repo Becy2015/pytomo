@@ -15,11 +15,13 @@
 
 """DNS name dictionary"""
 
-import dns.name
+from __future__ import absolute_import
+
+from . import name as dns_name
 
 class NameDict(dict):
 
-    """A dictionary whose keys are dns.name.Name objects.
+    """A dictionary whose keys are dns_name.Name objects.
     @ivar max_depth: the maximum depth of the keys that have ever been
     added to the dictionary.
     @type max_depth: int
@@ -30,7 +32,7 @@ class NameDict(dict):
         self.max_depth = 0
 
     def __setitem__(self, key, value):
-        if not isinstance(key, dns.name.Name):
+        if not isinstance(key, dns_name.Name):
             raise ValueError('NameDict key must be a name')
         depth = len(key)
         if depth > self.max_depth:
@@ -44,7 +46,7 @@ class NameDict(dict):
         a superdomain of I{name}.
 
         @param name: the name
-        @type name: dns.name.Name object
+        @type name: dns_name.Name object
         @rtype: (key, value) tuple
         """
 
@@ -52,8 +54,8 @@ class NameDict(dict):
         if depth > self.max_depth:
             depth = self.max_depth
         for i in xrange(-depth, 0):
-            n = dns.name.Name(name[i:])
+            n = dns_name.Name(name[i:])
             if self.has_key(n):
                 return (n, self[n])
-        v = self[dns.name.empty]
-        return (dns.name.empty, v)
+        v = self[dns_name.empty]
+        return (dns_name.empty, v)

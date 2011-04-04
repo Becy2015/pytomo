@@ -2,13 +2,15 @@
 """Module to retrieve the IP address of a URL out of a set of nameservers
 """
 
+from __future__ import with_statement, absolute_import
+
 from urlparse import urlsplit
 import sys
 
-import pytomo.dns.resolver as dns_resolver
-import pytomo.dns.exception as dns_exception
+from .dns import resolver as dns_resolver
+from .dns import exception as dns_exception
 
-import pytomo.config_pytomo as config_pytomo
+from . import config_pytomo
 
 def get_default_name_servers():
     "Return a list of IP addresses of default name servers"
@@ -41,9 +43,14 @@ def get_ip_addresses(url):
             rdatas = None
             continue
         if rdatas:
+            try:
+                address = rdatas[0].address
+            except AttributeError, mes:
+                config_pytomo.LOG.error('DNS failed: %s' % mes)
+                continue
             config_pytomo.LOG.debug("URL %s resolved as: %s"
-                                    % (hostname, rdatas[0].address))
-            results.append((rdatas[0].address, '_'.join((name, server))))
+                                    % (hostname, address))
+            results.append((address, '_'.join((name, server))))
     return results
 
 if __name__ == '__main__':

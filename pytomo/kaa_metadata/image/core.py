@@ -29,14 +29,16 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 # python imports
 import os
-import sys
+#import sys
 import logging
 import xml.sax
 
 # kaa_metadata imports
-from kaa_metadata.core import ParseError, Media, MEDIA_IMAGE
+from ..core import ParseError, Media, MEDIA_IMAGE
 
 # get logging object
 log = logging.getLogger('metadata')

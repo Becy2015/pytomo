@@ -29,13 +29,15 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
 import os
 
 # import kaa_metadata.video core
-import core
+from . import core
 
 class VCDFile(core.Collection):
     """

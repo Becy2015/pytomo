@@ -31,12 +31,14 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 import struct
 
 # import kaa_metadata.audio core
-import core
+from . import core
 
 # ADTS Fixed header: these don't change from frame to frame
 #

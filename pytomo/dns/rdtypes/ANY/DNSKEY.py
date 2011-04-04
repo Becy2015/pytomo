@@ -13,13 +13,15 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.rdtypes.keybase
+from __future__ import absolute_import
+
+from .. import keybase
 
 # flag constants
 SEP = 0x0001
 REVOKE = 0x0080
 ZONE = 0x0100
 
-class DNSKEY(dns.rdtypes.keybase.KEYBase):
+class DNSKEY(keybase.KEYBase):
     """DNSKEY record"""
     pass

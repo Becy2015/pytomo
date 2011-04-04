@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
@@ -38,7 +40,7 @@ import logging
 import xml.sax
 
 # kaa_metadata imports
-import kaa_metadata.core as core
+from .. import core
 
 # get logging object
 log = logging.getLogger('metadata')
