@@ -32,13 +32,15 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
 import logging
 
 # import kaa_metadata.audio core
-import core
+from . import core
 
 # get logging object
 log = logging.getLogger('metadata')

@@ -23,9 +23,11 @@
 whose key is the rdatatype value and whose value is True in this dictionary.
 @type _metaclasses: dict"""
 
+from __future__ import absolute_import
+
 import re
 
-import dns.exception
+from . import exception as dns_exception
 
 RESERVED0 = 0
 IN = 1
@@ -65,7 +67,7 @@ _metaclasses = {
 
 _unknown_class_pattern = re.compile('CLASS([0-9]+)$', re.I);
 
-class UnknownRdataclass(dns.exception.DNSException):
+class UnknownRdataclass(dns_exception.DNSException):
     """Raised when a class is unknown."""
     pass
 
@@ -74,7 +76,7 @@ def from_text(text):
     @param text: the text
     @type text: string
     @rtype: int
-    @raises dns.rdataclass.UnknownRdataClass: the class is unknown
+    @raises dns_rdataclass.UnknownRdataClass: the class is unknown
     @raises ValueError: the rdata class value is not >= 0 and <= 65535
     """
 

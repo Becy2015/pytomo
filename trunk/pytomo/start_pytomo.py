@@ -2,20 +2,30 @@
 """Module to launch a crawl
 """
 
-from __future__ import with_statement
+from __future__ import with_statement, absolute_import
+
 import sys
 from urlparse import urlsplit
 from pprint import pprint
 import logging
-from time import strftime
+from time import strftime, timezone
 import os
 from string import maketrans
 from optparse import OptionParser
+import hashlib
+import socket
+import urllib2
+import platform
+import signal
 
 from os.path import abspath, dirname, sep
 from sys import path
 # assumes the standard distribution paths
 PACKAGE_DIR = dirname(abspath(path[0]))
+
+PUBLIC_IP_FINDER = 'http://www.whatismyip.com/automation/n09230945.asp'
+# removed timeout for python2.5 compliance
+#IP_FINDER_TIMEOUT = 3
 
 try:
     from win32com.shell import shell, shellcon
@@ -23,14 +33,13 @@ try:
 except ImportError:
     HOME_DIR = os.path.expanduser('~')
 
-
-import pytomo.config_pytomo as config_pytomo
-import pytomo.lib_cache_url as lib_cache_url
-import pytomo.lib_dns as lib_dns
-import pytomo.lib_ping as lib_ping
-import pytomo.lib_youtube_download as lib_youtube_download
-import pytomo.lib_database as lib_database
-import pytomo.lib_youtube_api as lib_youtube_api
+from . import config_pytomo
+from . import lib_cache_url
+from . import lib_dns
+from . import lib_ping
+from . import lib_youtube_download
+from . import lib_database
+from . import lib_youtube_api
 
 # only 1 service is implemented
 SERVICE = 'Youtube'
@@ -112,12 +121,59 @@ def check_out_files(file_pattern, directory, timestamp):
                     raise IOError
     else:
         out_dir = os.getcwd()
-    out_file = sep.join((out_dir, '.'.join((timestamp, file_pattern))))
+    out_file = sep.join((out_dir, '.'.join((socket.gethostname(), timestamp,
+                                            file_pattern))))
     # do not catch IOError
     with open(out_file, 'a') as _:
         # just test writing in the out file
         pass
     return out_file
+
+def md5sum(input_file):
+    "Return the standard md5 of the file"
+    # to cope with large files
+    # value taken from Python distribution
+    try:
+        input_stream = open(input_file, 'rb')
+    except (TypeError, IOError), mes:
+        config_pytomo.LOG.exception('Unable to compute the md5 of file: %s'
+                                    % mes)
+        return None
+    bufsize = 8096
+    hash_value = hashlib.md5()
+    while True:
+        data = input_stream.read(bufsize)
+        if not data:
+            break
+        hash_value.update(data)
+    return hash_value.hexdigest()
+
+class MaxUrlException(Exception):
+    "Class to stop crawling when the max nb of urls has been attained"
+    pass
+
+def crawl_links(input_links, crawled_urls, result_stream=None, data_base=None):
+    "Crawl each input link"
+    max_crawled_urls = config_pytomo.MAX_CRAWLED_URLS
+    for url in input_links:
+        config_pytomo.LOG.info("Crawl of url # %d" % len(crawled_urls))
+        config_pytomo.LOG.debug("Crawl url: %s" % url)
+        if url in crawled_urls:
+            config_pytomo.LOG.debug("Skipped url already crawled: %s"
+                                    % url)
+            break
+        if len(crawled_urls) >= max_crawled_urls:
+            raise MaxUrlException()
+        print >> result_stream, config_pytomo.SEP_LINE
+        stats = compute_stats(url)
+        if stats:
+            pprint(stats, stream=result_stream)
+            if data_base:
+                for row in format_stats(stats):
+                    data_base.insert_record(row)
+                    crawled_urls.add(url)
+            else:
+                config_pytomo.LOG.info('no stats for url: %s' % url)
 
 def do_crawl(result_stream=sys.stdout, db_file=None, timestamp=None):
     """Crawls the urls given by the url_file
@@ -136,7 +192,6 @@ def do_crawl(result_stream=sys.stdout, db_file=None, timestamp=None):
                                             config_pytomo.DATABASE_TIMESTAMP)
         data_base.create_pytomo_table(config_pytomo.TABLE_TIMESTAMP)
     max_rounds = config_pytomo.MAX_ROUNDS
-    max_crawled_urls = config_pytomo.MAX_CRAWLED_URLS
     max_per_page = config_pytomo.MAX_PER_PAGE
     max_per_url = config_pytomo.MAX_PER_URL
     input_links = set(filter(None,
@@ -147,24 +202,12 @@ def do_crawl(result_stream=sys.stdout, db_file=None, timestamp=None):
     for round_nb in xrange(max_rounds):
         config_pytomo.LOG.warn("Round %d started\n%s"
                                % (round_nb, config_pytomo.SEP_LINE))
-        # crawl each input link
-        for url in input_links:
-            config_pytomo.LOG.info("Crawl of url # %d" % len(crawled_urls))
-            config_pytomo.LOG.debug("Crawl url: %s" % url)
-            if url in crawled_urls or len(crawled_urls) > max_crawled_urls:
-                config_pytomo.LOG.debug("Skipped url already crawled: %s"
-                                        % url)
-                break
-            print >> result_stream, config_pytomo.SEP_LINE
-            stats = compute_stats(url)
-            if stats:
-                pprint(stats, stream=result_stream)
-                if data_base:
-                    for row in format_stats(stats):
-                        data_base.insert_record(row)
-                crawled_urls.add(url)
-            else:
-                config_pytomo.LOG.info('no stats for url: %s' % url)
+        try:
+            crawl_links(input_links, crawled_urls, result_stream, data_base)
+        except MaxUrlException:
+            config_pytomo.LOG.warn("Stopping crawl because already crawled "
+                                   "%d urls" % len(crawled_urls))
+            break
         # next round input are related links of the current input_links
         input_links = lib_cache_url.get_next_round_urls(input_links,
                                                         max_per_page,
@@ -173,7 +216,7 @@ def do_crawl(result_stream=sys.stdout, db_file=None, timestamp=None):
         data_base.close_handle()
     config_pytomo.LOG.warn("Crawl finished\n" + config_pytomo.SEP_LINE)
 
-def convert_debug_level(option, opt_str, value, parser):
+def convert_debug_level(_, __, value, parser):
     "Convert the string passed to a logging level"
     try:
         log_level = config_pytomo.NAME_TO_LEVEL[value.upper()]
@@ -186,7 +229,7 @@ def convert_debug_level(option, opt_str, value, parser):
         return
     setattr(parser.values, 'LOG_LEVEL', log_level)
 
-def set_proxies(option, opt_str, value, parser):
+def set_proxies(_, __, value, parser):
     "Convert the proxy passed to a dict to be handled by urllib"
     if value:
         if not value.startswith('http://'):
@@ -233,6 +276,9 @@ def create_options(parser):
                       help=("Minimum Playout Buffer Size (default %f)"
                             % config_pytomo.MIN_PLAYOUT_BUFFER_SIZE),
                       default=config_pytomo.MIN_PLAYOUT_BUFFER_SIZE)
+    parser.add_option("-x", dest="LOG_PUBLIC_IP", action="store_false",
+                      help=("Do NOT store public IP address of the machine "
+                            "in the logs"), default=config_pytomo.LOG_PUBLIC_IP)
     parser.add_option("-L", dest="LOG_LEVEL", type='string',
                       help=("The log level setting for the Logging module."
                             "Choose from: 'DEBUG', 'INFO', 'WARNING', "
@@ -259,6 +305,96 @@ def write_options_to_config(options):
     for name, value in options.__dict__.items():
         setattr(config_pytomo, name, value)
 
+def log_ip_address():
+    "Log the remote IP addresses"
+    # is local address of some interest??
+    # check: http://stackoverflow.com/
+    # questions/166506/finding-local-ip-addresses-in-python
+    if config_pytomo.PROXIES:
+        proxy = urllib2.ProxyHandler(config_pytomo.PROXIES)
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+    try:
+        public_ip = urllib2.urlopen(PUBLIC_IP_FINDER).read()
+    except urllib2.URLError, mes:
+        config_pytomo.LOG.warn('Public IP address not found: %s' % mes)
+        public_ip = None
+    config_pytomo.LOG.critical('Machine has this public IP address: %s'
+                               % public_ip)
+
+def log_md5_results(result_file, db_file):
+    "Computes and stores the md5 hash of result and database files"
+    if db_file:
+        config_pytomo.LOG.critical('Hash of database file: %s'
+                                   % md5sum(db_file))
+    if result_file and result_file != sys.stdout:
+        config_pytomo.LOG.critical('Hash of result file: %s'
+                                   % md5sum(result_file))
+
+def configure_log_file(timestamp):
+    "Configure log file and indicate succes or failure"
+    print "Configuring log file"
+    # to have kaa-metadata logs
+    config_pytomo.LOG = logging.getLogger('metadata')
+    if config_pytomo.LOG_FILE == '-':
+        handler = logging.StreamHandler(sys.stdout)
+        print "Logs are on standard output"
+    else:
+        try:
+            log_file = check_out_files(config_pytomo.LOG_FILE,
+                                       config_pytomo.LOG_DIR, timestamp)
+        except IOError:
+            print >> sys.stderr, ("Problem opening file: %s" % log_file)
+            return False
+        print "Logs are there: %s" % log_file
+        # for lib_youtube_download
+        config_pytomo.LOG_FILE_TIMESTAMP = log_file
+        handler = logging.FileHandler(filename=log_file)
+    log_formatter = logging.Formatter("%(asctime)s - %(filename)s:%(lineno)d - "
+                                      "%(levelname)s - %(message)s")
+    handler.setFormatter(log_formatter)
+    config_pytomo.LOG.addHandler(handler)
+    config_pytomo.LOG.setLevel(config_pytomo.LOG_LEVEL)
+    config_pytomo.LOG.critical('Log level set to %s',
+                           config_pytomo.LEVEL_TO_NAME[config_pytomo.LOG_LEVEL])
+    # to not have console output
+    config_pytomo.LOG.propagate = False
+    # log all config file values except built in values
+    for value in filter(lambda x: not x.startswith('__'),
+                        config_pytomo.__dict__):
+        config_pytomo.LOG.critical('%s: %s'
+                                   % (value, getattr(config_pytomo, value)))
+    return True
+
+class MyTimeoutException(Exception):
+    "Class to generate timeout exceptions"
+    pass
+
+def log_provider(timeout=config_pytomo.USER_INPUT_TIMEOUT):
+    "Get and logs the provider from the user or skip after timeout seconds"
+    def timeout_handler(signum, frame):
+        "handle the timeout"
+        raise MyTimeoutException()
+    # non-posix support for signals is weak
+    support_signal = hasattr(signal, 'SIGALRM') and hasattr(signal, 'alarm')
+    if support_signal:
+        signal.signal(signal.SIGALRM, timeout_handler)
+        # triger alarm in timeout seconds
+        signal.alarm(timeout)
+    try:
+        provider = raw_input(''.join((
+            "Please indicate your provider/ISP (leave blank for skipping).\n",
+            "Crawl will start when you press Enter",
+            ((" (or after %d seconds)" % timeout) if support_signal else ''),
+            ".\n")))
+    except MyTimeoutException:
+        return None
+    finally:
+        if support_signal:
+            # alarm disabled
+            signal.alarm(0)
+    config_pytomo.LOG.critical('User has given this provider: %s' % provider)
+
 def main(argv=None):
     """Program wrapper
     Setup of log part
@@ -268,64 +404,54 @@ def main(argv=None):
     usage = ("%prog [-r max_rounds] [-u max_crawled_url] [-p max_per_url] "
              "[-P max_per_page] [-t time_frame] [-n ping_packets] "
              "[-D download_time] [-B buffering_video_duration] "
-             "[-M min_playout_buffer_size] [-L log_level]")
+             "[-M min_playout_buffer_size] [-x] [-L log_level]")
     parser = OptionParser(usage=usage)
     create_options(parser)
     (options, _) = parser.parse_args(argv)
     check_options(parser, options)
     write_options_to_config(options)
-    config_pytomo.LOG = logging.getLogger('pytomo')
     timestamp = strftime("%Y-%m-%d.%H_%M_%S")
-    print "Configuring log file"
-    if config_pytomo.LOG_FILE == '-':
-        handler = logging.StreamHandler(sys.stdout)
-        print "Logs will be on standard output"
-    else:
-        try:
-            log_file = check_out_files(config_pytomo.LOG_FILE,
-                                       config_pytomo.LOG_DIR, timestamp)
-        except IOError:
-            print >> sys.stderr, ("Problem opening file: %s" % log_file)
-            return 1
-        print "Logs will be there: %s" % log_file
-        # for lib_youtube_download
-        config_pytomo.LOG_FILE_TIMESTAMP = log_file
-        handler = logging.FileHandler(filename=log_file)
-    log_formatter = logging.Formatter("%(asctime)s - %(filename)s:%(lineno)d - "
-                                      "%(levelname)s - %(message)s")
-    handler.setFormatter(log_formatter)
-    config_pytomo.LOG.addHandler(handler)
+    is_log_configured = configure_log_file(timestamp)
+    if not is_log_configured:
+        return -1
     try:
         result_file = check_out_files(config_pytomo.RESULT_FILE,
                                       config_pytomo.RESULT_DIR, timestamp)
     except IOError:
-        result_file = sys.stdout
+        result_file = None
     try:
         db_file = check_out_files(config_pytomo.DATABASE,
                                   config_pytomo.DATABASE_DIR, timestamp)
     except IOError:
         db_file = None
-    # to not have console output
-    config_pytomo.LOG.setLevel(config_pytomo.LOG_LEVEL)
-    config_pytomo.LOG.critical('Log level set to %s',
-                           config_pytomo.LEVEL_TO_NAME[config_pytomo.LOG_LEVEL])
-    config_pytomo.LOG.propagate = False
-    print "Text results will be there: %s" % result_file
-    print "Database results will be there: %s" % db_file
+    config_pytomo.LOG.critical('Offset between local time and UTC: %d'
+                               % timezone)
+    config_pytomo.SYSTEM = platform.system()
+    config_pytomo.LOG.warn('Pytomo is running on this system: %s'
+                           % config_pytomo.SYSTEM)
+    if config_pytomo.LOG_PUBLIC_IP:
+        log_ip_address()
+    print "Text results are there: %s" % result_file
+    print "Database results are there: %s" % db_file
     while True:
         start_crawl = raw_input('Are you ok to start crawling? (Y/N)\n')
         if start_crawl.upper() == 'N':
             return 0
         elif start_crawl.upper() == 'Y':
             break
+    log_provider(timeout=config_pytomo.USER_INPUT_TIMEOUT)
     print "Type Ctrl-C to interrupt crawl"
     try:
         with open(result_file, 'w') as result_stream:
             do_crawl(result_stream, db_file=db_file, timestamp=timestamp)
+    except config_pytomo.BlackListException, mes:
+        config_pytomo.LOG.critical('Crawl detected by YouTube: '
+                                   'log to YouTube and enter captcha')
     except KeyboardInterrupt:
         config_pytomo.LOG.critical('Crawl interrupted by user')
     except Exception, mes:
         config_pytomo.LOG.exception('Uncaught exception: %s' % mes)
+    log_md5_results(result_file, db_file)
     raw_input('\nCrawl finished: check the logs\nPress Enter to exit\n')
     return 0
 

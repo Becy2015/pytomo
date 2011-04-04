@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
@@ -39,10 +41,10 @@ import logging
 # kaa imports
 #import kaa
 # use strutils instead of kaa
-import strutils as kaa
+from .. import strutils as kaa
 
 # import kaa_metadata.image core
-import core
+from . import core
 
 # get logging object
 log = logging.getLogger('metadata')

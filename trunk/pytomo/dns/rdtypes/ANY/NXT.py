@@ -13,16 +13,18 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.exception
-import dns.rdata
-import dns.rdatatype
-import dns.name
+from __future__ import absolute_import
 
-class NXT(dns.rdata.Rdata):
+from . import exception as dns_exception
+from . import rdata as dns_rdata
+from . import rdatatype as dns_rdatatype
+from . import name as dns_name
+
+class NXT(dns_rdata.Rdata):
     """NXT record
 
     @ivar next: the next name
-    @type next: dns.name.Name object
+    @type next: dns_name.Name object
     @ivar bitmap: the type bitmap
     @type bitmap: string
     @see: RFC 2535"""
@@ -41,7 +43,7 @@ class NXT(dns.rdata.Rdata):
             byte = ord(self.bitmap[i])
             for j in xrange(0, 8):
                 if byte & (0x80 >> j):
-                    bits.append(dns.rdatatype.to_text(i * 8 + j))
+                    bits.append(dns_rdatatype.to_text(i * 8 + j))
         text = ' '.join(bits)
         return '%s %s' % (next, text)
 
@@ -59,14 +61,14 @@ class NXT(dns.rdata.Rdata):
             if token.value.isdigit():
                 nrdtype = int(token.value)
             else:
-                nrdtype = dns.rdatatype.from_text(token.value)
+                nrdtype = dns_rdatatype.from_text(token.value)
             if nrdtype == 0:
-                raise dns.exception.SyntaxError("NXT with bit 0")
+                raise dns_exception.SyntaxError("NXT with bit 0")
             if nrdtype > 127:
-                raise dns.exception.SyntaxError("NXT with bit > 127")
+                raise dns_exception.SyntaxError("NXT with bit > 127")
             i = nrdtype // 8
             bitmap[i] = chr(ord(bitmap[i]) | (0x80 >> (nrdtype % 8)))
-        bitmap = dns.rdata._truncate_bitmap(bitmap)
+        bitmap = dns_rdata._truncate_bitmap(bitmap)
         return cls(rdclass, rdtype, next, bitmap)
 
     from_text = classmethod(from_text)
@@ -79,7 +81,7 @@ class NXT(dns.rdata.Rdata):
         return self.next.to_digestable(origin) + self.bitmap
 
     def from_wire(cls, rdclass, rdtype, wire, current, rdlen, origin = None):
-        (next, cused) = dns.name.from_wire(wire[: current + rdlen], current)
+        (next, cused) = dns_name.from_wire(wire[: current + rdlen], current)
         current += cused
         rdlen -= cused
         bitmap = wire[current : current + rdlen]

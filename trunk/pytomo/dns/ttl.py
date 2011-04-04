@@ -15,9 +15,11 @@
 
 """DNS TTL conversion."""
 
-import dns.exception
+from __future__ import absolute_import
 
-class BadTTL(dns.exception.SyntaxError):
+from . import exception as dns_exception
+
+class BadTTL(dns_exception.SyntaxError):
     pass
 
 def from_text(text):
@@ -27,7 +29,7 @@ def from_text(text):
 
     @param text: the textual TTL
     @type text: string
-    @raises dns.ttl.BadTTL: the TTL is not well-formed
+    @raises dns_ttl.BadTTL: the TTL is not well-formed
     @rtype: int
     """
 

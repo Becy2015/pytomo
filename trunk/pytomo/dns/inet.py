@@ -15,10 +15,12 @@
 
 """Generic Internet address helper functions."""
 
+from __future__ import absolute_import
+
 import socket
 
-import dns.ipv4
-import dns.ipv6
+from . import ipv4 as dns_ipv4
+from . import ipv6 as dns_ipv6
 
 
 # We assume that AF_INET is always defined.
@@ -47,9 +49,9 @@ def inet_pton(family, text):
     """
     
     if family == AF_INET:
-        return dns.ipv4.inet_aton(text)
+        return dns_ipv4.inet_aton(text)
     elif family == AF_INET6:
-        return dns.ipv6.inet_aton(text)
+        return dns_ipv6.inet_aton(text)
     else:
         raise NotImplementedError
 
@@ -65,9 +67,9 @@ def inet_ntop(family, address):
     @rtype: string
     """
     if family == AF_INET:
-        return dns.ipv4.inet_ntoa(address)
+        return dns_ipv4.inet_ntoa(address)
     elif family == AF_INET6:
-        return dns.ipv6.inet_ntoa(address)
+        return dns_ipv6.inet_ntoa(address)
     else:
         raise NotImplementedError
 
@@ -80,11 +82,11 @@ def af_for_address(text):
     @rtype: int
     """
     try:
-        junk = dns.ipv4.inet_aton(text)
+        junk = dns_ipv4.inet_aton(text)
         return AF_INET
     except:
         try:
-            junk = dns.ipv6.inet_aton(text)
+            junk = dns_ipv6.inet_aton(text)
             return AF_INET6
         except:
             raise ValueError
@@ -97,11 +99,11 @@ def is_multicast(text):
     @rtype: bool
     """
     try:
-        first = ord(dns.ipv4.inet_aton(text)[0])
+        first = ord(dns_ipv4.inet_aton(text)[0])
         return (first >= 224 and first <= 239)
     except:
         try:
-            first = ord(dns.ipv6.inet_aton(text)[0])
+            first = ord(dns_ipv6.inet_aton(text)[0])
             return (first == 255)
         except:
             raise ValueError

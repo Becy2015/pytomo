@@ -13,9 +13,11 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.rdtypes.sigbase
+from __future__ import absolute_import
 
-class SIG(dns.rdtypes.sigbase.SIGBase):
+from .. import sigbase
+
+class SIG(sigbase.SIGBase):
     """SIG record"""
     def to_digestable(self, origin = None):
         return struct.pack('!HBBIIIH', self.type_covered,

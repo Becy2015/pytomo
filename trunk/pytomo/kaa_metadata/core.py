@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 # python imports
 import re
 import logging
@@ -36,10 +38,10 @@ import logging
 # kaa imports
 #import kaa
 # use strutils instead of kaa
-import strutils as kaa
+from . import strutils as kaa
 
-import fourcc
-import language
+from . import fourcc
+from . import language
 
 UNPRINTABLE_KEYS = [ 'thumbnail', 'url' ]
 

@@ -13,9 +13,12 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.exception
+from __future__ import absolute_import
 
-class DHCID(dns.rdata.Rdata):
+from ... import exception as dns_exception
+from ... import rdata as dns_rdata
+
+class DHCID(dns_rdata.Rdata):
     """DHCID record
 
     @ivar data: the data (the content of the RR is opaque as far as the
@@ -30,7 +33,7 @@ class DHCID(dns.rdata.Rdata):
         self.data = data
 
     def to_text(self, origin=None, relativize=True, **kw):
-        return dns.rdata._base64ify(self.data)
+        return dns_rdata._base64ify(self.data)
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         chunks = []
@@ -39,7 +42,7 @@ class DHCID(dns.rdata.Rdata):
             if t.is_eol_or_eof():
                 break
             if not t.is_identifier():
-                raise dns.exception.SyntaxError
+                raise dns_exception.SyntaxError
             chunks.append(t.value)
         b64 = ''.join(chunks)
         data = b64.decode('base64_codec')

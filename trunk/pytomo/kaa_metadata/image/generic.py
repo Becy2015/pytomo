@@ -34,13 +34,15 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
 import time
 
 # import kaa_metadata.image core
-import core
+from . import core
 import exiv2
 
 mapping = {

@@ -29,13 +29,15 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
 import sndhdr
 
 # import kaa_metadata.audio core
-import core
+from . import core
 
 class PCM(core.Music):
     def __init__(self,file):

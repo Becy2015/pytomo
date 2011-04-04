@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """Module to generate the RTT times of a ping
 
  Sample for windows:
@@ -17,19 +16,25 @@
 
 """
 
-from __future__ import with_statement
+
+
+from __future__ import with_statement, absolute_import
 import os
 import re
 
-import pytomo.config_pytomo as config_pytomo
+from . import config_pytomo
 
 RTT_MATCH_LINUX = r"rtt min/avg/max/mdev = "
 RTT_PATTERN_LINUX = r"(\d+.\d+)/(\d+.\d+)/(\d+.\d+)/\d+.\d+ ms"
 PING_OPTION_LINUX = '-c'
 
 RTT_MATCH_WINDOWS = r"Minimum = "
-RTT_PATTERN_WINDOWS = (
-    r"Minimum = (\d+)ms, Maximum = (\d+)ms, Average = (\d+)ms")
+if 'LANG' in os.environ and os.environ['LANG'] == 'FR':
+    RTT_PATTERN_WINDOWS = (
+        r"(\d+)ms, Maximum = (\d+)ms, Moyenne = (\d+)ms")
+else:
+    RTT_PATTERN_WINDOWS = (
+        r"(\d+)ms, Maximum = (\d+)ms, Average = (\d+)ms")
 PING_OPTION_WINDOWS = '-n'
 
 RTT_MATCH_DARWIN = "round-trip min/avg/max/stddev = "
@@ -70,8 +75,8 @@ def ping_ip(ip_address, ping_packets=config_pytomo.PING_PACKETS):
         if not config_pytomo.RTT:
             config_pytomo.LOG.warn("Not able to process ping on your system")
             return None
-    my_cmd = 'ping %s %s' % (config_pytomo.ping_option_nb_pkts, ip_address)
-    ping_result = os.popen(my_cmd)
+    ping_cmd = 'ping %s %s' % (config_pytomo.ping_option_nb_pkts, ip_address)
+    ping_result = os.popen(ping_cmd)
     rtt_stats = None
     # instead of grep which is less portable
     for rtt_line in ping_result:

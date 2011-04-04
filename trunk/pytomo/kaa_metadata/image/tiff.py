@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
@@ -36,8 +38,8 @@ import struct
 import logging
 
 # import kaa_metadata.image core
-import core
-import IPTC
+from . import core
+from . import IPTC
 
 # get logging object
 log = logging.getLogger('metadata')

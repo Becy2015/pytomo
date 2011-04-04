@@ -29,12 +29,14 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = [ 'Factory', 'register', 'gettype', 'parse' ]
 
 # python imports
 import stat
 import os
-import sys
+#import sys
 import urlparse
 import urllib
 import logging
@@ -43,17 +45,11 @@ import logging
 #import kaa.utils
 
 # kaa_metadata imports
-import core
+from . import core
 
 # get logging object
 log = logging.getLogger('metadata')
-log.disabled = True
-#handler = logging.StreamHandler(sys.stdout)
-#log_formatter = logging.Formatter("%(asctime)s - %(filename)s:%(lineno)d - "
-#                                  "%(levelname)s - %(message)s")
-#
-#handler.setFormatter(log_formatter)
-#log.addHandler(handler)
+#log.disabled = True
 
 # factory object
 _factory = None
@@ -145,6 +141,7 @@ class _Factory:
         self.extmap = {}
         self.mimemap = {}
         self.classmap = {}
+        self.errormap = {}
         self.magicmap = {}
         self.types = []
         self.device_types = []
@@ -156,16 +153,28 @@ class _Factory:
         if name not in self.classmap:
             # Import the parser class for the given name.
             try:
-                exec('from %s import Parser' % name)
+                exec('from .%s import Parser' % name)
                 self.classmap[name] = Parser
-            except Exception:
+            except ImportError:
                 # Something failed while trying to import this parser.  Rather
                 # than bail altogher, just log the error and use NullParser.
                 log.exception('Error importing parser %s' % name)
                 self.classmap[name] = NullParser
-
         return self.classmap[name]
 
+    def get_error(self, name):
+        """Return the ParseError exception from the module
+        Needed for the catching the correct exception in create_from_file
+        """
+        if '.' in name:
+            name = '.'.join(name.split('.')[:-1] + ['core'])
+        if name not in self.errormap:
+            try:
+                exec('from .%s import ParseError' % name)
+                self.errormap[name] = ParseError
+            except ImportError:
+                self.errormap[name] = core.ParseError
+        return self.errormap[name]
 
     def get_scheme_from_info(self, info):
         if info.__class__.__name__ == 'DVDInfo':
@@ -186,14 +195,15 @@ class _Factory:
             parsers = self.extmap[e[1:]]
             for info in parsers:
                 file.seek(0,0)
+                parser = self.get_class(info[R_CLASS])
+                parse_error = self.get_error(info[R_CLASS])
                 try:
-                    parser = self.get_class(info[R_CLASS])
                     return parser(file)
-                except core.ParseError:
+                except parse_error:
                     pass
                 except Exception:
-                    log.exception('parse error')
-
+                    log.exception('parse error for this parser %s'
+                                  % info[R_CLASS])
         # Try to find a parser based on the first bytes of the
         # file (magic header). If a magic header is found but the
         # parser failed, no other parser will be tried to speed
@@ -206,13 +216,15 @@ class _Factory:
                 for p in magicmap[magic[:length]]:
                     log.info('Trying %s by magic header', p[R_CLASS])
                     file.seek(0,0)
+                    parser = self.get_class(p[R_CLASS])
+                    parse_error = self.get_error(p[R_CLASS])
                     try:
-                        parser = self.get_class(p[R_CLASS])
                         return parser(file)
-                    except core.ParseError:
+                    except parse_error:
                         pass
                     except Exception:
-                        log.exception('parse error')
+                        log.exception('parse error for this parser %s'
+                                      % p[R_CLASS])
                 log.info('Magic header found but parser failed')
                 return None
 
@@ -228,12 +240,14 @@ class _Factory:
                 continue
             log.debug('trying %s' % e[R_MIMETYPE])
             file.seek(0,0)
+            parser = self.get_class(e[R_CLASS])
+            parse_error = self.get_error(e[R_CLASS])
             try:
-                return self.get_class(e[R_CLASS])(file)
-            except core.ParseError:
+                return parser(file)
+            except parse_error:
                 pass
             except Exception:
-                log.exception('parser error')
+                log.exception('parse error for this parser %s' % e[R_CLASS])
         return None
 
 
@@ -263,9 +277,11 @@ class _Factory:
             # instead of doing it here...
             for e in self.stream_types:
                 log.debug('Trying %s' % e[R_MIMETYPE])
+                parser = self.get_class(e[R_CLASS])
+                parse_error = self.get_error(e[R_CLASS])
                 try:
-                    return self.get_class(e[R_CLASS])(url)
-                except core.ParseError:
+                    return parser(url)
+                except parse_error:
                     pass
 
         elif scheme == 'dvd':
@@ -284,9 +300,11 @@ class _Factory:
             mime = uhandle.info().gettype()
             log.debug("Trying %s" % mime)
             if self.mimemap.has_key(mime):
+                parser = self.get_class(self.mimemap[mime][R_CLASS])
+                parse_error = self.get_error(self.mimemap[mime][R_CLASS])
                 try:
-                    return self.get_class(self.mimemap[mime][R_CLASS])(file)
-                except core.ParseError:
+                    return parser(file)
+                except parse_error:
                     pass
             # XXX Todo: Try other types
 
@@ -306,7 +324,8 @@ class _Factory:
             r = self.create_from_file(f, force)
             f.close()
             if r:
-                r.url = '%s://%s' % (self.get_scheme_from_info(r), os.path.abspath(filename))
+                r.url = '%s://%s' % (self.get_scheme_from_info(r),
+                                     os.path.abspath(filename))
                 return r
         return None
 
@@ -318,11 +337,14 @@ class _Factory:
         """
         for e in self.device_types:
             log.debug('Trying %s' % e[R_MIMETYPE])
+            parser = self.get_class(e[R_CLASS])
+            parse_error = self.get_error(e[R_CLASS])
             try:
-                t = self.get_class(e[R_CLASS])(devicename)
-                t.url = '%s://%s' % (self.get_scheme_from_info(t), os.path.abspath(devicename))
+                t = parser(devicename)
+                t.url = '%s://%s' % (self.get_scheme_from_info(t),
+                                     os.path.abspath(devicename))
                 return t
-            except core.ParseError:
+            except parse_error:
                 pass
         return None
 
@@ -333,9 +355,11 @@ class _Factory:
         """
         for e in self.directory_types:
             log.debug('Trying %s' % e[R_MIMETYPE])
+            parser = self.get_class(e[R_CLASS])
+            parse_error = self.get_error(e[R_CLASS])
             try:
-                return self.get_class(e[R_CLASS])(dirname)
-            except core.ParseError:
+                return parser(dirname)
+            except parse_error:
                 pass
         return None
 
@@ -350,7 +374,8 @@ class _Factory:
                 return self.create_from_url(name)
             if not os.path.exists(name):
                 return None
-            if (os.uname()[0] == 'FreeBSD' and \
+            # Windows Python has no os.uname
+            if (hasattr(os, 'uname') and os.uname()[0] == 'FreeBSD' and
                 stat.S_ISCHR(os.stat(name)[stat.ST_MODE])) \
                 or stat.S_ISBLK(os.stat(name)[stat.ST_MODE]):
                 return self.create_from_device(name)

@@ -13,8 +13,10 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.rdtypes.txtbase
+from __future__ import absolute_import
 
-class TXT(dns.rdtypes.txtbase.TXTBase):
+from .. import txtbase
+
+class TXT(txtbase.TXTBase):
     """TXT record"""
     pass

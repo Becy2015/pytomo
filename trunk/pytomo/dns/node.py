@@ -15,11 +15,13 @@
 
 """DNS nodes.  A node is a set of rdatasets."""
 
+from __future__ import absolute_import
+
 import StringIO
 
-import dns.rdataset
-import dns.rdatatype
-import dns.renderer
+from . import rdataset as dns_rdataset
+from . import rdatatype as dns_rdatatype
+from . import renderer as dns_renderer
 
 class Node(object):
     """A DNS node.
@@ -27,7 +29,7 @@ class Node(object):
     A node is a set of rdatasets
 
     @ivar rdatasets: the node's rdatasets
-    @type rdatasets: list of dns.rdataset.Rdataset objects"""
+    @type rdatasets: list of dns_rdataset.Rdataset objects"""
 
     __slots__ = ['rdatasets']
 
@@ -43,7 +45,7 @@ class Node(object):
         Each rdataset at the node is printed.  Any keyword arguments
         to this method are passed on to the rdataset's to_text() method.
         @param name: the owner name of the rdatasets
-        @type name: dns.name.Name object
+        @type name: dns_name.Name object
         @rtype: string
         """
 
@@ -80,7 +82,7 @@ class Node(object):
     def __iter__(self):
         return iter(self.rdatasets)
 
-    def find_rdataset(self, rdclass, rdtype, covers=dns.rdatatype.NONE,
+    def find_rdataset(self, rdclass, rdtype, covers=dns_rdatatype.NONE,
                       create=False):
         """Find an rdataset matching the specified properties in the
         current node.
@@ -90,8 +92,8 @@ class Node(object):
         @param rdtype: The type of the rdataset
         @type rdtype: int
         @param covers: The covered type.  Usually this value is
-        dns.rdatatype.NONE, but if the rdtype is dns.rdatatype.SIG or
-        dns.rdatatype.RRSIG, then the covers value will be the rdata
+        dns_rdatatype.NONE, but if the rdtype is dns_rdatatype.SIG or
+        dns_rdatatype.RRSIG, then the covers value will be the rdata
         type the SIG/RRSIG covers.  The library treats the SIG and RRSIG
         types as if they were a family of
         types, e.g. RRSIG(A), RRSIG(NS), RRSIG(SOA).  This makes RRSIGs much
@@ -102,7 +104,7 @@ class Node(object):
         @type create: bool
         @raises KeyError: An rdataset of the desired type and class does
         not exist and I{create} is not True.
-        @rtype: dns.rdataset.Rdataset object
+        @rtype: dns_rdataset.Rdataset object
         """
 
         for rds in self.rdatasets:
@@ -110,11 +112,11 @@ class Node(object):
                 return rds
         if not create:
             raise KeyError
-        rds = dns.rdataset.Rdataset(rdclass, rdtype)
+        rds = dns_rdataset.Rdataset(rdclass, rdtype)
         self.rdatasets.append(rds)
         return rds
 
-    def get_rdataset(self, rdclass, rdtype, covers=dns.rdatatype.NONE,
+    def get_rdataset(self, rdclass, rdtype, covers=dns_rdatatype.NONE,
                      create=False):
         """Get an rdataset matching the specified properties in the
         current node.
@@ -130,7 +132,7 @@ class Node(object):
         @type covers: int
         @param create: If True, create the rdataset if it is not found.
         @type create: bool
-        @rtype: dns.rdataset.Rdataset object or None
+        @rtype: dns_rdataset.Rdataset object or None
         """
 
         try:
@@ -139,7 +141,7 @@ class Node(object):
             rds = None
         return rds
 
-    def delete_rdataset(self, rdclass, rdtype, covers=dns.rdatatype.NONE):
+    def delete_rdataset(self, rdclass, rdtype, covers=dns_rdatatype.NONE):
         """Delete the rdataset matching the specified properties in the
         current node.
 

@@ -29,13 +29,15 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
 import struct
 
 # import kaa_metadata.audio core
-import core
+from . import core
 
 # http://www.atsc.org/standards/a_52a.pdf
 # fscod: Sample rate code, 2 bits

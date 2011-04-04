@@ -15,24 +15,26 @@
 
 """Common DNSSEC-related functions and constants."""
 
+from __future__ import absolute_import
+
 import cStringIO
 import struct
 import time
 
-import dns.exception
-import dns.hash
-import dns.name
-import dns.node
-import dns.rdataset
-import dns.rdata
-import dns.rdatatype
-import dns.rdataclass
+from . import exception as dns_exception
+from . import hash as dns_hash
+from . import name as dns_name
+from . import node as dns_node
+from . import rdataset as dns_rdataset
+from . import rdata as dns_rdata
+from . import rdatatype as dns_rdatatype
+from . import rdataclass as dns_rdataclass
 
-class UnsupportedAlgorithm(dns.exception.DNSException):
+class UnsupportedAlgorithm(dns_exception.DNSException):
     """Raised if an algorithm is not supported."""
     pass
 
-class ValidationFailure(dns.exception.DNSException):
+class ValidationFailure(dns_exception.DNSException):
     """The DNSSEC signature is invalid."""
     pass
 
@@ -109,31 +111,31 @@ def key_id(key, origin=None):
 def make_ds(name, key, algorithm, origin=None):
     if algorithm.upper() == 'SHA1':
         dsalg = 1
-        hash = dns.hash.get('SHA1')()
+        hash = dns_hash.get('SHA1')()
     elif algorithm.upper() == 'SHA256':
         dsalg = 2
-        hash = dns.hash.get('SHA256')()
+        hash = dns_hash.get('SHA256')()
     else:
         raise UnsupportedAlgorithm, 'unsupported algorithm "%s"' % algorithm
 
     if isinstance(name, (str, unicode)):
-        name = dns.name.from_text(name, origin)
+        name = dns_name.from_text(name, origin)
     hash.update(name.canonicalize().to_wire())
     hash.update(_to_rdata(key, origin))
     digest = hash.digest()
 
     dsrdata = struct.pack("!HBB", key_id(key), key.algorithm, dsalg) + digest
-    return dns.rdata.from_wire(dns.rdataclass.IN, dns.rdatatype.DS, dsrdata, 0,
+    return dns_rdata.from_wire(dns_rdataclass.IN, dns_rdatatype.DS, dsrdata, 0,
                                len(dsrdata))
 
 def _find_key(keys, rrsig):
     value = keys.get(rrsig.signer)
     if value is None:
         return None
-    if isinstance(value, dns.node.Node):
+    if isinstance(value, dns_node.Node):
         try:
-            rdataset = node.find_rdataset(dns.rdataclass.IN,
-                                          dns.rdatatype.DNSKEY)
+            rdataset = dns_node.find_rdataset(dns_rdataclass.IN,
+                                          dns_rdatatype.DNSKEY)
         except KeyError:
             return None
     else:
@@ -167,13 +169,13 @@ def _is_sha512(algorithm):
 
 def _make_hash(algorithm):
     if _is_md5(algorithm):
-        return dns.hash.get('MD5')()
+        return dns_hash.get('MD5')()
     if _is_sha1(algorithm):
-        return dns.hash.get('SHA1')()
+        return dns_hash.get('SHA1')()
     if _is_sha256(algorithm):
-        return dns.hash.get('SHA256')()
+        return dns_hash.get('SHA256')()
     if _is_sha512(algorithm):
-        return dns.hash.get('SHA512')()
+        return dns_hash.get('SHA512')()
     raise ValidationFailure, 'unknown hash for algorithm %u' % algorithm
 
 def _make_algorithm_id(algorithm):
@@ -201,21 +203,21 @@ def _validate_rrsig(rrset, rrsig, keys, origin=None, now=None):
     of the rrset.
 
     @param rrset: The RRset to validate
-    @type rrset: dns.rrset.RRset or (dns.name.Name, dns.rdataset.Rdataset)
+    @type rrset: dns_rrset.RRset or (dns_name.Name, dns_rdataset.Rdataset)
     tuple
     @param rrsig: The signature rdata
-    @type rrsig: dns.rrset.Rdata
+    @type rrsig: dns_rrset.Rdata
     @param keys: The key dictionary.
-    @type keys: a dictionary keyed by dns.name.Name with node or rdataset values
+    @type keys: a dictionary keyed by dns_name.Name with node or rdataset values
     @param origin: The origin to use for relative names
-    @type origin: dns.name.Name or None
+    @type origin: dns_name.Name or None
     @param now: The time to use when validating the signatures.  The default
     is the current time.
     @type now: int
     """
 
     if isinstance(origin, (str, unicode)):
-        origin = dns.name.from_text(origin, dns.name.root)
+        origin = dns_name.from_text(origin, dns_name.root)
 
     key = _find_key(keys, rrsig)
     if not key:
@@ -281,7 +283,7 @@ def _validate_rrsig(rrset, rrsig, keys, origin=None, now=None):
 
     if rrsig.labels < len(rrname) - 1:
         suffix = rrname.split(rrsig.labels + 1)[1]
-        rrname = dns.name.from_text('*', suffix)
+        rrname = dns_name.from_text('*', suffix)
     rrnamebuf = rrname.to_digestable(origin)
     rrfixed = struct.pack('!HHI', rdataset.rdtype, rdataset.rdclass,
                           rrsig.original_ttl)
@@ -316,22 +318,22 @@ def _validate(rrset, rrsigset, keys, origin=None, now=None):
     """Validate an RRset
 
     @param rrset: The RRset to validate
-    @type rrset: dns.rrset.RRset or (dns.name.Name, dns.rdataset.Rdataset)
+    @type rrset: dns_rrset.RRset or (dns_name.Name, dns_rdataset.Rdataset)
     tuple
     @param rrsigset: The signature RRset
-    @type rrsigset: dns.rrset.RRset or (dns.name.Name, dns.rdataset.Rdataset)
+    @type rrsigset: dns_rrset.RRset or (dns_name.Name, dns_rdataset.Rdataset)
     tuple
     @param keys: The key dictionary.
-    @type keys: a dictionary keyed by dns.name.Name with node or rdataset values
+    @type keys: a dictionary keyed by dns_name.Name with node or rdataset values
     @param origin: The origin to use for relative names
-    @type origin: dns.name.Name or None
+    @type origin: dns_name.Name or None
     @param now: The time to use when validating the signatures.  The default
     is the current time.
     @type now: int
     """
 
     if isinstance(origin, (str, unicode)):
-        origin = dns.name.from_text(origin, dns.name.root)
+        origin = dns_name.from_text(origin, dns_name.root)
 
     if isinstance(rrset, tuple):
         rrname = rrset[0]

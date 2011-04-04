@@ -13,13 +13,15 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+from __future__ import absolute_import
+
 import struct
 
-import dns.exception
-import dns.rdata
-import dns.name
+from ... import exception as dns_exception
+from ... import rdata as dns_rdata
+from ... import name as dns_name
 
-class SRV(dns.rdata.Rdata):
+class SRV(dns_rdata.Rdata):
     """SRV record
 
     @ivar priority: the priority
@@ -29,7 +31,7 @@ class SRV(dns.rdata.Rdata):
     @ivar port: the port of the service
     @type port: int
     @ivar target: the target host
-    @type target: dns.name.Name object
+    @type target: dns_name.Name object
     @see: RFC 2782"""
 
     __slots__ = ['priority', 'weight', 'port', 'target']
@@ -67,10 +69,10 @@ class SRV(dns.rdata.Rdata):
                                                  wire[current : current + 6])
         current += 6
         rdlen -= 6
-        (target, cused) = dns.name.from_wire(wire[: current + rdlen],
+        (target, cused) = dns_name.from_wire(wire[: current + rdlen],
                                              current)
         if cused != rdlen:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         if not origin is None:
             target = target.relativize(origin)
         return cls(rdclass, rdtype, priority, weight, port, target)

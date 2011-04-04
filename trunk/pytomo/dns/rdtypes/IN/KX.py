@@ -13,8 +13,10 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.rdtypes.mxbase
+from __future__ import absolute_import
 
-class KX(dns.rdtypes.mxbase.UncompressedMX):
+from .. import mxbase
+
+class KX(mxbase.UncompressedMX):
     """KX record"""
     pass

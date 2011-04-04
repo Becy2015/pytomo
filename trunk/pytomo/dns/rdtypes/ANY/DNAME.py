@@ -13,9 +13,11 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.rdtypes.nsbase
+from __future__ import absolute_import
 
-class DNAME(dns.rdtypes.nsbase.UncompressedNS):
+from .. import nsbase
+
+class DNAME(nsbase.UncompressedNS):
     """DNAME record"""
     def to_digestable(self, origin = None):
         return self.target.to_digestable(origin)

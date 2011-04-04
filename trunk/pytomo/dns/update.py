@@ -15,22 +15,25 @@
 
 """DNS Dynamic Update Support"""
 
-import dns.message
-import dns.name
-import dns.opcode
-import dns.rdata
-import dns.rdataclass
-import dns.rdataset
-import dns.tsig
+from __future__ import absolute_import
 
-class Update(dns.message.Message):
-    def __init__(self, zone, rdclass=dns.rdataclass.IN, keyring=None,
-                 keyname=None, keyalgorithm=dns.tsig.default_algorithm):
+from . import message as dns_message
+from . import name as dns_name
+from . import opcode as dns_opcode
+from . import rdata as dns_rdata
+from . import rdataclass as dns_rdataclass
+from . import rdataset as dns_rdataset
+from . import rdatatype as dns_rdatatype
+from . import tsig as dns_tsig
+
+class Update(dns_message.Message):
+    def __init__(self, zone, rdclass=dns_rdataclass.IN, keyring=None,
+                 keyname=None, keyalgorithm=dns_tsig.default_algorithm):
         """Initialize a new DNS Update object.
 
         @param zone: The zone which is being updated.
-        @type zone: A dns.name.Name or string
-        @param rdclass: The class of the zone; defaults to dns.rdataclass.IN.
+        @type zone: A dns_name.Name or string
+        @param rdclass: The class of the zone; defaults to dns_rdataclass.IN.
         @type rdclass: An int designating the class, or a string whose value
         is the name of a class.
         @param keyring: The TSIG keyring to use; defaults to None.
@@ -41,23 +44,23 @@ class Update(dns.message.Message):
         keyring.  Note that the order of keys in a dictionary is not defined,
         so applications should supply a keyname when a keyring is used, unless
         they know the keyring contains only one key.
-        @type keyname: dns.name.Name or string
+        @type keyname: dns_name.Name or string
         @param keyalgorithm: The TSIG algorithm to use; defaults to
-        dns.tsig.default_algorithm.  Constants for TSIG algorithms are defined
-        in dns.tsig, and the currently implemented algorithms are
+        dns_tsig.default_algorithm.  Constants for TSIG algorithms are defined
+        in dns_tsig, and the currently implemented algorithms are
         HMAC_MD5, HMAC_SHA1, HMAC_SHA224, HMAC_SHA256, HMAC_SHA384, and
         HMAC_SHA512.
         @type keyalgorithm: string
         """
         super(Update, self).__init__()
-        self.flags |= dns.opcode.to_flags(dns.opcode.UPDATE)
+        self.flags |= dns_opcode.to_flags(dns_opcode.UPDATE)
         if isinstance(zone, (str, unicode)):
-            zone = dns.name.from_text(zone)
+            zone = dns_name.from_text(zone)
         self.origin = zone
         if isinstance(rdclass, str):
-            rdclass = dns.rdataclass.from_text(rdclass)
+            rdclass = dns_rdataclass.from_text(rdclass)
         self.zone_rdclass = rdclass
-        self.find_rrset(self.question, self.origin, rdclass, dns.rdatatype.SOA,
+        self.find_rrset(self.question, self.origin, rdclass, dns_rdatatype.SOA,
                         create=True, force_unique=True)
         if not keyring is None:
             self.use_tsig(keyring, keyname, algorithm=keyalgorithm)
@@ -86,8 +89,8 @@ class Update(dns.message.Message):
                 - ttl, rdtype, string..."""
 
         if isinstance(name, (str, unicode)):
-            name = dns.name.from_text(name, None)
-        if isinstance(args[0], dns.rdataset.Rdataset):
+            name = dns_name.from_text(name, None)
+        if isinstance(args[0], dns_rdataset.Rdataset):
             for rds in args:
                 if replace:
                     self.delete(name, rds.rdtype)
@@ -96,7 +99,7 @@ class Update(dns.message.Message):
         else:
             args = list(args)
             ttl = int(args.pop(0))
-            if isinstance(args[0], dns.rdata.Rdata):
+            if isinstance(args[0], dns_rdata.Rdata):
                 if replace:
                     self.delete(name, args[0].rdtype)
                 for rd in args:
@@ -104,11 +107,11 @@ class Update(dns.message.Message):
             else:
                 rdtype = args.pop(0)
                 if isinstance(rdtype, str):
-                    rdtype = dns.rdatatype.from_text(rdtype)
+                    rdtype = dns_rdatatype.from_text(rdtype)
                 if replace:
                     self.delete(name, rdtype)
                 for s in args:
-                    rd = dns.rdata.from_text(self.zone_rdclass, rdtype, s,
+                    rd = dns_rdata.from_text(self.zone_rdclass, rdtype, s,
                                              self.origin)
                     self._add_rr(name, ttl, rd, section=section)
 
@@ -136,35 +139,35 @@ class Update(dns.message.Message):
                 - rdtype, [string...]"""
 
         if isinstance(name, (str, unicode)):
-            name = dns.name.from_text(name, None)
+            name = dns_name.from_text(name, None)
         if len(args) == 0:
-            rrset = self.find_rrset(self.authority, name, dns.rdataclass.ANY,
-                                    dns.rdatatype.ANY, dns.rdatatype.NONE,
-                                    dns.rdatatype.ANY, True, True)
-        elif isinstance(args[0], dns.rdataset.Rdataset):
+            rrset = self.find_rrset(self.authority, name, dns_rdataclass.ANY,
+                                    dns_rdatatype.ANY, dns_rdatatype.NONE,
+                                    dns_rdatatype.ANY, True, True)
+        elif isinstance(args[0], dns_rdataset.Rdataset):
             for rds in args:
                 for rd in rds:
-                    self._add_rr(name, 0, rd, dns.rdataclass.NONE)
+                    self._add_rr(name, 0, rd, dns_rdataclass.NONE)
         else:
             args = list(args)
-            if isinstance(args[0], dns.rdata.Rdata):
+            if isinstance(args[0], dns_rdata.Rdata):
                 for rd in args:
-                    self._add_rr(name, 0, rd, dns.rdataclass.NONE)
+                    self._add_rr(name, 0, rd, dns_rdataclass.NONE)
             else:
                 rdtype = args.pop(0)
                 if isinstance(rdtype, (str, unicode)):
-                    rdtype = dns.rdatatype.from_text(rdtype)
+                    rdtype = dns_rdatatype.from_text(rdtype)
                 if len(args) == 0:
                     rrset = self.find_rrset(self.authority, name,
                                             self.zone_rdclass, rdtype,
-                                            dns.rdatatype.NONE,
-                                            dns.rdataclass.ANY,
+                                            dns_rdatatype.NONE,
+                                            dns_rdataclass.ANY,
                                             True, True)
                 else:
                     for s in args:
-                        rd = dns.rdata.from_text(self.zone_rdclass, rdtype, s,
+                        rd = dns_rdata.from_text(self.zone_rdclass, rdtype, s,
                                                  self.origin)
-                        self._add_rr(name, 0, rd, dns.rdataclass.NONE)
+                        self._add_rr(name, 0, rd, dns_rdataclass.NONE)
 
     def replace(self, name, *args):
         """Replace records.  The first argument is always a name.  The other
@@ -194,16 +197,16 @@ class Update(dns.message.Message):
                 - rdtype, string..."""
 
         if isinstance(name, (str, unicode)):
-            name = dns.name.from_text(name, None)
+            name = dns_name.from_text(name, None)
         if len(args) == 0:
             rrset = self.find_rrset(self.answer, name,
-                                    dns.rdataclass.ANY, dns.rdatatype.ANY,
-                                    dns.rdatatype.NONE, None,
+                                    dns_rdataclass.ANY, dns_rdatatype.ANY,
+                                    dns_rdatatype.NONE, None,
                                     True, True)
-        elif isinstance(args[0], dns.rdataset.Rdataset) or \
-             isinstance(args[0], dns.rdata.Rdata) or \
+        elif isinstance(args[0], dns_rdataset.Rdataset) or \
+             isinstance(args[0], dns_rdata.Rdata) or \
              len(args) > 1:
-            if not isinstance(args[0], dns.rdataset.Rdataset):
+            if not isinstance(args[0], dns_rdataset.Rdataset):
                 # Add a 0 TTL
                 args = list(args)
                 args.insert(0, 0)
@@ -211,10 +214,10 @@ class Update(dns.message.Message):
         else:
             rdtype = args[0]
             if isinstance(rdtype, (str, unicode)):
-                rdtype = dns.rdatatype.from_text(rdtype)
+                rdtype = dns_rdatatype.from_text(rdtype)
             rrset = self.find_rrset(self.answer, name,
-                                    dns.rdataclass.ANY, rdtype,
-                                    dns.rdatatype.NONE, None,
+                                    dns_rdataclass.ANY, rdtype,
+                                    dns_rdatatype.NONE, None,
                                     True, True)
 
     def absent(self, name, rdtype=None):
@@ -222,18 +225,18 @@ class Update(dns.message.Message):
         not exist as a prerequisite to the execution of the update."""
 
         if isinstance(name, (str, unicode)):
-            name = dns.name.from_text(name, None)
+            name = dns_name.from_text(name, None)
         if rdtype is None:
             rrset = self.find_rrset(self.answer, name,
-                                    dns.rdataclass.NONE, dns.rdatatype.ANY,
-                                    dns.rdatatype.NONE, None,
+                                    dns_rdataclass.NONE, dns_rdatatype.ANY,
+                                    dns_rdatatype.NONE, None,
                                     True, True)
         else:
             if isinstance(rdtype, (str, unicode)):
-                rdtype = dns.rdatatype.from_text(rdtype)
+                rdtype = dns_rdatatype.from_text(rdtype)
             rrset = self.find_rrset(self.answer, name,
-                                    dns.rdataclass.NONE, rdtype,
-                                    dns.rdatatype.NONE, None,
+                                    dns_rdataclass.NONE, rdtype,
+                                    dns_rdatatype.NONE, None,
                                     True, True)
 
     def to_wire(self, origin=None, max_size=65535):

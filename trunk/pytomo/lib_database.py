@@ -2,7 +2,9 @@
 """Module for sqllite interface to the pytomo database
 """
 
-from __future__ import with_statement
+
+
+from __future__ import with_statement, absolute_import
 import sqlite3
 from pprint import pprint
 
@@ -10,10 +12,10 @@ from pprint import pprint
 import logging
 import sys
 from time import strftime
-from os import sep
+from os.path import sep, basename
 
 # config file
-import pytomo.config_pytomo as config_pytomo
+from . import config_pytomo
 
 class PytomoDatabase:
     """Pytomo database class
@@ -61,12 +63,13 @@ class PytomoDatabase:
             # isolation_level in order to auto-commit
             self.py_conn = sqlite3.connect(database_file, isolation_level=None)
         except sqlite3.Error, mes:
-            config_pytomo.LOG.exception("Unable to connect to the database: %s"
-                                        % database_file)
+            config_pytomo.LOG.exception(''.join((
+                'Unable to connect to the database: ', database_file,
+                '\nError message: ', mes)))
             self.created = False
             return
         config_pytomo.LOG.info(' '.join(("Created connection to data base",
-                                         "Database: %s" % database_file)))
+                                         "Database:", basename(database_file))))
         self.created = True
         self.py_cursor = self.py_conn.cursor()
 

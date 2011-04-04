@@ -13,8 +13,10 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import dns.rdtypes.sigbase
+from __future__ import absolute_import
 
-class RRSIG(dns.rdtypes.sigbase.SIGBase):
+from .. import sigbase
+
+class RRSIG(sigbase.SIGBase):
     """RRSIG record"""
     pass

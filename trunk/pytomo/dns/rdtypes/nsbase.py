@@ -15,17 +15,19 @@
 
 """NS-like base classes."""
 
+from __future__ import absolute_import
+
 import cStringIO
 
-import dns.exception
-import dns.rdata
-import dns.name
+from .. import exception as dns_exception
+from .. import rdata as dns_rdata
+from .. import name as dns_name
 
-class NSBase(dns.rdata.Rdata):
+class NSBase(dns_rdata.Rdata):
     """Base class for rdata that is like an NS record.
 
     @ivar target: the target name of the rdata
-    @type target: dns.name.Name object"""
+    @type target: dns_name.Name object"""
 
     __slots__ = ['target']
 
@@ -52,10 +54,10 @@ class NSBase(dns.rdata.Rdata):
         return self.target.to_digestable(origin)
 
     def from_wire(cls, rdclass, rdtype, wire, current, rdlen, origin = None):
-        (target, cused) = dns.name.from_wire(wire[: current + rdlen],
+        (target, cused) = dns_name.from_wire(wire[: current + rdlen],
                                              current)
         if cused != rdlen:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         if not origin is None:
             target = target.relativize(origin)
         return cls(rdclass, rdtype, target)

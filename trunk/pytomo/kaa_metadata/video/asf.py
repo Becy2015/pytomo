@@ -32,6 +32,8 @@
 #
 # -----------------------------------------------------------------------------
 
+from __future__ import absolute_import
+
 __all__ = ['Parser']
 
 # python imports
@@ -40,9 +42,9 @@ import string
 import logging
 
 # import kaa_metadata.video core
-import core
+from . import core
 # import kaa_metadata.audio for asf files without video stream
-import kaa_metadata.audio.core as audiocore
+from ..audio import core as audiocore
 
 # get logging object
 log = logging.getLogger('metadata')

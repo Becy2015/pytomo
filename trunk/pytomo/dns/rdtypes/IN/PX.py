@@ -13,25 +13,27 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+from __future__ import absolute_import
+
 import struct
 
-import dns.exception
-import dns.rdata
-import dns.name
+from ... import exception as dns_exception
+from ... import rdata as dns_rdata
+from ... import name as dns_name
 
-class PX(dns.rdata.Rdata):
+class PX(dns_rdata.Rdata):
     """PX record.
 
     @ivar preference: the preference value
     @type preference: int
     @ivar map822: the map822 name
-    @type map822: dns.name.Name object
+    @type map822: dns_name.Name object
     @ivar mapx400: the mapx400 name
-    @type mapx400: dns.name.Name object
+    @type mapx400: dns_name.Name object
     @see: RFC 2163"""
 
     __slots__ = ['preference', 'map822', 'mapx400']
-        
+
     def __init__(self, rdclass, rdtype, preference, map822, mapx400):
         super(PX, self).__init__(rdclass, rdtype)
         self.preference = preference
@@ -42,7 +44,7 @@ class PX(dns.rdata.Rdata):
         map822 = self.map822.choose_relativity(origin, relativize)
         mapx400 = self.mapx400.choose_relativity(origin, relativize)
         return '%d %s %s' % (self.preference, map822, mapx400)
-        
+
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         preference = tok.get_uint16()
         map822 = tok.get_name()
@@ -51,7 +53,7 @@ class PX(dns.rdata.Rdata):
         mapx400 = mapx400.choose_relativity(origin, relativize)
         tok.get_eol()
         return cls(rdclass, rdtype, preference, map822, mapx400)
-    
+
     from_text = classmethod(from_text)
 
     def to_wire(self, file, compress = None, origin = None):
@@ -59,23 +61,23 @@ class PX(dns.rdata.Rdata):
         file.write(pref)
         self.map822.to_wire(file, None, origin)
         self.mapx400.to_wire(file, None, origin)
-        
+
     def from_wire(cls, rdclass, rdtype, wire, current, rdlen, origin = None):
         (preference, ) = struct.unpack('!H', wire[current : current + 2])
         current += 2
         rdlen -= 2
-        (map822, cused) = dns.name.from_wire(wire[: current + rdlen],
+        (map822, cused) = dns_name.from_wire(wire[: current + rdlen],
                                                current)
         if cused > rdlen:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         current += cused
         rdlen -= cused
         if not origin is None:
             map822 = map822.relativize(origin)
-        (mapx400, cused) = dns.name.from_wire(wire[: current + rdlen],
+        (mapx400, cused) = dns_name.from_wire(wire[: current + rdlen],
                                               current)
         if cused != rdlen:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         if not origin is None:
             mapx400 = mapx400.relativize(origin)
         return cls(rdclass, rdtype, preference, map822, mapx400)

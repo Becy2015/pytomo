@@ -26,9 +26,11 @@ whose key is the rdatatype value and whose value is True in this dictionary.
 whose key is the rdatatype value and whose value is True in this dictionary.
 @type _singletons: dict"""
 
+from __future__ import absolute_import
+
 import re
 
-import dns.exception
+from . import exception as dns_exception
 
 NONE = 0
 A = 1
@@ -175,7 +177,7 @@ _singletons = {
 
 _unknown_type_pattern = re.compile('TYPE([0-9]+)$', re.I);
 
-class UnknownRdatatype(dns.exception.DNSException):
+class UnknownRdatatype(dns_exception.DNSException):
     """Raised if a type is unknown."""
     pass
 
@@ -183,7 +185,7 @@ def from_text(text):
     """Convert text into a DNS rdata type value.
     @param text: the text
     @type text: string
-    @raises dns.rdatatype.UnknownRdatatype: the type is unknown
+    @raises dns_rdatatype.UnknownRdatatype: the type is unknown
     @raises ValueError: the rdata type value is not >= 0 and <= 65535
     @rtype: int"""
 

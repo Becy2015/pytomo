@@ -13,19 +13,21 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+from __future__ import absolute_import
+
 import struct
 
-import dns.exception
-import dns.rdata
-import dns.name
+from . import exception as dns_exception
+from . import rdata as dns_rdata
+from . import name as dns_name
 
-class SOA(dns.rdata.Rdata):
+class SOA(dns_rdata.Rdata):
     """SOA record
 
     @ivar mname: the SOA MNAME (master name) field
-    @type mname: dns.name.Name object
+    @type mname: dns_name.Name object
     @ivar rname: the SOA RNAME (responsible name) field
-    @type rname: dns.name.Name object
+    @type rname: dns_name.Name object
     @ivar serial: The zone's serial number
     @type serial: int
     @ivar refresh: The zone's refresh value (in seconds)
@@ -90,14 +92,14 @@ class SOA(dns.rdata.Rdata):
                         self.retry, self.expire, self.minimum)
 
     def from_wire(cls, rdclass, rdtype, wire, current, rdlen, origin = None):
-        (mname, cused) = dns.name.from_wire(wire[: current + rdlen], current)
+        (mname, cused) = dns_name.from_wire(wire[: current + rdlen], current)
         current += cused
         rdlen -= cused
-        (rname, cused) = dns.name.from_wire(wire[: current + rdlen], current)
+        (rname, cused) = dns_name.from_wire(wire[: current + rdlen], current)
         current += cused
         rdlen -= cused
         if rdlen != 20:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         five_ints = struct.unpack('!IIIII',
                                   wire[current : current + rdlen])
         if not origin is None:

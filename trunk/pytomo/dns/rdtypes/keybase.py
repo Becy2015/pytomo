@@ -13,11 +13,13 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+from __future__ import absolute_import
+
 import struct
 
-import dns.exception
-import dns.dnssec
-import dns.rdata
+from .. import exception as dns_exception
+from .. import dnssec as dns_dnssec
+from .. import rdata as dns_rdata
 
 _flags_from_text = {
     'NOCONF': (0x4000, 0xC000),
@@ -62,7 +64,7 @@ _protocol_from_text = {
     'ALL' : 255,
     }
 
-class KEYBase(dns.rdata.Rdata):
+class KEYBase(dns_rdata.Rdata):
     """KEY-like record base
 
     @ivar flags: the key flags
@@ -85,7 +87,7 @@ class KEYBase(dns.rdata.Rdata):
 
     def to_text(self, origin=None, relativize=True, **kw):
         return '%d %d %d %s' % (self.flags, self.protocol, self.algorithm,
-                                dns.rdata._base64ify(self.key))
+                                dns_rdata._base64ify(self.key))
 
     def from_text(cls, rdclass, rdtype, tok, origin = None, relativize = True):
         flags = tok.get_string()
@@ -97,7 +99,7 @@ class KEYBase(dns.rdata.Rdata):
             for flag in flag_names:
                 v = _flags_from_text.get(flag)
                 if v is None:
-                    raise dns.exception.SyntaxError('unknown flag %s' % flag)
+                    raise dns_exception.SyntaxError('unknown flag %s' % flag)
                 flags &= ~v[1]
                 flags |= v[0]
         protocol = tok.get_string()
@@ -106,16 +108,16 @@ class KEYBase(dns.rdata.Rdata):
         else:
             protocol = _protocol_from_text.get(protocol)
             if protocol is None:
-                raise dns.exception.SyntaxError('unknown protocol %s' % protocol)
+                raise dns_exception.SyntaxError('unknown protocol %s' % protocol)
 
-        algorithm = dns.dnssec.algorithm_from_text(tok.get_string())
+        algorithm = dns_dnssec.algorithm_from_text(tok.get_string())
         chunks = []
         while 1:
             t = tok.get().unescape()
             if t.is_eol_or_eof():
                 break
             if not t.is_identifier():
-                raise dns.exception.SyntaxError
+                raise dns_exception.SyntaxError
             chunks.append(t.value)
         b64 = ''.join(chunks)
         key = b64.decode('base64_codec')
@@ -130,7 +132,7 @@ class KEYBase(dns.rdata.Rdata):
 
     def from_wire(cls, rdclass, rdtype, wire, current, rdlen, origin = None):
         if rdlen < 4:
-            raise dns.exception.FormError
+            raise dns_exception.FormError
         header = struct.unpack('!HBB', wire[current : current + 4])
         current += 4
         rdlen -= 4

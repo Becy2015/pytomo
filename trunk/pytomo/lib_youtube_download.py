@@ -7,7 +7,9 @@ Usage : ./complete_yt_dl.py http://www.youtube.com/watch?v=-5aTKyaVbyE 30
 
 """
 
-from __future__ import with_statement
+
+
+from __future__ import with_statement, absolute_import
 import httplib
 import math
 import re
@@ -21,15 +23,15 @@ import tempfile
 # only for logging
 import logging
 from time import strftime
-from os import sep
+from os import sep, remove
 
-import pytomo.kaa_metadata as kaa_metadata
-from pytomo.kaa_metadata.core import ParseError
+from . import kaa_metadata
+from .kaa_metadata.core import ParseError
 
 # for python2.5 only
 from cgi import parse_qs
 
-import pytomo.config_pytomo as config_pytomo
+from . import config_pytomo
 
 STD_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.12) \
@@ -370,8 +372,10 @@ template')
         Return the data stream
         """
         data = None
-        urllib2.install_opener(urllib2.build_opener(urllib2.ProxyHandler(
-                                                        config_pytomo.PROXIES)))
+        if config_pytomo.PROXIES:
+            proxy = urllib2.ProxyHandler(config_pytomo.PROXIES)
+            opener = urllib2.build_opener(proxy)
+            urllib2.install_opener(opener)
         basic_request = urllib2.Request(url, None, STD_HEADERS)
         request = urllib2.Request(url, None, STD_HEADERS)
         count = 0
@@ -434,15 +438,15 @@ template')
             # buffering
             pass
 
-    def compute_encoding_rate(self, data_block, meta_file):
+    def compute_encoding_rate(self, data_block, meta_file_name):
         """Compute the encoding rate
         if found in the temp file, close the file and set the value in the
         object
         """
-        meta_file.write(data_block)
-        meta_file.flush()
+        with open(meta_file_name, 'a') as meta_file:
+            meta_file.write(data_block)
         try:
-            data_duration = get_data_duration(meta_file.name)
+            data_duration = get_data_duration(meta_file_name)
         except ParseError, mes:
             config_pytomo.LOG.debug('data duration not yet found: %s'
                                    % mes)
@@ -452,11 +456,11 @@ template')
             self.encoding_rate = self.data_len / data_duration
             config_pytomo.LOG.debug("Encoding rate is: %.2fkb/s"
                                     % (self.encoding_rate / 1e3))
-            meta_file.close()
 
     def _do_download(self, url):
         '''Module that handles the download of the file and
         calculates the time, bytes downloaded'''
+        config_pytomo.LOG.debug('Downloading url: %s' % url)
         data = self.establish_connection(url)
         if not data:
             config_pytomo.LOG.error('could not establish connection to url: %s'
@@ -464,12 +468,17 @@ template')
             return None
         # content-length in bytes
         self.data_len = float(data.info().get('Content-length', None))
+        tries = 0
         byte_counter = 0
         accumulated_playback = 0.0
         accumulated_buffer = 0.0
         block_size = 1024
         start = time.time()
-        meta_file = tempfile.NamedTemporaryFile()
+        with tempfile.NamedTemporaryFile() as meta_file:
+            # just to get a temporary file name in the current dir
+            # cannot use the file stream directly because it is not permitted
+            # to open a temporary file already open
+            meta_file_name = meta_file.name
         while True:
             # Download and write
             before = time.time()
@@ -478,8 +487,10 @@ template')
                 data_block = data.read(block_size)
             else:
                 break
-            if not self.encoding_rate:
-                self.compute_encoding_rate(data_block, meta_file)
+            if (not self.encoding_rate
+                and tries <= config_pytomo.MAX_NB_TRIES_ENCODING):
+                self.compute_encoding_rate(data_block, meta_file_name)
+                tries += 1
             data_block_len = len(data_block)
             if data_block_len == 0:
                 break
@@ -513,6 +524,7 @@ template')
                     'accumulated_buffer': accumulated_buffer,
                 }
                 self.report_progress(progress_stats)
+        remove(meta_file_name)
         self.set_total_bytes(byte_counter)
         self.accumulated_playback = accumulated_playback
         self.accumulated_buffer = accumulated_buffer
@@ -641,17 +653,17 @@ class YoutubeIE(InfoExtractor):
         """Get video info
         Return the video
         """
-        #proxy = urllib2.ProxyHandler()
-        #opener = urllib2.build_opener(proxy)
         self.report_video_webpage_download(video_id)
         video_info = None
         for el_type in ['&el=embedded', '&el=detailpage', '&el=vevo', '']:
             video_info_url = ('http://www.youtube.com/get_video_info?\
 &video_id=%s%s&ps=default&eurl=&gl=US&hl=en' % (video_id, el_type))
             request = urllib2.Request(video_info_url, None, STD_HEADERS)
+            if config_pytomo.PROXIES:
+                proxy = urllib2.ProxyHandler(config_pytomo.PROXIES)
+                opener = urllib2.build_opener(proxy)
+                urllib2.install_opener(opener)
             try:
-                #opener_request = opener.open(request)
-                #video_info_webpage = opener_request.read()
                 video_info_webpage = urllib2.urlopen(request).read()
                 video_info = parse_qs(video_info_webpage)
                 if 'token' in video_info:
@@ -793,7 +805,10 @@ def get_youtube_cache_url(url):
     mobj = re.match(youtube_ie._VALID_URL, url)
     if not mobj:
         config_pytomo.LOG.warning('\n'.join(('url: %s not valid' % url,
-                                     'only Youtube download is implemented')))
+                                     'only YouTube download is implemented')))
+        if config_pytomo.BLACK_LISTED in url:
+            config_pytomo.LOG.error('Black listed url: %s' % url)
+            raise config_pytomo.BlackListException(url)
         return None
     video_id = mobj.group(2)
     try:
@@ -850,7 +865,7 @@ def get_download_stats(ip_address_uri,
                ]
     return None
 
-def main(argv=None):
+def deprecated(argv=None):
     "Program Wrapper"
     if argv is None:
         argv = sys.argv[1:]
@@ -902,7 +917,4 @@ def main(argv=None):
                 'encoding_rate': file_downloader.encoding_rate,
                 'interruptions': file_downloader.interruptions}
     return dict_res
-
-if __name__ == '__main__':
-    sys.exit(main())
 
