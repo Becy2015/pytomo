@@ -230,8 +230,10 @@ def convert_debug_level(_, __, value, parser):
     setattr(parser.values, 'LOG_LEVEL', log_level)
 
 def set_proxies(_, __, value, parser):
-    "Convert the proxy passed to a dict to be handled by urllib"
+    "Convert the proxy passed to a dict to be handled by urllib2"
     if value:
+        # remove quotes
+        value = value.translate(None, '\'"')
         if not value.startswith('http://'):
             value = 'http://'.join(('', value))
         setattr(parser.values, 'PROXIES', {'http': value})
@@ -307,6 +309,8 @@ def write_options_to_config(options):
 
 def log_ip_address():
     "Log the remote IP addresses"
+    print ("Logging the IP address: if it takes too long, please check your "
+           "proxy")
     # is local address of some interest??
     # check: http://stackoverflow.com/
     # questions/166506/finding-local-ip-addresses-in-python
@@ -384,7 +388,7 @@ def log_provider(timeout=config_pytomo.USER_INPUT_TIMEOUT):
     try:
         provider = raw_input(''.join((
             "Please indicate your provider/ISP (leave blank for skipping).\n",
-            "Crawl will start when you press Enter",
+            "Crawl will START when you PRESS ENTER",
             ((" (or after %d seconds)" % timeout) if support_signal else ''),
             ".\n")))
     except MyTimeoutException:
@@ -419,11 +423,13 @@ def main(argv=None):
                                       config_pytomo.RESULT_DIR, timestamp)
     except IOError:
         result_file = None
+    print "Text results are there: %s" % result_file
     try:
         db_file = check_out_files(config_pytomo.DATABASE,
                                   config_pytomo.DATABASE_DIR, timestamp)
     except IOError:
         db_file = None
+    print "Database results are there: %s" % db_file
     config_pytomo.LOG.critical('Offset between local time and UTC: %d'
                                % timezone)
     config_pytomo.SYSTEM = platform.system()
@@ -431,8 +437,6 @@ def main(argv=None):
                            % config_pytomo.SYSTEM)
     if config_pytomo.LOG_PUBLIC_IP:
         log_ip_address()
-    print "Text results are there: %s" % result_file
-    print "Database results are there: %s" % db_file
     while True:
         start_crawl = raw_input('Are you ok to start crawling? (Y/N)\n')
         if start_crawl.upper() == 'N':
