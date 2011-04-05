@@ -53,6 +53,8 @@ TIME_FRAME = 'week'
 # for lib_cache_url.py
 # proxy to set at command line
 PROXIES = None
+# replace with your values
+#PROXIES = {'http': 'http://www.example.com:3128/'}
 
 ################################################################################
 # for lib_dns.py
