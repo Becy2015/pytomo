@@ -85,79 +85,97 @@ class FlashVideo(core.AVContainer):
     """
     table_mapping = { 'FLVINFO' : FLVINFO }
 
-    def __init__(self,file):
+    def __init__(self, in_file):
         core.AVContainer.__init__(self)
         self.mime = 'video/flv'
         self.type = 'Flash Video'
-        data = file.read(13)
+        self.copyright = None
+        self.width = None
+        self.height = None
+        self.length = None
+        data = in_file.read(13)
         if len(data) < 13 or struct.unpack('>3sBBII', data)[0] != 'FLV':
             raise core.ParseError()
 
-        for i in range(10):
+        for _ in range(10):
             if self.audio and self.video:
                 break
-            data = file.read(11)
+            data = in_file.read(11)
             if len(data) < 11:
                 break
             chunk = struct.unpack('>BH4BI', data)
             size = (chunk[1] << 8) + chunk[2]
 
             if chunk[0] == FLV_TAG_TYPE_AUDIO:
-                flags = ord(file.read(1))
+                flags = ord(in_file.read(1))
                 if not self.audio:
-                    a = core.AudioStream()
-                    a.channels = (flags & FLV_AUDIO_CHANNEL_MASK) + 1
-                    srate = (flags & FLV_AUDIO_SAMPLERATE_MASK)
-                    a.samplerate = (44100 << (srate >> FLV_AUDIO_SAMPLERATE_OFFSET) >> 3)
-                    codec = (flags & FLV_AUDIO_CODECID_MASK) >> FLV_AUDIO_CODECID_OFFSET
-                    if codec < len(FLV_AUDIO_CODECID):
-                        a.codec = FLV_AUDIO_CODECID[codec]
-                    self.audio.append(a)
-
-                file.seek(size - 1, 1)
+                    self.audio.append(self.get_audio_type(flags))
+                in_file.seek(size - 1, 1)
 
             elif chunk[0] == FLV_TAG_TYPE_VIDEO:
-                flags = ord(file.read(1))
+                flags = ord(in_file.read(1))
                 if not self.video:
-                    v = core.VideoStream()
-                    codec = (flags & FLV_VIDEO_CODECID_MASK) - 2
-                    if codec < len(FLV_VIDEO_CODECID):
-                        v.codec = FLV_VIDEO_CODECID[codec]
-                    # width and height are in the meta packet, but I have
-                    # no file with such a packet inside. So maybe we have
-                    # to decode some parts of the video.
-                    self.video.append(v)
-
-                file.seek(size - 1, 1)
+                    self.video.append(self.get_video_type(flags))
+                in_file.seek(size - 1, 1)
 
             elif chunk[0] == FLV_TAG_TYPE_META:
                 log.info('metadata %s', str(chunk))
-                metadata = file.read(size)
-                try:
-                    while metadata:
-                        length, value = self._parse_value(metadata)
-                        if isinstance(value, dict):
-                            log.info('metadata: %s', value)
-                            if value.get('creator'):
-                                self.copyright = value.get('creator')
-                            if value.get('width'):
-                                self.width = value.get('width')
-                            if value.get('height'):
-                                self.height = value.get('height')
-                            if value.get('duration'):
-                                self.length = value.get('duration')
-                            self._appendtable('FLVINFO', value)
-                        if not length:
-                            # parse error
-                            break
-                        metadata = metadata[length:]
-                except (IndexError, struct.error, TypeError):
-                    pass
+                metadata = in_file.read(size)
+                self.add_metadata(metadata)
             else:
                 log.info('unkown %s', str(chunk))
-                file.seek(size, 1)
+                in_file.seek(size, 1)
 
-            file.seek(4, 1)
+            in_file.seek(4, 1)
+
+    @staticmethod
+    def get_audio_type(flags):
+        "Create an audio stream in the media"
+        a = core.AudioStream()
+        a.channels = (flags & FLV_AUDIO_CHANNEL_MASK) + 1
+        srate = (flags & FLV_AUDIO_SAMPLERATE_MASK)
+        a.samplerate = (44100 <<
+                        (srate >> FLV_AUDIO_SAMPLERATE_OFFSET) >> 3)
+        codec = ((flags & FLV_AUDIO_CODECID_MASK)
+                 >> FLV_AUDIO_CODECID_OFFSET)
+        if codec < len(FLV_AUDIO_CODECID):
+            a.codec = FLV_AUDIO_CODECID[codec]
+        return a
+
+    @staticmethod
+    def get_video_type(flags):
+        "Create a video stream in the media"
+        v = core.VideoStream()
+        codec = (flags & FLV_VIDEO_CODECID_MASK) - 2
+        if codec < len(FLV_VIDEO_CODECID):
+            v.codec = FLV_VIDEO_CODECID[codec]
+        # width and height are in the meta packet, but I have
+        # no in_file with such a packet inside. So maybe we have
+        # to decode some parts of the video.
+        return v
+
+    def add_metadata(self, metadata):
+        'Tries to put metadata in the stream'
+        try:
+            while metadata:
+                length, value = self._parse_value(metadata)
+                if isinstance(value, dict):
+                    log.info('metadata: %s', value)
+                    if value.get('creator'):
+                        self.copyright = value.get('creator')
+                    if value.get('width'):
+                        self.width = value.get('width')
+                    if value.get('height'):
+                        self.height = value.get('height')
+                    if value.get('duration'):
+                        self.length = value.get('duration')
+                    self._appendtable('FLVINFO', value)
+                if not length:
+                    # parse error
+                    break
+                metadata = metadata[length:]
+        except (IndexError, struct.error, TypeError):
+            log.exception('Error after parsing flv header')
 
     def _parse_value(self, data):
         """
@@ -166,32 +184,28 @@ class FlashVideo(core.AVContainer):
         if ord(data[0]) == FLV_DATA_TYPE_NUMBER:
             value = struct.unpack('>d', data[1:9])[0]
             return 9, value
-
         if ord(data[0]) == FLV_DATA_TYPE_BOOL:
             return 2, bool(data[1])
-
         if ord(data[0]) == FLV_DATA_TYPE_STRING:
             length = (ord(data[1]) << 8) + ord(data[2])
-            return length + 3, data[3:length+3]
-
+            return (length + 3), data[3:(length + 3)]
         if ord(data[0]) == FLV_DATA_TYPE_ECMARRAY:
             init_length = len(data)
             num = struct.unpack('>I', data[1:5])[0]
             data = data[5:]
             result = {}
-            for i in range(num):
+            for _ in range(num):
                 length = (ord(data[0]) << 8) + ord(data[1])
-                key = data[2:length+2]
-                data = data[length + 2:]
+                key = data[2:(length + 2)]
+                data = data[(length + 2):]
                 length, value = self._parse_value(data)
                 if not length:
                     return 0, result
                 result[key] = value
                 data = data[length:]
-            return init_length - len(data), result
-
+            return (init_length - len(data)), result
         log.info('unknown code: %x. Stop metadata parser', ord(data[0]))
         return 0, None
 
-
 Parser = FlashVideo
+

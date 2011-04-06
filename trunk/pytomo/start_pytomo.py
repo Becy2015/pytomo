@@ -86,7 +86,7 @@ def format_stats(stats):
             download_stats = [None] * config_pytomo.NB_DOWNLOAD_VALUES
         # use inet_aton(ip_address) for optimisation on this field
         row = ([SERVICE, url, cache_url, ip_address, resolver]
-               + download_stats + list(ping_times))
+               + list(ping_times) + download_stats)
         record_list.append(tuple(row))
     return record_list
 
@@ -95,6 +95,8 @@ def check_out_files(file_pattern, directory, timestamp):
     Test if the path exists, create if possible or create it in default user
     directory
     """
+    if file_pattern == None:
+        return None
     if config_pytomo.USE_PACKAGE_DIR:
         base_dir = PACKAGE_DIR
     else:
@@ -164,10 +166,12 @@ def crawl_links(input_links, crawled_urls, result_stream=None, data_base=None):
             break
         if len(crawled_urls) >= max_crawled_urls:
             raise MaxUrlException()
-        print >> result_stream, config_pytomo.SEP_LINE
+        if result_stream:
+            print >> result_stream, config_pytomo.SEP_LINE
         stats = compute_stats(url)
         if stats:
-            pprint(stats, stream=result_stream)
+            if result_stream:
+                pprint(stats, stream=result_stream)
             if data_base:
                 for row in format_stats(stats):
                     data_base.insert_record(row)
@@ -175,10 +179,14 @@ def crawl_links(input_links, crawled_urls, result_stream=None, data_base=None):
             else:
                 config_pytomo.LOG.info('no stats for url: %s' % url)
 
-def do_crawl(result_stream=sys.stdout, db_file=None, timestamp=None):
+def do_crawl(result_stream=None, db_file=None, timestamp=None):
     """Crawls the urls given by the url_file
     up to max_rounds are performed or max_visited_urls
     """
+    if not db_file and not result_stream:
+        config_pytomo.LOG.critical('Cannot start crawl because no file can '
+                                   'store output')
+        return
     config_pytomo.LOG.critical('Start crawl')
     if not timestamp:
         timestamp = strftime("%Y-%m-%d.%H_%M_%S")
@@ -310,7 +318,7 @@ def write_options_to_config(options):
 def log_ip_address():
     "Log the remote IP addresses"
     print ("Logging the IP address: if it takes too long, please check your "
-           "proxy")
+           "proxy.\n Check the help of this program.")
     # is local address of some interest??
     # check: http://stackoverflow.com/
     # questions/166506/finding-local-ip-addresses-in-python
@@ -423,13 +431,15 @@ def main(argv=None):
                                       config_pytomo.RESULT_DIR, timestamp)
     except IOError:
         result_file = None
-    print "Text results are there: %s" % result_file
+    if result_file:
+        print "Text results are there: %s" % result_file
     try:
         db_file = check_out_files(config_pytomo.DATABASE,
                                   config_pytomo.DATABASE_DIR, timestamp)
     except IOError:
         db_file = None
-    print "Database results are there: %s" % db_file
+    if db_file:
+        print "Database results are there: %s" % db_file
     config_pytomo.LOG.critical('Offset between local time and UTC: %d'
                                % timezone)
     config_pytomo.SYSTEM = platform.system()
@@ -446,11 +456,18 @@ def main(argv=None):
     log_provider(timeout=config_pytomo.USER_INPUT_TIMEOUT)
     print "Type Ctrl-C to interrupt crawl"
     try:
-        with open(result_file, 'w') as result_stream:
-            do_crawl(result_stream, db_file=db_file, timestamp=timestamp)
-    except config_pytomo.BlackListException, mes:
-        config_pytomo.LOG.critical('Crawl detected by YouTube: '
-                                   'log to YouTube and enter captcha')
+        result_stream = None
+        if result_file:
+            result_stream = open(result_file, 'w')
+        do_crawl(result_stream=result_stream, db_file=db_file,
+                 timestamp=timestamp)
+        if result_file:
+            result_stream.close()
+    except config_pytomo.BlackListException:
+        err_mes = ('Crawl detected by YouTube: '
+                   'log to YouTube and enter captcha')
+        config_pytomo.LOG.critical(err_mes)
+        print err_mes
     except KeyboardInterrupt:
         config_pytomo.LOG.critical('Crawl interrupted by user')
     except Exception, mes:

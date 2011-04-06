@@ -37,14 +37,15 @@ from .version import VERSION
 # not needed here, and imports a function not windows compatible
 #import disc.cdrom as cdrom
 
-from .core import Media, MEDIA_AUDIO, MEDIA_VIDEO, MEDIA_IMAGE, MEDIA_AV, \
-     MEDIA_SUBTITLE, MEDIA_CHAPTER, MEDIA_DIRECTORY, MEDIA_DISC, MEDIA_GAME, \
-     EXTENSION_STREAM, EXTENSION_DEVICE, EXTENSION_DIRECTORY
+from .core import (Media, MEDIA_AUDIO, MEDIA_VIDEO, MEDIA_IMAGE, MEDIA_AV,
+                   MEDIA_SUBTITLE, MEDIA_CHAPTER, MEDIA_DIRECTORY,
+                   MEDIA_DISC, MEDIA_GAME, EXTENSION_STREAM,
+                   EXTENSION_DEVICE, EXTENSION_DIRECTORY)
 
 if False:
     # to trick the module finder of pyinstaller
     from .video import mp4, flv, mpeg, riff
-    from .audio import mp3
+    from .audio import mp3, eyeD3
     #from .image import *
     from .misc import xmlfile
 
@@ -63,7 +64,7 @@ register('video/avi', ('wav', 'avi'), 'video.riff')
 #register('video/vcd', ('cue',), 'video.vcd')
 
 # Audio parsers
-register('audio/mpeg', ('mp3',), 'audio.mp3')
+#register('audio/mpeg', ('mp3',), 'audio.mp3')
 # register('audio/ac3', ('ac3',), 'audio.ac3')
 # register('application/adts', ('aac',), 'audio.adts')
 # register('audio/m4a', ('m4a',), 'audio.m4a')
@@ -97,7 +98,7 @@ register('audio/mpeg', ('mp3',), 'audio.mp3')
 
 # Misc parsers
 # register('directory', EXTENSION_DIRECTORY, 'misc.directory')
-register('text/xml', ('xml', 'fxd', 'html', 'htm'), 'misc.xmlfile')
+#register('text/xml', ('xml', 'fxd', 'html', 'htm'), 'misc.xmlfile')
 
 # These parsers are prone to producing false positives, so we use them
 # last.  They should be fixed.
