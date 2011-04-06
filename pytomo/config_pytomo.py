@@ -11,7 +11,8 @@ from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 USE_PACKAGE_DIR = False
 
 RESULT_DIR = 'results'
-RESULT_FILE = 'pytomo.result'
+RESULT_FILE = None
+#RESULT_FILE = 'pytomo.result'
 
 DATABASE_DIR = 'databases'
 DATABASE = 'pytomo_database.db'
@@ -94,7 +95,7 @@ NB_PING_VALUES = 3
 NB_DOWNLOAD_VALUES = 10
 NB_FIELDS = NB_IDENT_VALUES + NB_PING_VALUES + NB_DOWNLOAD_VALUES
 
-USER_INPUT_TIMEOUT = 4
+USER_INPUT_TIMEOUT = 5
 
 LEVEL_TO_NAME = {DEBUG: 'DEBUG',
                  INFO: 'INFO',
