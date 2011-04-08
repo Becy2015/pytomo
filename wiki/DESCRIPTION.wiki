@@ -150,14 +150,9 @@ Youtube links and to store it for next round of the crawl.
          lib_cache_url.get_next_round_urls(url_file_in, [max_per_page=20, max_per_url=5])
 }}}
 *Arguments*
-   * *url_file_in:* 
-        File with a list of URLs to crawl (only Youtube is implemented).
-   * *max_per_page:*
-        Number of links to consider per page(only the first max_per_page 
-        related video links will be considered).
-   * *max_per_url:* 
-        Number of links to select per page (max_per_url links 
-        will be randomly selected out of the max_per_page considered).
+   * *url_file_in:*File with a list of URLs to crawl (only Youtube is implemented).
+   * *max_per_page:*Number of links to consider per page(only the first max_per_page related video links will be considered).
+   * *max_per_url:* Number of links to select per page (max_per_url links will be randomly selected out of the max_per_page considered).
    
 *Functions*
    * *get_all_links(url):*
@@ -181,8 +176,8 @@ Function to get the most popular Youtube videos according to the time frame.
     Not meant to be called directly. But provides one function as discussed below.
 
 *Arguments*
-    * time = 'today' or 'month' or 'week' or 'alltime'
-    * max_results = Total top videos needed (in  multiples of 25)
+    * *time = 'today' or 'month' or 'week' or 'alltime'
+    * *max_results = Total top videos needed (in  multiples of 25)
 
 *Function*
    * *get_popular_links(time='today', `[`max_results=25`]`):*
