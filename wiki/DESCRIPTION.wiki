@@ -123,11 +123,11 @@ Module to retrieve the IP address of a URL out of a set of nameservers (default 
 
 Module to generate the RTT times of a ping.This module has been configured to work on Linux, Windows and Mac systems.
     
-*Usage*
+* Usage*
     Not meant to be called directly. But provides the two functions
     discussed below.
             
-*Functions*
+* Functions*
     * * configure_ping_options(ping_packets = config_pytomo.PING_PACKETS ):* 
        Function that generate the Regular Expression to match the RTT  patterns on different operating systems.
     * *ping_ip(ipaddress, `[`pingpackets=config_pytomo.PING_PACKETS`]`):*
@@ -157,7 +157,7 @@ Youtube links and to store it for next round of the crawl.
         related video links will be considered).
    * *max_per_url:* 
         Number of links to select per page (max_per_url links 
-        will be randomly selected out of the max_per_page      considered).
+        will be randomly selected out of the max_per_page considered).
    
 *Functions*
    * *get_all_links(url):*
@@ -176,7 +176,7 @@ Youtube links and to store it for next round of the crawl.
 ===lib_youtube_api.py===
 
 Function to get the most popular Youtube videos according to the time frame.
- 
+
 *Usage*
     Not meant to be called directly. But provides one function as discussed below.
 
