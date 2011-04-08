@@ -176,8 +176,8 @@ Function to get the most popular Youtube videos according to the time frame.
     Not meant to be called directly. But provides one function as discussed below.
 
 *Arguments*
-    * *time = 'today' or 'month' or 'week' or 'alltime'
-    * *max_results = Total top videos needed (in  multiples of 25)
+    * *time *= 'today' or 'month' or 'week' or 'alltime'
+    * *max_results *= Total top videos needed (in  multiples of 25)
 
 *Function*
    * *get_popular_links(time='today', `[`max_results=25`]`):*
