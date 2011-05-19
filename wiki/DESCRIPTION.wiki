@@ -230,6 +230,7 @@ The columns of the database are as follows:
   * IP          - The IP address of the cache server from which the video is downloaded.
   * Resolver    - The DNS resolver used to get obtain the IP address of the cache server.Example Google DNS, Local DNS
   * !DownloadTime  - The Time taken to download the video sample (We do not download the entire video but only for a limited download time.)
+  * !VideoType     - The format of the video that was downloaded.
   * !VideoDuration - The actual duration of the complete video.
   * !VideoLength   - The length(in bytes) of the complete video.
   * !EncodingRate  - The encoding rate of the video. 
@@ -241,6 +242,7 @@ The columns of the database are as follows:
   * !PingMin     - The minimum recorded ping time to the resolved IP address of the cache server.
   * !PingAvg     - The average recorded ping time to the resolved IP address of the cache server.
   * !PingMax     - The maximum recorded ping time to the resolved IP address of the cache server.
+  * !RedirectUrl - In case of HTTP redirect while downloading the video from the cache server. The address of the URL to which the the request has been redirected is stored in this field.
     
 ==results/==
 
