@@ -1,30 +1,18 @@
 #!/usr/bin/env python2.5
 """Module to retrieve the related videos from a file with a list of Youtube
 links and to store it for next round of the crawl
-
-Arguments:
-    * url_file_in: file with a list of URLs to crawl (only Youtube is
-      implemented)
-    * max_per_page: nb of links to consider per page (only the first
-      max_per_page related video links will be seen)
-    * max_per_url: nb of links to select per page (max_per_url links will be
-      randomly selected out of the max_per_page considered)
-    * out_file_name: file name to store the list of related video urls
-    * pickle_output: boolean to tell if the file is a pickle file or a text
-      file
-Usage:
-    * from command line:
-        ./dict_cache.py url_file.txt
-    * as library:
-
-
-        import lib_cache_url
-        url_file_in = 'url_file.txt'
-        lib_cache_url.get_next_round_urls(url_file_in, max_per_page=20,
-                                          max_per_url=5, out_file_name=None,
-                                          pickle_output=False)
+    Usage:
+        import pytomo.lib_cache_url as lib_cache_url
+        import pytomo.config_pytomo as config_pytomo
+        import pytomo.start_pytomo as start_pytomo
+        log_file = 'test_cache_url'
+        url = 'http://www.youtube.com/watch?v=cv5bF2FJQBc'
+        max_per_page = 25
+        max_per_url = 10
+        start_pytomo.configure_log_file(log_file)
+        lib_cache_url.get_youtube_links(url)
+        lib_cache_url.get_related_urls(url, max_per_page, max_per_url)
 """
-
 from __future__ import with_statement, absolute_import
 
 import sys
@@ -32,14 +20,15 @@ import htmllib
 import formatter
 import urllib
 import random
+import time
 from operator import concat
 import logging
 import socket
-
 from optparse import OptionParser
 
 # global config
 from . import config_pytomo
+CONTINUOUS_CRAWL_SIZE = 10
 
 class LinksExtractor(htmllib.HTMLParser):
     "Simple HTML parser to obtain the urls from webpage"
@@ -75,6 +64,11 @@ def get_all_links(url):
         data = urllib.urlopen(url, proxies=config_pytomo.PROXIES)
     # socket.error is a child of IOError only in 2.6
     except socket.error, mes:
+        config_pytomo.LOG.warn(''.join((
+            'Problem in getting links of this url: ', url,
+            '\nError message: ', mes)))
+        return []
+    except IOError, mes:
         config_pytomo.LOG.warn(''.join((
             'Problem in getting links of this url: ', url,
             '\nError message: ', mes)))
@@ -115,7 +109,19 @@ def get_links(url, service, max_per_page):
     return links
 
 def trunk_url(url):
-    "Return the interesting part of a Youtube url"
+    """ Return the interesting part of a Youtube url
+    >>> url= 'http://www.youtube.com/watch?v=hE0207sxaPg&feature=hp_SLN&list=SL'
+    >>> trunk_url(url)  #doctest: +NORMALIZE_WHITESPACE
+    'http://www.youtube.com/watch?v=hE0207sxaPg'
+    >>> url = 'http://www.youtube.com/watch?v=y2kEx5BLoC4& \
+    ... feature=list_related&playnext=1&list=MLGxdCwVVULXfxx-61LMYHbwpcwAvZd-rI'
+    >>> trunk_url(url)  #doctest: +NORMALIZE_WHITESPACE
+     'http://www.youtube.com/watch?v=y2kEx5BLoC4'
+    >>> url = 'http://www.youtube.com/watch?v=UC-RFFIMXlA'
+    >>> trunk_url(url)  #doctest: +NORMALIZE_WHITESPACE
+    'http://www.youtube.com/watch?v=UC-RFFIMXlA'
+    """
+
     return url.split('&', 1)[0]
 
 def get_related_urls(url, max_per_page, max_per_url):
@@ -135,13 +141,23 @@ def get_next_round_urls(input_links, max_per_page=20, max_per_url=5):
         * input_links: list of the urls
         * max_per_url and max_per_page options
         * out_file_name: if provided, list is dump in it
-        * pickle_output: indicate if dump format is pickle or text
     """
     # keep only non-duplicated links and no links from input file
-    related_links = set(reduce(concat, (get_related_urls(url, max_per_page,
-                                                         max_per_url)
-                                        for url in input_links), [])
-                       ).difference(input_links)
+    if len(input_links) > CONTINUOUS_CRAWL_SIZE:
+        related_links = []
+        for url in input_links:
+            time.sleep(config_pytomo.DELAY_BETWEEN_REQUESTS)
+            related_links = concat(related_links,
+                                   get_related_urls(url, max_per_page,
+                                                   max_per_url))
+        related_links = set(related_links).difference(input_links)
+
+
+    else:
+        related_links = set(reduce(concat, (get_related_urls(url, max_per_page,
+                                                             max_per_url)
+                                            for url in input_links), [])
+                           ).difference(input_links)
     config_pytomo.LOG.info("%d links collected by crawler"
                             % len(related_links))
     config_pytomo.LOG.debug(related_links)
@@ -204,5 +220,5 @@ def main(argv=None):
                         max_per_url=options.max_per_url)
 
 if __name__ == '__main__':
-    sys.exit(main())
-
+    import doctest
+    doctest.testmod()

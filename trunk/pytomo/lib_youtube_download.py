@@ -2,12 +2,11 @@
 """Module to download youtube video for a limited amount of time and
 calculate the data downloaded within that time
 
-
-Usage : ./complete_yt_dl.py http://www.youtube.com/watch?v=-5aTKyaVbyE 30
-
+    Usage:
+        This module provides two classes: FileDownloader class and the
+        InfoExtractor class.
+        This module is not meant to be called directly.
 """
-
-
 
 from __future__ import with_statement, absolute_import
 import httplib
@@ -125,7 +124,16 @@ class FileDownloader(object):
     _format_downloaded = None
 
     def __init__(self, download_time):
-        """Create a FileDownloader object with the given options."""
+        """Create a FileDownloader object with the given options.
+
+           Configuring log_file for doc_test
+           >>> import pytomo.start_pytomo as start_pytomo
+           >>> start_pytomo.configure_log_file('doc_test') #doctest: +ELLIPSIS
+           Configuring log file
+           Logs are there: ...
+           True
+           >>> filedownloader = FileDownloader(30)
+        """
         self._ies = []
         #self._pps = []
         self._download_retcode = 0
@@ -145,6 +153,8 @@ class FileDownloader(object):
         self.data_len = None
         self.data_duration = None
         self.max_instant_thp = None
+        self.video_type = None
+        self.redirect_url = None
         try:
             self.download_time = int(download_time)
         except ValueError:
@@ -185,7 +195,22 @@ class FileDownloader(object):
 
     @staticmethod
     def format_bytes(byte_counter):
-        'Formatting the bytes'
+        """Formatting the bytes
+       #First checking to see if we catch the ValueError for FileDownloader
+       >>> dwn_time = 30
+       >>> filedownloader = FileDownloader(dwn_time)
+       >>> FileDownloader.format_bytes(24240)
+       '23.67k'
+       >>> FileDownloader.format_bytes(4194304)
+       '4.00M'
+       >>> FileDownloader.format_bytes(None)
+       'N/A'
+       >>> FileDownloader.format_bytes('24240')
+       '23.67k'
+       >>> FileDownloader.format_bytes(0.0)
+       '0.00b'
+       """
+
         if byte_counter is None:
             return 'N/A'
         if type(byte_counter) is str:
@@ -200,15 +225,41 @@ class FileDownloader(object):
 
     @staticmethod
     def calc_percent(byte_counter, data_len):
-        "Computes remaining percent of download"
-        if data_len is None:
+        """ Computes remaining percent of download
+         >>> dwn_time = 30
+         >>> filedownloader = FileDownloader(dwn_time)
+         >>> filedownloader.calc_percent(1024, 2048)
+         ' 50.0%'
+         >>> filedownloader.calc_percent(0, None)
+         '---.-%'
+        """
+        if data_len is None or not data_len:
+            # case where length is not present in metadata or zero
             return '---.-%'
         return '%6s' % ('%3.1f%%'
                         % (float(byte_counter) / float(data_len) * 100.0))
 
     @staticmethod
     def calc_eta(start, now, total, current):
-        "Computes the remaining time"
+        """
+           Computes the remaining time
+          >>> start =  1302688075.6457109
+           >>> now = 1302688088.907017
+           >>> total = 100
+           >>> current = 20
+           >>> dwn_time = 30
+           >>> filedownloader = FileDownloader(dwn_time)
+           >>> FileDownloader.calc_eta(start, now, total, current)
+           '00:53'
+           >>> # case where total = None
+           >>> FileDownloader.calc_eta(start, now, None, current)
+           '--:--'
+           >>> # Case where eta > 99 mins
+           >>> now = 1302692284.52929
+           >>> FileDownloader.calc_eta(start, now, total, current)
+           '--:--'
+        """
+
         if total is None:
             return '--:--'
         dif = now - start
@@ -223,7 +274,19 @@ class FileDownloader(object):
 
     @staticmethod
     def calc_speed(start, now, byte_counter):
-        "Computes download speed"
+        """
+        Computes download speed
+
+       >>> start =  1302692811.61169
+       >>> now = 1302692821.595638
+       >>> byte_counter = 248000
+       >>> dwn_time = 30
+       >>> filedownloader = FileDownloader(dwn_time)
+       >>> filedownloader.calc_speed(start, now, byte_counter)
+       ' 24.26kb/s'
+       >>> filedownloader.calc_speed(start, now, 00)
+       '    ---b/s'
+       """
         diff = now - start
         if byte_counter == 0 or diff < 0.001: # One millisecond
             return '%10s' % '---b/s'
@@ -234,7 +297,18 @@ class FileDownloader(object):
     @staticmethod
     def best_block_size(elapsed_time, data_block_len):
         '''Function to determine the best block size tht is to be used for the
-        remaining data'''
+        remaining data
+       >>> dwn_time = 30
+       >>> filedownloader = FileDownloader(dwn_time)
+       >>> filedownloader.best_block_size(0.0001, 81943040)
+       4194304L
+       >>> filedownloader.best_block_size(20, 2097152)
+       1048576L
+       >>> filedownloader.best_block_size(2, 81943040)
+       4194304L
+       >>> filedownloader.best_block_size(20, 2097152)
+       1048576L
+       '''
         new_min = max(data_block_len / 2.0, 1.0)
         # Do not surpass 4 MB
         new_max = min(max(data_block_len * 2.0, 1.0), 4194304)
@@ -253,7 +327,16 @@ class FileDownloader(object):
         add_ie.set_downloader(self)
 
     def to_screen(self, message, skip_eol=False):
-        """Print message to stdout if not in quiet mode."""
+        """Print message to stdout if not in quiet mode.
+        >>> dwn_time = 30
+        >>> filedownloader = FileDownloader(dwn_time)
+        >>> import sys
+        >>> screen_file = filedownloader._screen_file
+        >>> filedownloader._screen_file = sys.stdout
+        >>> filedownloader.to_screen('Message to screen')
+        Message to screen
+        >>> filedownloader._screen_file = screen_file
+       """
         #if not self.quiet:
         terminator = [u'\n', u''][skip_eol]
         print >> self._screen_file, (u'%s%s' % (message, terminator)),
@@ -298,7 +381,6 @@ Retrying (attempt %d of %d)...' % (count, retries))
         #else:
             #self.to_screen(u'')
 
-
     def process_info(self, info_dict):
         """Process a single dictionary returned by an InfoExtractor."""
 #        # Do nothing else if in simulate mode
@@ -324,7 +406,7 @@ Retrying (attempt %d of %d)...' % (count, retries))
 template')
             return
         try:
-            total_download_time = self._do_download(
+            _, total_download_time = self._do_download(
                                         info_dict['url'].encode('utf-8'),
                                       )
         except (OSError, IOError), err:
@@ -332,46 +414,41 @@ template')
         except (httplib.HTTPException, socket.error), err:
             self.trouble(u'ERROR: unable to download video data: %s' % str(err))
             return
-        except (ContentTooShortError, ), err:
-            self.trouble(
-                u'ERROR: content too short (expected %s bytes and served %s)'
-                % (err.expected, err.downloaded))
-            return
+        #except (ContentTooShortError, ), err:
+        #    self.trouble(
+        #        u'ERROR: content too short (expected %s bytes and served %s)'
+        #        % (err.expected, err.downloaded))
+        #    return
 
         self.set_total_time(total_download_time)
         return total_download_time
 
     def download(self, url_list):
         """Download a given list of URLs."""
-
         for url in url_list:
             suitable_found = False
             for ie_var in self._ies:
                 # Go to next InfoExtractor if not suitable
                 if not ie_var.suitable(url):
                     continue
-
                 # Suitable InfoExtractor found
                 suitable_found = True
-
                 # Extract information from URL and process it
                 ie_var.extract(url)
-
                 # Suitable InfoExtractor had been found; go to next URL
                 break
-
             if not suitable_found:
                 self.trouble(u'ERROR: no suitable InfoExtractor: %s' % url)
-
         return self._download_retcode
-
 
     @staticmethod
     def establish_connection(url):
         """Set up the connection
         Return the data stream
+        The url is the cache_url of the video.
         """
         data = None
+        status_code = None
         if config_pytomo.PROXIES:
             proxy = urllib2.ProxyHandler(config_pytomo.PROXIES)
             opener = urllib2.build_opener(proxy)
@@ -406,7 +483,14 @@ template')
         if count > retries:
             config_pytomo.LOG.error(u'ERROR: giving up after %d retries'
                                     % retries)
-        return data
+        if data:
+            if not data.geturl() == url:
+                config_pytomo.LOG.info(u'Redirect for url %s to %s' %(
+                                            url, data.geturl()))
+                status_code = config_pytomo.HTTP_REDIRECT_CODE
+            else:
+                status_code = config_pytomo.HTTP_OK
+        return status_code, data
 
     def compute_interruptions(self, data_block_len, current_time):
         "Compute the number of interruptions in the playback"
@@ -443,10 +527,10 @@ template')
         if found in the temp file, close the file and set the value in the
         object
         """
-        with open(meta_file_name, 'a') as meta_file:
+        with open(meta_file_name, 'ab') as meta_file:
             meta_file.write(data_block)
         try:
-            data_duration = get_data_duration(meta_file_name)
+            data_duration, self.video_type = get_data_duration(meta_file_name)
         except ParseError, mes:
             config_pytomo.LOG.debug('data duration not yet found: %s'
                                    % mes)
@@ -454,18 +538,29 @@ template')
         if data_duration:
             self.data_duration = data_duration
             self.encoding_rate = self.data_len / data_duration
+            if self.video_type == 'flv':
+                self.encoding_rate *= 8
             config_pytomo.LOG.debug("Encoding rate is: %.2fkb/s"
                                     % (self.encoding_rate / 1e3))
 
     def _do_download(self, url):
         '''Module that handles the download of the file and
-        calculates the time, bytes downloaded'''
+        calculates the time, bytes downloaded. Here the url is the cache URL
+        of the video
+        '''
         config_pytomo.LOG.debug('Downloading url: %s' % url)
-        data = self.establish_connection(url)
+        #status_code = None
+        status_code, data = self.establish_connection(url)
         if not data:
             config_pytomo.LOG.error('could not establish connection to url: %s'
                                     % url)
-            return None
+            return status_code, None
+        # If there was a redirection for the cache url,
+        # get the DNS resolution again.
+        if status_code == config_pytomo.HTTP_REDIRECT_CODE:
+            config_pytomo.LOG.info("URL redirected.")
+            self.redirect_url = data.geturl()
+            return status_code, None
         # content-length in bytes
         self.data_len = float(data.info().get('Content-length', None))
         tries = 0
@@ -478,6 +573,7 @@ template')
             # just to get a temporary file name in the current dir
             # cannot use the file stream directly because it is not permitted
             # to open a temporary file already open
+            # and the delete parameter available in 2.7 only
             meta_file_name = meta_file.name
         while True:
             # Download and write
@@ -529,7 +625,7 @@ template')
         self.accumulated_playback = accumulated_playback
         self.accumulated_buffer = accumulated_buffer
         config_pytomo.LOG.info("nb of interruptions: %d" % self.interruptions)
-        return (after - start)
+        return status_code, (after - start)
 
 class InfoExtractor(object):
     """Information Extractor class.
@@ -627,7 +723,18 @@ class YoutubeIE(InfoExtractor):
 
     @staticmethod
     def suitable(url):
-        'Returns True if URL is suitable to this IE else False'
+        """ Returns True if URL is suitable to this IE else False
+        >>> yie = YoutubeIE(InfoExtractor)
+        >>> yie.suitable('http://www.youtube.com/watch?v=rERIxeYOYhI')
+        True
+        >>> yie.suitable('http://www.youtube.com')
+        False
+        >>> yie.suitable('http://www.youtube.com/watch?v=-VB2dHVNyds&amp')
+        True
+        >>> yie.suitable('http://www.youtube.com/watch?')
+        False
+
+        """
         return (re.match(YoutubeIE._VALID_URL, url) is not None)
 
     def report_lang(self):
@@ -751,7 +858,10 @@ video info for unknown reason')
             self._downloader.trouble(u'ERROR: invalid URL: %s' % url)
             return
         video_id = mobj.group(2)
-        video_info = self.get_video_info(video_id)
+        try:
+            video_info = self.get_video_info(video_id)
+        except DownloadError:
+            return
         if not video_info:
             return
         # Start extracting information
@@ -785,8 +895,8 @@ def get_data_duration(meta_file_name):
     info = kaa_metadata.parse(meta_file_name)
     if (info and 'length' in info):
         data_duration = info.length
-        return data_duration
-    return None
+        video_type = str(info.mime.split('/')[1])
+        return data_duration, video_type
 
 def get_youtube_info_extractor(download_time=config_pytomo.DOWNLOAD_TIME):
     "Return an info extractor for YouTube with correct mocks"
@@ -800,7 +910,7 @@ def get_youtube_info_extractor(download_time=config_pytomo.DOWNLOAD_TIME):
     return youtube_ie
 
 def get_youtube_cache_url(url):
-    "Return the cache url of the video"
+    "Return the cache url of the video (Wrote mock test)"
     youtube_ie = get_youtube_info_extractor()
     mobj = re.match(youtube_ie._VALID_URL, url)
     if not mobj:
@@ -844,7 +954,8 @@ def get_download_stats(ip_address_uri,
     """
     file_downloader = FileDownloader(download_time)
     try:
-        download_time = file_downloader._do_download(ip_address_uri)
+        status_code, download_time = (
+            file_downloader._do_download(ip_address_uri))
     except DownloadError, mes:
         config_pytomo.LOG.error(mes)
         return None
@@ -852,7 +963,8 @@ def get_download_stats(ip_address_uri,
         config_pytomo.LOG.exception('Uncaught exception: %s' % mes)
         return None
     if download_time:
-        return [download_time,
+        return (status_code, [download_time,
+                file_downloader.video_type,
                 file_downloader.data_duration,
                 file_downloader.data_len,
                 file_downloader.encoding_rate,
@@ -862,7 +974,9 @@ def get_download_stats(ip_address_uri,
                 file_downloader.accumulated_playback,
                 file_downloader.current_buffer,
                 file_downloader.max_instant_thp,
-               ]
+                ], None)
+    if status_code == config_pytomo.HTTP_REDIRECT_CODE:
+        return status_code, None, file_downloader.redirect_url
     return None
 
 def deprecated(argv=None):
@@ -918,3 +1032,7 @@ def deprecated(argv=None):
                 'interruptions': file_downloader.interruptions}
     return dict_res
 
+if __name__ == '__main__':
+    #sys.exit(main())
+    import doctest
+    doctest.testmod()

@@ -1,5 +1,20 @@
 #!/usr/bin/env python
-"""Module to launch a crawl
+"""
+Module to launch a crawl.
+This module supplies the following functions that can be used
+independently:
+    1. compute_stats: To calculate the download statistics of a URL.
+
+   Usage:
+       To use the functions provided in this module independently,
+   first place yourself just above pytomo folder.Then:
+
+   import pytomo.start_pytomo as start_pytomo
+   import config_pytomo as config_pytomo
+   import platform
+   config_pytomo.SYSTEM = platform.system()
+   url = 'http://www.youtube.com/watch?v=cv5bF2FJQBc'
+   start_pytomo.compute_stats(url)
 """
 
 from __future__ import with_statement, absolute_import
@@ -8,6 +23,7 @@ import sys
 from urlparse import urlsplit
 from pprint import pprint
 import logging
+import datetime
 from time import strftime, timezone
 import os
 from string import maketrans
@@ -17,9 +33,10 @@ import socket
 import urllib2
 import platform
 import signal
-
+import time
 from os.path import abspath, dirname, sep
 from sys import path
+
 # assumes the standard distribution paths
 PACKAGE_DIR = dirname(abspath(path[0]))
 
@@ -41,6 +58,9 @@ from . import lib_youtube_download
 from . import lib_database
 from . import lib_youtube_api
 
+if config_pytomo.PLOT:
+    from . import lib_plot
+
 # only 1 service is implemented
 SERVICE = 'Youtube'
 
@@ -58,35 +78,114 @@ def compute_stats(url):
     ip_addresses = lib_dns.get_ip_addresses(parsed_uri.netloc)
     for (ip_address, resolver) in ip_addresses:
         config_pytomo.LOG.debug("Compute stats for IP: %s" % ip_address)
+        timestamp = datetime.datetime.now()
         if ip_address in current_stats:
             # if stats already computed, just indicate a new resolver in the
             # result list
-            current_stats[ip_address][-1] += '_%s' % resolver
-            config_pytomo.LOG.debug("Skip IP already crawled: %s" % ip_address)
+            current_stats[ip_address][-1] = ('%s_%s' %
+                                             (current_stats[ip_address][-1],
+                                              resolver))
+            config_pytomo.LOG.debug("Skip IP already crawled: %s"
+                                    % ip_address)
             continue
         ping_times = lib_ping.ping_ip(ip_address)
         # it's important to pass the uri with the ip_address to avoid
         # uncontrolled DNS resolution
         ip_address_uri = ('://'.join((parsed_uri.scheme, ip_address)) +
                           cache_urn)
-        download_stats = lib_youtube_download.get_download_stats(ip_address_uri)
-        current_stats[ip_address] = [ping_times, download_stats, resolver]
+        status_code, download_stats, redirect_url = (
+                lib_youtube_download.get_download_stats(ip_address_uri))
+        current_stats[ip_address] = [timestamp, ping_times, download_stats,
+                                     redirect_url, resolver]
     # TODO: check if cache_url is the same independently of DNS
-    return (url, cache_url, current_stats)
+    return status_code, (url, cache_url, current_stats)
 
 def format_stats(stats):
-    "Return the stats as a list of tuple to insert into database"
+    """Return the stats as a list of tuple to insert into database
+    Doctest:
+
+    >>> stats = ('http://www.youtube.com/watch?v=RcmKbTR--iA',
+    ...            'http://v15.lscache3.c.youtube.com',
+    ...             {'173.194.20.56': [datetime.datetime(
+    ...                                 2011, 5, 6, 15, 30, 50, 103775),
+    ...                                 None,
+    ...                                [8.9944229125976562, 'mp4',
+    ...                                225,
+    ...                                115012833.0,
+    ...                                511168.14666666667,
+    ...                                9575411,
+    ...                                0,
+    ...                                0.99954795837402344,
+    ...                                7.9875903129577637,
+    ...                                11.722306421319782,
+    ...                                1192528.8804511931],
+    ...                              'default_10.193.225.12', None]})
+
+    >>> format_stats(stats) #doctest: +NORMALIZE_WHITESPACE
+        [(datetime.datetime(2011, 5, 6, 15, 30, 50, 103775),
+          'Youtube', 'http://www.youtube.com/watch?v=RcmKbTR--iA',
+      'http://v15.lscache3.c.youtube.com', '173.194.20.56',
+      'default_10.193.225.12', None, None, None, 8.9944229125976562, 'mp4',
+      225, 115012833.0, 511168.14666666667, 9575411, 0, 0.99954795837402344,
+      7.9875903129577637, 11.722306421319782, 1192528.8804511931, None)]
+
+    >>> stats = ('http://www.youtube.com/watch?v=OdF-oiaICZI',
+    ...  'http://v7.lscache8.c.youtube.com',
+    ...                 {'74.125.105.226': [datetime.datetime(
+    ...                                       2011, 5, 6, 15, 30, 50, 103775),
+    ...                                     [26.0, 196.0, 82.0],
+    ...                                     [30.311000108718872, 'mp4',
+    ...                                      287.487, 16840065.0,
+    ...                                      58576.78781997099,
+    ...                                      1967199, 0,
+    ...                                      1.316999912261963,
+    ...                                      28.986000061035156,
+    ...                                      5.542251416248594,
+    ...                                      1109.4598961624772],
+    ...                   'google_public_dns_8.8.8.8_open_dns_208.67.220.220',
+    ...                                 'http://www.youtube.com/fake_redirect'],
+    ...                  '173.194.8.226': [datetime.datetime(2011, 5, 6, 15,
+    ...                                                       30, 51, 103775),
+    ...                                    [103.0, 108.0, 105.0],
+    ...                                    [30.287999868392944, 'mp4',
+    ...                                     287.487, 16840065.0,
+    ...                                     58576.78781997099,
+    ...                                     2307716,
+    ...                                     0,
+    ...                                     1.3849999904632568,
+    ...                                     28.89300012588501,
+    ...                                     11.47842453761781,
+    ...                                     32770.37517215069],
+    ...                                    'default_212.234.161.118', None]})
+
+    >>> format_stats(stats) #doctest: +NORMALIZE_WHITESPACE
+    [(datetime.datetime(2011, 5, 6, 15, 30, 50, 103775),
+       'Youtube', 'http://www.youtube.com/watch?v=OdF-oiaICZI',
+      'http://v7.lscache8.c.youtube.com', '74.125.105.226',
+      'google_public_dns_8.8.8.8_open_dns_208.67.220.220', 26.0, 196.0, 82.0,
+      30.311000108718872, 'mp4', 287.48700000000002, 16840065.0,
+         58576.787819970988, 1967199, 0, 1.3169999122619629,
+         28.986000061035156, 5.5422514162485941,
+      1109.4598961624772, 'http://www.youtube.com/fake_redirect'),
+     (datetime.datetime(2011, 5, 6, 15, 30, 51, 103775),
+       'Youtube', 'http://www.youtube.com/watch?v=OdF-oiaICZI',
+      'http://v7.lscache8.c.youtube.com', '173.194.8.226',
+      'default_212.234.161.118', 103.0, 108.0, 105.0, 30.287999868392944,
+      'mp4', 287.48700000000002, 16840065.0, 58576.787819970988, 2307716, 0,
+      1.3849999904632568, 28.89300012588501, 11.47842453761781,
+      32770.375172150692, None)]
+"""
     record_list = []
     (url, cache_url, current_stats) = stats
     for (ip_address, values) in current_stats.items():
-        (ping_times, download_stats, resolver) = values
+        (timestamp, ping_times, download_stats, redirect_url, resolver) = values
         if not ping_times:
             ping_times = [None] * config_pytomo.NB_PING_VALUES
         if not download_stats:
             download_stats = [None] * config_pytomo.NB_DOWNLOAD_VALUES
         # use inet_aton(ip_address) for optimisation on this field
-        row = ([SERVICE, url, cache_url, ip_address, resolver]
-               + list(ping_times) + download_stats)
+        row = ([timestamp, SERVICE, url, cache_url, ip_address, resolver]
+               + list(ping_times) + download_stats + [redirect_url])
         record_list.append(tuple(row))
     return record_list
 
@@ -94,6 +193,15 @@ def check_out_files(file_pattern, directory, timestamp):
     """Return a full path of the file used for the output
     Test if the path exists, create if possible or create it in default user
     directory
+
+    >>> file_pattern = None
+    >>> directory = 'logs'
+    >>> timestamp = 'doc_test'
+    >>> check_out_files(file_pattern, directory, timestamp) #doctest: +ELLIPSIS
+    >>> file_pattern = 'pytomo.log'
+    >>> check_out_files(file_pattern, directory, timestamp) #doctest: +ELLIPSIS
+    '...doc_test.pytomo.log'
+
     """
     if file_pattern == None:
         return None
@@ -163,23 +271,36 @@ def crawl_links(input_links, crawled_urls, result_stream=None, data_base=None):
         if url in crawled_urls:
             config_pytomo.LOG.debug("Skipped url already crawled: %s"
                                     % url)
-            break
+            continue
         if len(crawled_urls) >= max_crawled_urls:
             raise MaxUrlException()
         if result_stream:
             print >> result_stream, config_pytomo.SEP_LINE
-        stats = compute_stats(url)
-        if stats:
-            if result_stream:
-                pprint(stats, stream=result_stream)
-            if data_base:
-                for row in format_stats(stats):
-                    data_base.insert_record(row)
-                    crawled_urls.add(url)
-            else:
-                config_pytomo.LOG.info('no stats for url: %s' % url)
+        status_code, nb_redirects = None, 0
+        stats = None
+        while (nb_redirects <= config_pytomo.MAX_NB_REDIRECT
+               and (status_code == config_pytomo.HTTP_REDIRECT_CODE
+                    or not status_code)):
+            try:
+                status_code, stats = compute_stats(url)
+            except TypeError:
+                config_pytomo.LOG.error('Error retrieving stats for : %s' %url)
+                break
+            if status_code == config_pytomo.HTTP_REDIRECT_CODE:
+                nb_redirects += 1
+            if stats:
+                crawled_urls.add(url)
+                if result_stream:
+                    pprint(stats, stream=result_stream)
+                if data_base:
+                    for row in format_stats(stats):
+                        data_base.insert_record(row)
+                else:
+                    config_pytomo.LOG.info('no stats for url: %s' % url)
+                # wait only if there were stats retrieved
+                time.sleep(config_pytomo.DELAY_BETWEEN_REQUESTS)
 
-def do_crawl(result_stream=None, db_file=None, timestamp=None):
+def do_crawl(result_stream=None, db_file=None, timestamp=None, image_file=None):
     """Crawls the urls given by the url_file
     up to max_rounds are performed or max_visited_urls
     """
@@ -210,12 +331,22 @@ def do_crawl(result_stream=None, db_file=None, timestamp=None):
     for round_nb in xrange(max_rounds):
         config_pytomo.LOG.warn("Round %d started\n%s"
                                % (round_nb, config_pytomo.SEP_LINE))
+        # Reseting the name servers at start of each crawl
+        config_pytomo.EXTRA_NAME_SERVERS_CC = (
+                                config_pytomo.EXTRA_NAME_SERVERS[:])
+        config_pytomo.LOG.info("Name servers at round %s:"
+                               % config_pytomo.EXTRA_NAME_SERVERS_CC)
         try:
             crawl_links(input_links, crawled_urls, result_stream, data_base)
         except MaxUrlException:
             config_pytomo.LOG.warn("Stopping crawl because already crawled "
                                    "%d urls" % len(crawled_urls))
+            if config_pytomo.PLOT:
+                lib_plot.plot_data(db_file, image_file)
             break
+        # The plot is redrawn everytime the database is updated
+        if config_pytomo.PLOT:
+            lib_plot.plot_data(db_file, image_file)
         # next round input are related links of the current input_links
         input_links = lib_cache_url.get_next_round_urls(input_links,
                                                         max_per_page,
@@ -318,7 +449,7 @@ def write_options_to_config(options):
 def log_ip_address():
     "Log the remote IP addresses"
     print ("Logging the IP address: if it takes too long, please check your "
-           "proxy.\n Check the help of this program.")
+           "proxy.\nCheck the help of this program.")
     # is local address of some interest??
     # check: http://stackoverflow.com/
     # questions/166506/finding-local-ip-addresses-in-python
@@ -327,9 +458,11 @@ def log_ip_address():
         opener = urllib2.build_opener(proxy)
         urllib2.install_opener(opener)
     try:
-        public_ip = urllib2.urlopen(PUBLIC_IP_FINDER).read()
+        public_ip = urllib2.urlopen(PUBLIC_IP_FINDER, None,
+                                    config_pytomo.IPADDR_TIMEOUT).read()
     except urllib2.URLError, mes:
         config_pytomo.LOG.warn('Public IP address not found: %s' % mes)
+        print 'Public IP address not found: %s' % mes
         public_ip = None
     config_pytomo.LOG.critical('Machine has this public IP address: %s'
                                % public_ip)
@@ -394,11 +527,7 @@ def log_provider(timeout=config_pytomo.USER_INPUT_TIMEOUT):
         # triger alarm in timeout seconds
         signal.alarm(timeout)
     try:
-        provider = raw_input(''.join((
-            "Please indicate your provider/ISP (leave blank for skipping).\n",
-            "Crawl will START when you PRESS ENTER",
-            ((" (or after %d seconds)" % timeout) if support_signal else ''),
-            ".\n")))
+        provider = prompt_provider(support_signal, timeout)
     except MyTimeoutException:
         return None
     finally:
@@ -406,6 +535,20 @@ def log_provider(timeout=config_pytomo.USER_INPUT_TIMEOUT):
             # alarm disabled
             signal.alarm(0)
     config_pytomo.LOG.critical('User has given this provider: %s' % provider)
+    return provider
+
+def prompt_provider(support_signal, timeout):
+    "Function to prompt for provider"
+    return raw_input(''.join((
+            "Please indicate your provider/ISP (leave blank for skipping).\n",
+            "Crawl will START when you PRESS ENTER",
+            ((" (or after %d seconds)" % timeout) if support_signal else ''),
+            ".\n")))
+
+
+def prompt_start_crawl():
+    "Funtion to prompt user for to accept the crawling"
+    return raw_input('Are you ok to start crawling? (Y/N)\n')
 
 def main(argv=None):
     """Program wrapper
@@ -424,6 +567,7 @@ def main(argv=None):
     write_options_to_config(options)
     timestamp = strftime("%Y-%m-%d.%H_%M_%S")
     is_log_configured = configure_log_file(timestamp)
+    image_file = None
     if not is_log_configured:
         return -1
     try:
@@ -447,8 +591,18 @@ def main(argv=None):
                            % config_pytomo.SYSTEM)
     if config_pytomo.LOG_PUBLIC_IP:
         log_ip_address()
+    if config_pytomo.PLOT:
+        try:
+            image_file = check_out_files(config_pytomo.IMAGE_FILE,
+                                    config_pytomo.IMAGE_DIR, timestamp)
+        except IOError:
+            image_file = None
+        if image_file:
+            print "Plots are here: %s" % image_file
+        else:
+            print "Unable to create image_file"
     while True:
-        start_crawl = raw_input('Are you ok to start crawling? (Y/N)\n')
+        start_crawl = prompt_start_crawl()
         if start_crawl.upper() == 'N':
             return 0
         elif start_crawl.upper() == 'Y':
@@ -457,10 +611,11 @@ def main(argv=None):
     print "Type Ctrl-C to interrupt crawl"
     try:
         result_stream = None
+        # memory monitoring module
         if result_file:
             result_stream = open(result_file, 'w')
         do_crawl(result_stream=result_stream, db_file=db_file,
-                 timestamp=timestamp)
+                 image_file=image_file, timestamp=timestamp)
         if result_file:
             result_stream.close()
     except config_pytomo.BlackListException:
@@ -477,5 +632,6 @@ def main(argv=None):
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
-
+    #sys.exit(main())
+    import doctest
+    doctest.testmod()
