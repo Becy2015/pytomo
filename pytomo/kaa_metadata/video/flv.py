@@ -125,7 +125,6 @@ class FlashVideo(core.AVContainer):
             else:
                 log.info('unkown %s', str(chunk))
                 in_file.seek(size, 1)
-
             in_file.seek(4, 1)
 
     @staticmethod
@@ -175,7 +174,8 @@ class FlashVideo(core.AVContainer):
                     break
                 metadata = metadata[length:]
         except (IndexError, struct.error, TypeError):
-            log.exception('Error after parsing flv header')
+            #log.exception('Error after parsing flv header')
+            pass
 
     def _parse_value(self, data):
         """

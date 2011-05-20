@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 """Module to generate the RTT times of a ping
 
- Sample for windows:
+   This module provides two functions that enable us to get the ping statistics
+   of an IP address on any system(Linux, Windows, Mac)
 
-        ['\n', 'Pinging 173.194.24.138 with 32 bytes of data:\n',
-        'Reply from 173.194.24.138: bytes=32 time=149ms TTL=43\n',
-        'Reply from 173.194.24.138: bytes=32 time=149ms TTL=43\n',
-        'Reply from 173.194.24.138: bytes=32 time=148ms TTL=43\n',
-        'Reply from 173.194.24.138: bytes=32 time=149ms TTL=43\n',
-        'Reply from 173.194.24.138: bytes=32 time=148ms TTL=43\n',
-        '\n', 'Ping statistics for 173.194.24.138:\n', '
-        Packets: Sent = 5, Received = 5, Lost = 0 (0% loss),\n',
-        'Approximate round trip times in milli-seconds:\n', '
-        Minimum = 148ms, Maximum = 149ms, Average = 148ms\n']
-
+   Usage:
+       import pytomo.lib_ping as lib_ping
+       import pytomo.config_pytomo as config_pytomo
+       # Get the system name to configure the Ping RE
+       import platform
+       config_pytomo.SYSTEM = platform.system()
+       # Set the Regular Expression for current system
+       nb_packets = 5
+       ip_address = '127.0.0.1'
+       lib_ping.configure_ping_options(nb_packets)
+       lib_ping.ping_ip(ip_address, nb_packets)
 """
 
 

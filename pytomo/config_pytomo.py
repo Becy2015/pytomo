@@ -11,8 +11,8 @@ from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 USE_PACKAGE_DIR = False
 
 RESULT_DIR = 'results'
-RESULT_FILE = None
-#RESULT_FILE = 'pytomo.result'
+#RESULT_FILE = None
+RESULT_FILE = 'pytomo.result'
 
 DATABASE_DIR = 'databases'
 DATABASE = 'pytomo_database.db'
@@ -31,6 +31,11 @@ LOG_LEVEL = DEBUG
 # log the public IP address
 LOG_PUBLIC_IP = True
 
+# Image file to save the graphs
+PLOT = False
+IMAGE_FILE = 'pytomo_image.png'
+IMAGE_DIR = 'plots'
+
 ################################################################################
 # for start_pytomo.py
 
@@ -40,8 +45,8 @@ LOG_PUBLIC_IP = True
 # Max number of rounds to perform
 MAX_ROUNDS = 100
 # Max number of urls to visit
-MAX_CRAWLED_URLS = 500
-# Max number of realetd videos from each url
+MAX_CRAWLED_URLS = 5000
+# Max number of related videos from each url
 MAX_PER_URL = 2
 # Max number of related videos from each page
 MAX_PER_PAGE = 30
@@ -49,6 +54,11 @@ MAX_PER_PAGE = 30
 # timeframe for the most popular videos fetch at start of crawl
 # put 'today', 'week', 'month' or 'all_time' (default case)
 TIME_FRAME = 'week'
+
+#Time delay between consecutive url crawls and download requests (in seconds)
+DELAY_BETWEEN_REQUESTS = 10
+
+IPADDR_TIMEOUT = 5
 
 ################################################################################
 # for lib_cache_url.py
@@ -63,7 +73,15 @@ PROXIES = None
 # other DNS servers to query
 GOOGLE_PUBLIC_DNS = ('google_public_dns', '8.8.8.8')
 OPEN_DNS = ('open_dns', '208.67.220.220')
+# The lifetime of a DNS query(in seconds). The default is 30 seconds.
+DNS_TIMEOUT = 4.0
 EXTRA_NAME_SERVERS = [GOOGLE_PUBLIC_DNS, OPEN_DNS]
+EXTRA_NAME_SERVERS_CC = []
+
+# HTTP codes to check for redirects.
+HTTP_REDIRECT_CODE = 301
+HTTP_OK = 200
+MAX_NB_REDIRECT = 8
 
 ################################################################################
 # for lib_ping.py
@@ -72,7 +90,7 @@ PING_PACKETS = 3
 
 ################################################################################
 # for lib_youtube_download.py
-DOWNLOAD_TIME = 30.0
+DOWNLOAD_TIME = 8.0
 BUFFERING_VIDEO_DURATION = 3.0
 MIN_PLAYOUT_BUFFER_SIZE = 1.0
 
@@ -89,11 +107,12 @@ SYSTEM = None
 RTT = None
 
 SEP_LINE = 80 * '#'
-
 NB_IDENT_VALUES = 5
 NB_PING_VALUES = 3
-NB_DOWNLOAD_VALUES = 10
-NB_FIELDS = NB_IDENT_VALUES + NB_PING_VALUES + NB_DOWNLOAD_VALUES
+NB_DOWNLOAD_VALUES = 11
+NB_REDIRECT_VALUES = 1
+NB_FIELDS = (NB_IDENT_VALUES + NB_PING_VALUES + NB_DOWNLOAD_VALUES
+             + NB_REDIRECT_VALUES)
 
 USER_INPUT_TIMEOUT = 5
 

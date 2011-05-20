@@ -4,18 +4,49 @@
         time = 'today' or 'month' or 'week' or all_time'
         max_results : In multiples of 25
     Returns: A list containing the list of videos.
+
+   Usage: To use the functions provided in this module independently,
+        first place yourself just above pytomo folder.Then:
+
+        import pytomo.start_pytomo
+        TIMESTAMP = 'test_timestamp'
+        start_pytomo.configure_log_file(TIMESTAMP)
+
+        import pytomo.lib_youtube_api as lib_youtube_api
+        time = 'today' # choose from 'today' or 'month' or 'week' or all_time'
+        max_results = 25
+        time_frame = lib_youtube_api.get_time_frame(time)
+        lib_youtube_api.get_popular_links(time_frame, max_results)
+
 """
 
 from __future__ import absolute_import
 
-from .lib_cache_url import get_all_links
+from . import lib_cache_url
 from . import config_pytomo
 
 # Youtube webpage limitation
 MAX_VIDEO_PER_PAGE = 25
 
 def get_time_frame(time=config_pytomo.TIME_FRAME):
-    "Returns the time frame in the form accepted by youtube_api"
+    """ Returns the time frame in the form accepted by youtube_api
+    >>> from . import start_pytomo
+    >>> start_pytomo.configure_log_file('doc_test') #doctest: +ELLIPSIS
+    Configuring log file
+    Logs are there: ...
+    True
+    >>> get_time_frame('today')
+    't'
+    >>> get_time_frame('week')
+    'w'
+    >>> get_time_frame('month')
+    'm'
+    >>> get_time_frame('all_time')
+    'a'
+    >>> get_time_frame('other')
+    'a'
+    """
+
     if time == 'today':
         time_frame = 't'
     elif time == 'week':
@@ -48,7 +79,7 @@ def get_popular_links(time=config_pytomo.TIME_FRAME,
             ('http://www.youtube.com/charts/videos_views?p=2&gl=US&t=',
              time_frame, '&p=', str(page + 1))
                      )
-        links = get_all_links(url)
+        links = lib_cache_url.get_all_links(url)
         if not links:
             config_pytomo.LOG.warning('No popular link was found')
         popular_links = set()
@@ -61,3 +92,6 @@ def get_popular_links(time=config_pytomo.TIME_FRAME,
                     break
     return popular_links
 
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
