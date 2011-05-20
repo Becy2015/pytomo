@@ -134,7 +134,9 @@ def get_related_urls(url, max_per_page, max_per_url):
                             % (len(selected_links), url))
     return selected_links
 
-def get_next_round_urls(input_links, max_per_page=20, max_per_url=5):
+def get_next_round_urls(input_links, max_per_page=config_pytomo.MAX_PER_PAGE,
+                        max_per_url=config_pytomo.MAX_PER_URL,
+                        max_round_duration=config_pytomo.MAX_ROUND_DURATION):
     """Return a tuple of the set of input urls and a set of related url of
     videos
     Arguments:
@@ -143,6 +145,7 @@ def get_next_round_urls(input_links, max_per_page=20, max_per_url=5):
         * out_file_name: if provided, list is dump in it
     """
     # keep only non-duplicated links and no links from input file
+    start = time.time()
     if len(input_links) > CONTINUOUS_CRAWL_SIZE:
         related_links = []
         for url in input_links:
@@ -150,9 +153,9 @@ def get_next_round_urls(input_links, max_per_page=20, max_per_url=5):
             related_links = concat(related_links,
                                    get_related_urls(url, max_per_page,
                                                    max_per_url))
+            if (time.time() - start) > max_round_duration:
+                break
         related_links = set(related_links).difference(input_links)
-
-
     else:
         related_links = set(reduce(concat, (get_related_urls(url, max_per_page,
                                                              max_per_url)

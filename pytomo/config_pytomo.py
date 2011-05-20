@@ -49,7 +49,7 @@ MAX_CRAWLED_URLS = 5000
 # Max number of related videos from each url
 MAX_PER_URL = 2
 # Max number of related videos from each page
-MAX_PER_PAGE = 30
+MAX_PER_PAGE = 20
 
 # timeframe for the most popular videos fetch at start of crawl
 # put 'today', 'week', 'month' or 'all_time' (default case)
@@ -57,6 +57,8 @@ TIME_FRAME = 'week'
 
 #Time delay between consecutive url crawls and download requests (in seconds)
 DELAY_BETWEEN_REQUESTS = 10
+# Max duration of round for getting input links
+MAX_ROUND_DURATION = 600
 
 IPADDR_TIMEOUT = 5
 
