@@ -307,10 +307,10 @@ def crawl_links(input_links, crawled_urls, result_stream=None, data_base=None):
                     config_pytomo.LOG.info('no stats for url: %s' % url)
                 # wait only if there were stats retrieved
                 time.sleep(config_pytomo.DELAY_BETWEEN_REQUESTS)
-        if len(next_urls) > config_pytomo.MAX_CRAWLED_URLS:
-            next_urls = next_urls.union(lib_cache_url.get_related_urls(url,
-                                                                   max_per_page,
-                                                                   max_per_url))
+        if len(next_urls) < config_pytomo.MAX_CRAWLED_URLS:
+            related_urls = set(filter(None, lib_cache_url.get_related_urls(url,
+                                                   max_per_page, max_per_url)))
+            next_urls = next_urls.union(related_urls)
     return next_urls.difference(input_links)
 
 def do_crawl(result_stream=None, db_file=None, timestamp=None, image_file=None):
