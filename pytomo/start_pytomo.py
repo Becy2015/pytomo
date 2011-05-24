@@ -270,6 +270,9 @@ class MaxUrlException(Exception):
 def crawl_links(input_links, crawled_urls, result_stream=None, data_base=None):
     "Crawl each input link"
     max_crawled_urls = config_pytomo.MAX_CRAWLED_URLS
+    max_per_page = config_pytomo.MAX_PER_PAGE
+    max_per_url = config_pytomo.MAX_PER_URL
+    next_urls = set()
     for url in input_links:
         config_pytomo.LOG.info("Crawl of url # %d" % len(crawled_urls))
         config_pytomo.LOG.debug("Crawl url: %s" % url)
@@ -304,6 +307,11 @@ def crawl_links(input_links, crawled_urls, result_stream=None, data_base=None):
                     config_pytomo.LOG.info('no stats for url: %s' % url)
                 # wait only if there were stats retrieved
                 time.sleep(config_pytomo.DELAY_BETWEEN_REQUESTS)
+        if len(next_urls) > config_pytomo.MAX_CRAWLED_URLS:
+            next_urls = next_urls.union(lib_cache_url.get_related_urls(url,
+                                                                   max_per_page,
+                                                                   max_per_url))
+    return next_urls.difference(input_links)
 
 def do_crawl(result_stream=None, db_file=None, timestamp=None, image_file=None):
     """Crawls the urls given by the url_file
@@ -326,8 +334,8 @@ def do_crawl(result_stream=None, db_file=None, timestamp=None, image_file=None):
                                             config_pytomo.DATABASE_TIMESTAMP)
         data_base.create_pytomo_table(config_pytomo.TABLE_TIMESTAMP)
     max_rounds = config_pytomo.MAX_ROUNDS
-    max_per_page = config_pytomo.MAX_PER_PAGE
-    max_per_url = config_pytomo.MAX_PER_URL
+#    max_per_page = config_pytomo.MAX_PER_PAGE
+#    max_per_url = config_pytomo.MAX_PER_URL
     input_links = set(filter(None,
                              lib_youtube_api.get_popular_links(
                                  time=config_pytomo.TIME_FRAME,
@@ -342,22 +350,21 @@ def do_crawl(result_stream=None, db_file=None, timestamp=None, image_file=None):
         config_pytomo.LOG.info("Name servers at round %s:"
                                % config_pytomo.EXTRA_NAME_SERVERS_CC)
         try:
-            crawl_links(input_links, crawled_urls, result_stream, data_base)
+            input_links = crawl_links(input_links, crawled_urls, result_stream,
+                                      data_base)
         except MaxUrlException:
             config_pytomo.LOG.warn("Stopping crawl because already crawled "
                                    "%d urls" % len(crawled_urls))
-            if config_pytomo.PLOT:
-                lib_plot.plot_data(db_file, config_pytomo.COLUMN_NAMES,
-                                   image_file)
             break
+        time.sleep(config_pytomo.DELAY_BETWEEN_REQUESTS)
         # The plot is redrawn everytime the database is updated
         if config_pytomo.PLOT:
             lib_plot.plot_data(db_file, config_pytomo.COLUMN_NAMES,
                                image_file)
         # next round input are related links of the current input_links
-        input_links = lib_cache_url.get_next_round_urls(input_links,
-                                                        max_per_page,
-                                                        max_per_url)
+#        input_links = lib_cache_url.get_next_round_urls(input_links,
+#                                                        max_per_page,
+#                                                        max_per_url)
     if data_base:
         data_base.close_handle()
     config_pytomo.LOG.warn("Crawl finished\n" + config_pytomo.SEP_LINE)
@@ -625,6 +632,9 @@ def main(argv=None):
             result_stream = open(result_file, 'w')
         do_crawl(result_stream=result_stream, db_file=db_file,
                  image_file=image_file, timestamp=timestamp)
+        if config_pytomo.PLOT:
+            lib_plot.plot_data(db_file, config_pytomo.COLUMN_NAMES,
+                               image_file)
         if result_file:
             result_stream.close()
     except config_pytomo.BlackListException:

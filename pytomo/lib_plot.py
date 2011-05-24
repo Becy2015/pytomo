@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import datetime
 import sys
 from optparse import OptionParser
+import itertools
 
 INTERVAL = 2
 
@@ -31,9 +32,9 @@ def plot_data(db_file=None,
     plt.suptitle('Pytomo: Youtube Download Statistics', color='brown',
                  size=16)
     fig.subplots_adjust(hspace=0.4)
-    colors = ['red', 'green', 'brown', 'black', 'orange', 'cyan',
-              'magenta' , 'blue', 'pink']
-    colors *= 3
+    base_colors = ['green', 'brown', 'black', 'orange', 'cyan',
+              'magenta' , 'blue', 'pink', 'red']
+    colors = itertools.cycle(base_colors)
     print column_names
     for num, column_name in enumerate(list(column_names), 1):
         axes = fig.add_subplot(len(column_names), 1, num)
@@ -54,7 +55,7 @@ def plot_data(db_file=None,
                                                 '%Y-%m-%d %H:%M:%S'))
         try:
             axes.plot_date(dates, column_data, linestyle='-',
-                       color=colors[num])
+                       color=colors.next())
         except ValueError:
             print ''.join(("One of more columns have no numeric data",
                            "hence those columns have been skipped."))
@@ -153,6 +154,9 @@ def main(argv=None):
     if not options.database:
         print ("Must provide database \n")
         parser.print_help()
+        return(1)
+    if not options.column_names:
+        print("Need to select atleast one column")
         return(1)
     plot_data(db_file=options.database, column_names=options.column_names,
               image_file=options.image_file)
