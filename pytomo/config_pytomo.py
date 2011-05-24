@@ -11,8 +11,8 @@ from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 USE_PACKAGE_DIR = False
 
 RESULT_DIR = 'results'
-#RESULT_FILE = None
-RESULT_FILE = 'pytomo.result'
+RESULT_FILE = None
+#RESULT_FILE = 'pytomo.result'
 
 DATABASE_DIR = 'databases'
 DATABASE = 'pytomo_database.db'
@@ -33,6 +33,13 @@ LOG_PUBLIC_IP = True
 
 # Image file to save the graphs
 PLOT = False
+ # List containig the column names to be plotted
+COLUMN_NAMES = ['DownloadBytes', 'MaxInstantThp']
+# Choose from  [ PingMin , PingAvg , PingMax , DownloadTime, VideoDuration
+# VideoLength, EncodingRate, DownloadBytes, DownloadInterruptions,
+# BufferingDuration, PlaybackDuration, BufferDurationAtEnd, MaxInstantThp]
+
+
 IMAGE_FILE = 'pytomo_image.png'
 IMAGE_DIR = 'plots'
 
@@ -45,7 +52,7 @@ IMAGE_DIR = 'plots'
 # Max number of rounds to perform
 MAX_ROUNDS = 100
 # Max number of urls to visit
-MAX_CRAWLED_URLS = 5000
+MAX_CRAWLED_URLS = 50000
 # Max number of related videos from each url
 MAX_PER_URL = 2
 # Max number of related videos from each page

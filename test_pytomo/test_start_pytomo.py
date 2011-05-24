@@ -77,8 +77,8 @@ def test_compute_stats():
     ntools.assert_equals(res[1][0],'http://www.youtube.com/watch?v=cv5bF2FJQBc')
     ntools.assert_equals(res[1][1], 'http://v6.lscache3.c.youtube.com')
     stats = res[1][2]['127.0.0.1'][1:]
-    expected_stats = [['00.00', '00.00', '00.00'], [], 'mock_resolver',
-                      'redirect_url']
+    expected_stats = [['00.00', '00.00', '00.00'], [],
+                      'redirect_url', 'mock_resolver']
     ntools.assert_equals(stats, expected_stats)
 
 # Mock test for start_pytomo.check_out_files
@@ -287,19 +287,19 @@ download_time] [-B buffering_video_duration] [-M min_playout_buffer_size] [-x]
 Options:
   -h, --help            show this help message and exit
   -r MAX_ROUNDS         Max number of rounds to perform (default 100)
-  -u MAX_CRAWLED_URL    Max number of urls to visit (default 5000)
+  -u MAX_CRAWLED_URL    Max number of urls to visit (default 50000)
   -p MAX_PER_URL        Max number of related urls from each page (default 2)
   -P MAX_PER_PAGE       Max number of related videos from each page (default
-                        30)
+                        20)
   -t TIME_FRAME         Timeframe for the most popular videos to fetch at
                         start of crawl put 'today', 'week', 'month' or
                         'all_time' (default 'week')
-  -n PING_PACKETS       Number of packets to be sent for each ping (default 1)
-  -D DOWNLOAD_TIME      Download time for the video (default 8.000000)
+  -n PING_PACKETS       Number of packets to be sent for each ping (default 3)
+  -D DOWNLOAD_TIME      Download time for the video in seconds(default 8.000000)
   -B BUFFERING_VIDEO_DURATION
-                        Buffering video duration (default 3.000000)
+                        Buffering video duration in seconds (default 3.000000)
   -M MIN_PLAYOUT_BUFFER_SIZE
-                        Minimum Playout Buffer Size (default 1.000000)
+                        Minimum Playout Buffer Size in seconds(default 1.000000)
   -x                    Do NOT store public IP address of the machine in the
                         logs
   -L LOG_LEVEL          The log level setting for the Logging module.Choose

@@ -72,7 +72,7 @@ def get_ip_addresses(url):
                                 config_pytomo.EXTRA_NAME_SERVERS_CC):
                 if lname == name:
                     del config_pytomo.EXTRA_NAME_SERVERS_CC[i]
-                    config_pytomo.LOG.info("Ignoring %s for current round of"
+                    config_pytomo.LOG.info("Ignoring %s for current round of "
                                            "crawl" %name)
             continue
         except dns_exception.DNSException, mes:

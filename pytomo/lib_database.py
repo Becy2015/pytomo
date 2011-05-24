@@ -23,7 +23,7 @@
        >>> start_pytomo.configure_log_file('doc_test') #doctest: +ELLIPSIS
        Configuring log file
        Logs are there: ...
-       True
+       ...
        >>> import time
        >>> timestamp = strftime("%Y-%m-%d.%H_%M_%S")
        >>> # to make sure a new file is created for every run we use
