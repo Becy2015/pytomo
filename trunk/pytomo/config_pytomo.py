@@ -63,7 +63,7 @@ MAX_PER_PAGE = 20
 TIME_FRAME = 'week'
 
 #Time delay between consecutive url crawls and download requests (in seconds)
-DELAY_BETWEEN_REQUESTS = 10
+DELAY_BETWEEN_REQUESTS = 3
 # Max duration of round for getting input links
 MAX_ROUND_DURATION = 600
 
@@ -99,7 +99,7 @@ PING_PACKETS = 3
 
 ################################################################################
 # for lib_youtube_download.py
-DOWNLOAD_TIME = 8.0
+DOWNLOAD_TIME = 30.0
 BUFFERING_VIDEO_DURATION = 3.0
 MIN_PLAYOUT_BUFFER_SIZE = 1.0
 
@@ -123,7 +123,7 @@ NB_REDIRECT_VALUES = 1
 NB_FIELDS = (NB_IDENT_VALUES + NB_PING_VALUES + NB_DOWNLOAD_VALUES
              + NB_REDIRECT_VALUES)
 
-USER_INPUT_TIMEOUT = 5
+USER_INPUT_TIMEOUT = 10
 
 LEVEL_TO_NAME = {DEBUG: 'DEBUG',
                  INFO: 'INFO',
