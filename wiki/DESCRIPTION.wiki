@@ -2,7 +2,8 @@
 =PYTOMO=
 
   * Authors: Louis Plissonneau, Parikshit Juluri, Mickaël Meulle
-  * Version: 0.4.0 
+  * Version: 0.4.0
+  * Email : pytomo@gmail.com 
   * Copyright: GPLv2
 
 *Table of Contents*
