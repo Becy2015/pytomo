@@ -34,7 +34,7 @@ def get_time_frame(time=config_pytomo.TIME_FRAME):
     >>> start_pytomo.configure_log_file('doc_test') #doctest: +ELLIPSIS
     Configuring log file
     Logs are there: ...
-    True
+    ...
     >>> get_time_frame('today')
     't'
     >>> get_time_frame('week')

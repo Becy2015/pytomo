@@ -131,7 +131,7 @@ class FileDownloader(object):
            >>> start_pytomo.configure_log_file('doc_test') #doctest: +ELLIPSIS
            Configuring log file
            Logs are there: ...
-           True
+           ...
            >>> filedownloader = FileDownloader(30)
         """
         self._ies = []

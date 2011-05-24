@@ -36,6 +36,7 @@ import signal
 import time
 from os.path import abspath, dirname, sep
 from sys import path
+import tarfile
 
 # assumes the standard distribution paths
 PACKAGE_DIR = dirname(abspath(path[0]))
@@ -43,6 +44,8 @@ PACKAGE_DIR = dirname(abspath(path[0]))
 PUBLIC_IP_FINDER = 'http://www.whatismyip.com/automation/n09230945.asp'
 # removed timeout for python2.5 compliance
 #IP_FINDER_TIMEOUT = 3
+
+SEPARATOR_LINE = '#' * 80
 
 try:
     from win32com.shell import shell, shellcon
@@ -125,9 +128,10 @@ def format_stats(stats):
         [(datetime.datetime(2011, 5, 6, 15, 30, 50, 103775),
           'Youtube', 'http://www.youtube.com/watch?v=RcmKbTR--iA',
       'http://v15.lscache3.c.youtube.com', '173.194.20.56',
-      'default_10.193.225.12', None, None, None, 8.9944229125976562, 'mp4',
-      225, 115012833.0, 511168.14666666667, 9575411, 0, 0.99954795837402344,
-      7.9875903129577637, 11.722306421319782, 1192528.8804511931, None)]
+      None, None, None, None, 8.9944229125976562,
+      'mp4', 225, 115012833.0, 511168.14666666667, 9575411, 0,
+     0.99954795837402344, 7.9875903129577637, 11.722306421319782,
+      1192528.8804511931, 'default_10.193.225.12')]
 
     >>> stats = ('http://www.youtube.com/watch?v=OdF-oiaICZI',
     ...  'http://v7.lscache8.c.youtube.com',
@@ -158,22 +162,23 @@ def format_stats(stats):
     ...                                     32770.37517215069],
     ...                                    'default_212.234.161.118', None]})
 
+
     >>> format_stats(stats) #doctest: +NORMALIZE_WHITESPACE
     [(datetime.datetime(2011, 5, 6, 15, 30, 50, 103775),
        'Youtube', 'http://www.youtube.com/watch?v=OdF-oiaICZI',
       'http://v7.lscache8.c.youtube.com', '74.125.105.226',
-      'google_public_dns_8.8.8.8_open_dns_208.67.220.220', 26.0, 196.0, 82.0,
+      'http://www.youtube.com/fake_redirect', 26.0, 196.0, 82.0,
       30.311000108718872, 'mp4', 287.48700000000002, 16840065.0,
-         58576.787819970988, 1967199, 0, 1.3169999122619629,
-         28.986000061035156, 5.5422514162485941,
-      1109.4598961624772, 'http://www.youtube.com/fake_redirect'),
+      58576.787819970988, 1967199, 0, 1.3169999122619629,
+      28.986000061035156, 5.5422514162485941, 1109.4598961624772,
+      'google_public_dns_8.8.8.8_open_dns_208.67.220.220'),
      (datetime.datetime(2011, 5, 6, 15, 30, 51, 103775),
        'Youtube', 'http://www.youtube.com/watch?v=OdF-oiaICZI',
       'http://v7.lscache8.c.youtube.com', '173.194.8.226',
-      'default_212.234.161.118', 103.0, 108.0, 105.0, 30.287999868392944,
-      'mp4', 287.48700000000002, 16840065.0, 58576.787819970988, 2307716, 0,
-      1.3849999904632568, 28.89300012588501, 11.47842453761781,
-      32770.375172150692, None)]
+      None, 103.0, 108.0, 105.0, 30.287999868392944,
+      'mp4', 287.48700000000002, 16840065.0, 58576.787819970988, 2307716,
+      0, 1.3849999904632568, 28.89300012588501, 11.47842453761781,
+      32770.375172150692, 'default_212.234.161.118')]
 """
     record_list = []
     (url, cache_url, current_stats) = stats
@@ -342,11 +347,13 @@ def do_crawl(result_stream=None, db_file=None, timestamp=None, image_file=None):
             config_pytomo.LOG.warn("Stopping crawl because already crawled "
                                    "%d urls" % len(crawled_urls))
             if config_pytomo.PLOT:
-                lib_plot.plot_data(db_file, image_file)
+                lib_plot.plot_data(db_file, config_pytomo.COLUMN_NAMES,
+                                   image_file)
             break
         # The plot is redrawn everytime the database is updated
         if config_pytomo.PLOT:
-            lib_plot.plot_data(db_file, image_file)
+            lib_plot.plot_data(db_file, config_pytomo.COLUMN_NAMES,
+                               image_file)
         # next round input are related links of the current input_links
         input_links = lib_cache_url.get_next_round_urls(input_links,
                                                         max_per_page,
@@ -406,15 +413,15 @@ def create_options(parser):
                             "(default %d)" % config_pytomo.PING_PACKETS),
                       default=config_pytomo.PING_PACKETS)
     parser.add_option("-D", dest="DOWNLOAD_TIME", type='float',
-                      help=("Download time for the video (default %f)"
+                      help=("Download time for the video in seconds (default %f)"
                             % config_pytomo.DOWNLOAD_TIME),
                       default=config_pytomo.DOWNLOAD_TIME)
     parser.add_option("-B", dest="BUFFERING_VIDEO_DURATION", type='float',
-                      help=("Buffering video duration (default %f)"
+                      help=("Buffering video duration in seconds (default %f)"
                             % config_pytomo.BUFFERING_VIDEO_DURATION),
                       default=config_pytomo.BUFFERING_VIDEO_DURATION)
     parser.add_option("-M", dest="MIN_PLAYOUT_BUFFER_SIZE", type='float',
-                      help=("Minimum Playout Buffer Size (default %f)"
+                      help=("Minimum Playout Buffer Size in seconds (default %f)"
                             % config_pytomo.MIN_PLAYOUT_BUFFER_SIZE),
                       default=config_pytomo.MIN_PLAYOUT_BUFFER_SIZE)
     parser.add_option("-x", dest="LOG_PUBLIC_IP", action="store_false",
@@ -448,8 +455,7 @@ def write_options_to_config(options):
 
 def log_ip_address():
     "Log the remote IP addresses"
-    print ("Logging the IP address: if it takes too long, please check your "
-           "proxy.\nCheck the help of this program.")
+    print ("Logging the local public IP address.")
     # is local address of some interest??
     # check: http://stackoverflow.com/
     # questions/166506/finding-local-ip-addresses-in-python
@@ -461,11 +467,13 @@ def log_ip_address():
         public_ip = urllib2.urlopen(PUBLIC_IP_FINDER, None,
                                     config_pytomo.IPADDR_TIMEOUT).read()
     except urllib2.URLError, mes:
-        config_pytomo.LOG.warn('Public IP address not found: %s' % mes)
+        config_pytomo.LOG.critical('Public IP address not found: %s' % mes)
         print 'Public IP address not found: %s' % mes
         public_ip = None
-    config_pytomo.LOG.critical('Machine has this public IP address: %s'
-                               % public_ip)
+    else:
+        config_pytomo.LOG.critical('Machine has this public IP address: %s'
+                                   % public_ip)
+        print 'Machine has this public IP address: %s' % public_ip
 
 def log_md5_results(result_file, db_file):
     "Computes and stores the md5 hash of result and database files"
@@ -489,8 +497,9 @@ def configure_log_file(timestamp):
             log_file = check_out_files(config_pytomo.LOG_FILE,
                                        config_pytomo.LOG_DIR, timestamp)
         except IOError:
-            print >> sys.stderr, ("Problem opening file: %s" % log_file)
-            return False
+            print >> sys.stderr, ("Problem opening file with timestamp: %s"
+                                  % timestamp)
+            return None
         print "Logs are there: %s" % log_file
         # for lib_youtube_download
         config_pytomo.LOG_FILE_TIMESTAMP = log_file
@@ -509,7 +518,7 @@ def configure_log_file(timestamp):
                         config_pytomo.__dict__):
         config_pytomo.LOG.critical('%s: %s'
                                    % (value, getattr(config_pytomo, value)))
-    return True
+    return log_file
 
 class MyTimeoutException(Exception):
     "Class to generate timeout exceptions"
@@ -566,9 +575,9 @@ def main(argv=None):
     check_options(parser, options)
     write_options_to_config(options)
     timestamp = strftime("%Y-%m-%d.%H_%M_%S")
-    is_log_configured = configure_log_file(timestamp)
+    log_file = configure_log_file(timestamp)
     image_file = None
-    if not is_log_configured:
+    if not log_file:
         return -1
     try:
         result_file = check_out_files(config_pytomo.RESULT_FILE,
@@ -628,7 +637,16 @@ def main(argv=None):
     except Exception, mes:
         config_pytomo.LOG.exception('Uncaught exception: %s' % mes)
     log_md5_results(result_file, db_file)
-    raw_input('\nCrawl finished: check the logs\nPress Enter to exit\n')
+    tarfile_name = check_out_files('to_send.tbz',
+                                   config_pytomo.LOG_DIR, timestamp)
+    tar_file = tarfile.open(name=tarfile_name, mode='w:bz2')
+    tar_file.add(db_file)
+    tar_file.add(log_file)
+    tar_file.close()
+    print ('\nCrawl finished.\n%s\n\nPLEASE SEND THIS FILE BY EMAIL: '
+           '(to pytomo@gmail.com)\n%s\n'
+           % (SEPARATOR_LINE, tarfile_name))
+    raw_input('Press Enter to exit\n')
     return 0
 
 if __name__ == '__main__':
