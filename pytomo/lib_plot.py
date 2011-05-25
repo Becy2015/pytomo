@@ -40,7 +40,15 @@ def plot_data(db_file=None,
         axes = fig.add_subplot(len(column_names), 1, num)
         fig.autofmt_xdate()
         dates = []
-        cmd = ' '.join(("select strftime('%Y-%m-%d %H:%M:%S', ID),",
+        if column_name == 'AvgThp':
+            cmd = ' '.join(("select strftime('%Y-%m-%d %H:%M:%S', ID),",
+                            "DownloadBytes/DownloadTime",
+                            "from",
+                            user_table,
+                            "group by strftime('%Y%m%d%H%M',ID)"
+                           ))
+        else:
+            cmd = ' '.join(("select strftime('%Y-%m-%d %H:%M:%S', ID),",
                             "AVG(", column_name, ")",
                             "from",
                             user_table,
@@ -115,6 +123,11 @@ def create_options(parser):
                       const = 'BufferDurationAtEnd',
                       action = 'append_const', default = None,
                       help = "Plot BufferDurationAtEnd")
+    parser.add_option("-G", "--AvgThp",
+                      dest = "column_names",
+                      const = 'AvgThp',
+                      action = 'append_const', default = None,
+                      help = "Plot AverageThroughput")
     parser.add_option("-M", "--MaxInstantThp",
                       dest = "column_names",
                       const = 'MaxInstantThp',
@@ -145,9 +158,10 @@ def main(argv=None):
             " [-E EncodingRate] [-B DownloadBytes]"
             " [-I DownloadInterruptions]"
             " [-F BufferingDuration] [-P PlaybackDuration]"
-            " [-A  BufferDurationAtEnd] [-M MaxInstantThp]"
+            " [-A  BufferDurationAtEnd] [-G Average Throughput]"
+            " [-M MaxInstantThp]"
             " [-m PingMin] [-a PingAvg] [-x PingMax]"
-            "[-Y ALL COLUMNS]")
+            )
     parser = OptionParser(usage=usage)
     create_options(parser)
     (options, _) = parser.parse_args(argv)
@@ -161,7 +175,7 @@ def main(argv=None):
     plot_data(db_file=options.database, column_names=options.column_names,
               image_file=options.image_file)
 
-    print ''.join(("The plot for", str(options.column_names),
+    print ' '.join(("The plot for", str(options.column_names),
                  "from the database", options.database,
                  "has been saved to", options.image_file))
 
