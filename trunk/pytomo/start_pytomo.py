@@ -42,8 +42,6 @@ import tarfile
 PACKAGE_DIR = dirname(abspath(path[0]))
 
 PUBLIC_IP_FINDER = 'http://www.whatismyip.com/automation/n09230945.asp'
-# removed timeout for python2.5 compliance
-#IP_FINDER_TIMEOUT = 3
 
 SEPARATOR_LINE = '#' * 80
 
@@ -471,8 +469,12 @@ def log_ip_address():
         opener = urllib2.build_opener(proxy)
         urllib2.install_opener(opener)
     try:
-        public_ip = urllib2.urlopen(PUBLIC_IP_FINDER, None,
-                                    config_pytomo.IPADDR_TIMEOUT).read()
+        if sys.hexversion >= int(0x2060000):
+            # timeout is available only python above 2.6
+            public_ip = urllib2.urlopen(PUBLIC_IP_FINDER, None,
+                                        config_pytomo.IPADDR_TIMEOUT).read()
+        else:
+            public_ip = urllib2.urlopen(PUBLIC_IP_FINDER, None).read()
     except urllib2.URLError, mes:
         config_pytomo.LOG.critical('Public IP address not found: %s' % mes)
         print 'Public IP address not found: %s' % mes

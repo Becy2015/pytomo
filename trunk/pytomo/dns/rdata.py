@@ -37,6 +37,7 @@ from . import tokenizer as dns_tokenizer
 
 if False:
     # to trick the module finder of pyinstaller
+    # but do not compile in python2.5
     from .rdtypes.IN import *
     from .rdtypes.ANY import *
 

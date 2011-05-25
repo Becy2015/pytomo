@@ -295,7 +295,7 @@ Options:
                         start of crawl put 'today', 'week', 'month' or
                         'all_time' (default 'week')
   -n PING_PACKETS       Number of packets to be sent for each ping (default 3)
-  -D DOWNLOAD_TIME      Download time for the video in seconds(default 8.000000)
+  -D DOWNLOAD_TIME      Download time for the video in seconds(default 30.000000)
   -B BUFFERING_VIDEO_DURATION
                         Buffering video duration in seconds (default 3.000000)
   -M MIN_PLAYOUT_BUFFER_SIZE

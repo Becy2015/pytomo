@@ -499,8 +499,9 @@ template')
             # downloaded before getting the encoding rate because video data do
             # not appear before encoding rate!
             # NO: self.start_buffered_bytes += data_block_len
-            return
-        self.current_buffer += data_block_len / self.encoding_rate
+            return False
+        # block size is in Bytes and encoding in bits per seconds
+        self.current_buffer += 8 * data_block_len / self.encoding_rate
         if self.state == PLAYING_STATE:
             self.current_buffer -= (current_time - self.seen_timestamp)
             self.seen_timestamp = current_time
@@ -521,6 +522,7 @@ template')
         else:
             # buffering
             pass
+        return True
 
     def compute_encoding_rate(self, data_block, meta_file_name):
         """Compute the encoding rate
@@ -537,9 +539,8 @@ template')
             data_duration = None
         if data_duration:
             self.data_duration = data_duration
-            self.encoding_rate = self.data_len / data_duration
-            if self.video_type == 'flv':
-                self.encoding_rate *= 8
+            # data len in Bytes
+            self.encoding_rate = 8 * self.data_len / data_duration
             config_pytomo.LOG.debug("Encoding rate is: %.2fkb/s"
                                     % (self.encoding_rate / 1e3))
 
@@ -563,6 +564,7 @@ template')
             return status_code, None
         # content-length in bytes
         self.data_len = float(data.info().get('Content-length', None))
+        config_pytomo.LOG.debug('Content-length: %s' % self.data_len)
         tries = 0
         byte_counter = 0
         accumulated_playback = 0.0
@@ -707,8 +709,11 @@ class YoutubeIE(InfoExtractor):
     _AGE_URL = 'http://www.youtube.com/verify_age?next_url=/&gl=US&hl=en'
     _NETRC_MACHINE = 'youtube'
     # Listed in order of quality
-    _available_formats = ['38', '37', '22', '45', '35', '34', '43', '18', '6',
-                          '5', '17', '13']
+    #_available_formats = ['38', '37', '22', '45', '35', '34', '43', '18', '6',
+                          #'5', '17', '13']
+    # Listed in usual browser way
+    _available_formats = ['34', '18', '43', '35', '22', '45', '38', '5', '17',
+                          '37', '6', '13']
     _video_extensions = {
         '13': '3gp',
         '17': 'mp4',
