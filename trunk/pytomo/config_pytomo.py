@@ -103,7 +103,7 @@ PING_PACKETS = 3
 # for lib_youtube_download.py
 DOWNLOAD_TIME = 30.0
 BUFFERING_VIDEO_DURATION = 3.0
-MIN_PLAYOUT_BUFFER_SIZE = 1.0
+MIN_PLAYOUT_BUFFER_SIZE = 3.0
 
 # nb of tries for extracting metadata info from video
 MAX_NB_TRIES_ENCODING = 9
