@@ -5,6 +5,8 @@ Lines starting with # are comments
 
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 
+
+
 # use package directory for storing files
 # put it False if you want files in the current working dir (from where pytomo
 # is launched)
@@ -118,7 +120,7 @@ RTT = None
 SEP_LINE = 80 * '#'
 NB_IDENT_VALUES = 5
 NB_PING_VALUES = 3
-NB_DOWNLOAD_VALUES = 11
+NB_DOWNLOAD_VALUES = 13
 NB_REDIRECT_VALUES = 1
 NB_FIELDS = (NB_IDENT_VALUES + NB_PING_VALUES + NB_DOWNLOAD_VALUES
              + NB_REDIRECT_VALUES)

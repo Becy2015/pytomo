@@ -41,7 +41,7 @@ import tarfile
 # assumes the standard distribution paths
 PACKAGE_DIR = dirname(abspath(path[0]))
 
-PUBLIC_IP_FINDER = 'http://www.whatismyip.com/automation/n09230945.asp'
+PUBLIC_IP_FINDER = 'http://automation.whatismyip.com/n09230945.asp'
 
 SEPARATOR_LINE = '#' * 80
 
@@ -568,7 +568,7 @@ def prompt_start_crawl():
     "Funtion to prompt user for to accept the crawling"
     return raw_input('Are you ok to start crawling? (Y/N)\n')
 
-def main(argv=None):
+def main(version=None,argv=None):
     """Program wrapper
     Setup of log part
     """
@@ -604,6 +604,7 @@ def main(argv=None):
         print "Database results are there: %s" % db_file
     config_pytomo.LOG.critical('Offset between local time and UTC: %d'
                                % timezone)
+    config_pytomo.LOG.warn('Pytomo version = %s' % version)
     config_pytomo.SYSTEM = platform.system()
     config_pytomo.LOG.warn('Pytomo is running on this system: %s'
                            % config_pytomo.SYSTEM)
@@ -652,8 +653,8 @@ def main(argv=None):
     tarfile_name = check_out_files('to_send.tbz',
                                    config_pytomo.LOG_DIR, timestamp)
     tar_file = tarfile.open(name=tarfile_name, mode='w:bz2')
-    tar_file.add(db_file)
-    tar_file.add(log_file)
+    tar_file.add(db_file, arcname=os.path.basename(db_file))
+    tar_file.add(log_file, arcname=os.path.basename(log_file))
     tar_file.close()
     print ('\nCrawl finished.\n%s\n\nPLEASE SEND THIS FILE BY EMAIL: '
            '(to pytomo@gmail.com)\n%s\n'

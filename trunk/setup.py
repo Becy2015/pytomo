@@ -37,37 +37,38 @@ You can configure options in the command line of start_crawl.py or in the
 pytomo/config_pytomo.py file.
 """
 
-VERSION = '0.9.5'
+VERSION = '0.9.8'
 
 LICENSE = 'GPLv2'
 
-KWARGS = {
-    'name': 'Pytomo',
-    'version': VERSION,
-    'description': 'Python tomography tool',
-    'author': 'Louis Plissonneau',
-    'author_email': 'louis.plissonneau@gmail.com',
-    'url': 'http://code.google.com/p/pytomo',
-    'packages': ['pytomo','pytomo/dns', 'pytomo/dns/rdtypes',
-                 'pytomo/dns/rdtypes/ANY', 'pytomo/dns/rdtypes/IN',
-                 'pytomo/kaa_metadata', 'pytomo/kaa_metadata/audio',
-                 'pytomo/kaa_metadata/image', 'pytomo/kaa_metadata/video',
-                 'pytomo/kaa_metadata/misc'],
-    'scripts': ['bin/pytomo', 'start_crawl.py'],
-    'long_description': open('README.txt').read(),
-    'platforms': ['Linux', 'Windows', 'Mac'],
-    'license': LICENSE,
-    'classifiers': ['Development Status :: 4 - Beta',
-                    'Environment :: Console',
-                    'Intended Audience :: Science/Research',
-                    'Operating System :: OS Independent',
-                    'Operating System :: POSIX',
-                    'Operating System :: Microsoft',
-                    'Operating System :: MacOS :: MacOS X',
-                    'Programming Language :: Python :: 2',
-                    'Topic :: Internet',
-                   ],
-}
+if __name__ == '__main__':
+    KWARGS = {
+        'name': 'Pytomo',
+        'version': VERSION,
+        'description': 'Python tomography tool',
+        'author': 'Louis Plissonneau',
+        'author_email': 'louis.plissonneau@gmail.com',
+        'url': 'http://code.google.com/p/pytomo',
+        'packages': ['pytomo','pytomo/dns', 'pytomo/dns/rdtypes',
+                     'pytomo/dns/rdtypes/ANY', 'pytomo/dns/rdtypes/IN',
+                     'pytomo/kaa_metadata', 'pytomo/kaa_metadata/audio',
+                     'pytomo/kaa_metadata/image', 'pytomo/kaa_metadata/video',
+                     'pytomo/kaa_metadata/misc'],
+        'scripts': ['bin/pytomo', 'start_crawl.py'],
+        'long_description': open('README.txt').read(),
+        'platforms': ['Linux', 'Windows', 'Mac'],
+        'license': LICENSE,
+        'classifiers': ['Development Status :: 4 - Beta',
+                        'Environment :: Console',
+                        'Intended Audience :: Science/Research',
+                        'Operating System :: OS Independent',
+                        'Operating System :: POSIX',
+                        'Operating System :: Microsoft',
+                        'Operating System :: MacOS :: MacOS X',
+                        'Programming Language :: Python :: 2',
+                        'Topic :: Internet',
+                       ],
+    }
+    distutils.core.setup(**KWARGS)
 
-distutils.core.setup(**KWARGS)
 

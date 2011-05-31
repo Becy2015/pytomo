@@ -41,6 +41,7 @@ if False:
     from .rdtypes.IN import *
     from .rdtypes.ANY import *
 
+
 _hex_chunksize = 32
 
 def _hexify(data, chunksize=None):

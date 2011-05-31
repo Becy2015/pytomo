@@ -63,12 +63,7 @@ def get_all_links(url):
     try:
         data = urllib.urlopen(url, proxies=config_pytomo.PROXIES)
     # socket.error is a child of IOError only in 2.6
-    except socket.error, mes:
-        config_pytomo.LOG.warn(''.join((
-            'Problem in getting links of this url: ', url,
-            '\nError message: ', mes)))
-        return []
-    except IOError, mes:
+    except (socket.error, IOError), mes:
         config_pytomo.LOG.warn(''.join((
             'Problem in getting links of this url: ', url,
             '\nError message: ', mes)))
