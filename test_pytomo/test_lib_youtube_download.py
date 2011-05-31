@@ -377,6 +377,8 @@ def patch_get_download_stats():
             self.accumulated_playback = 0,
             self.current_buffer = 0,
             self.max_instant_thp = 0
+            self.initial_data = 0
+            self.initial_rate = 0
             self.video_type = None
         @classmethod
         def get_total_bytes(cls):
@@ -395,6 +397,8 @@ def patch_get_download_stats():
             self.accumulated_playback = 10
             self.current_buffer = 1
             self.video_type = 'flv'
+            self.initial_data = 1024
+            self.initial_rate = 100
             return 200, 30
     lib_youtube_download._FileDownloader = (
         lib_youtube_download.FileDownloader)
@@ -419,7 +423,7 @@ def test_get_download_stats():
         '&factor=1.25&id=39d17ea226880992'))
     status_code, res, redirect_url = lib_youtube_download.get_download_stats(
         ip_address_uri, 30)
-    expected_result =  [30, 'flv', 10, 100, 10, 1000, 10, 10, 10, 1, 0]
+    expected_result =  [30, 'flv', 10, 100, 10, 1000, 10, 1024,100,  10, 10, 1, 0]
     ntools.assert_equals(res, expected_result)
     res = lib_youtube_download.get_download_stats(None, 30)
     ntools.assert_false(res)

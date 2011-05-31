@@ -14,6 +14,13 @@ if PACKAGE_DIR not in path:
 
 import pytomo
 
+try:
+    import setup
+    version = setup.VERSION
+except ImportError:
+    version = None
+
 if __name__ == '__main__':
-    pytomo.start_pytomo.main()
+    pytomo.start_pytomo.main(version=version)
+
 

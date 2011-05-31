@@ -36,7 +36,7 @@
        ... 'http://v15.lscache3.c.youtube.com',
        ... '173.194.20.56','default_10.193.225.12', None, None, None,
        ... 8.9944229125976562, 'mp4', 225, 115012833.0, 511168.14666666667,
-       ... 9575411, 0, 0.99954795837402344, 7.9875903129577637,
+       ... 9575411, 0, 1024 ,100,  0.99954795837402344, 7.9875903129577637,
        ... 11.722306421319782, 1192528.8804511931, None)
        >>> doc_db.insert_record(record)
        >>> record = ('(datetime.datetime(2011, 5, 6, 15, 30, 50, 103775)' ,
@@ -44,7 +44,7 @@
        ... 'http://v15.lscache3.c.youtube.com',
        ... '173.194.20.56','default_10.193.225.12', None, None, None,
        ... 8.9944229125976562, 'mp4', 225, 115012833.0, 511168.14666666667,
-       ... 9575411, 0, 0.99954795837402344, 7.9875903129577637,
+       ... 9575411, 0, 1024, 100, 0.99954795837402344, 7.9875903129577637,
        ... 11.722306421319782, 1192528.8804511931,
        ... 'http://www.youtube.com/fake_redirect')
        >>> doc_db.insert_record(record)
@@ -66,6 +66,8 @@
         511168.14666666667,
         9575411,
         0,
+        1024.0,
+        100.0,
         0.99954795837402344,
         7.9875903129577637,
         11.722306421319782,
@@ -87,6 +89,8 @@
         511168.14666666667,
         9575411,
         0,
+        1024.0,
+        100.0,
         0.99954795837402344,
         7.9875903129577637,
         11.722306421319782,
@@ -135,6 +139,10 @@ class PytomoDatabase:
         DownloadBytes - The length of the video sample(in bytes)
         DownloadInterruptions -  Nb of interruptions experienced during the
                                 download
+        InitialData - Number of bytes downloaded in the initial buffering
+        period,
+        InitialRate - The mean data rate in (Kbps) during the initial
+        buffering period,
         BufferingDuration -  Accumulate time spend in buffering state
         PlaybackDuration - Accumulate time spend in playing state
         BufferDurationAtEnd - The buffer length at the end of download
@@ -191,6 +199,8 @@ class PytomoDatabase:
                        EncodingRate real,
                        DownloadBytes int,
                        DownloadInterruptions int,
+                       InitialData real,
+                       InitialRate real,
                        BufferingDuration real,
                        PlaybackDuration real,
                        BufferDurationAtEnd real,

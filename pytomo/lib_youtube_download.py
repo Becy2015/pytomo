@@ -155,6 +155,8 @@ class FileDownloader(object):
         self.max_instant_thp = None
         self.video_type = None
         self.redirect_url = None
+        self.initial_data = None
+        self.initial_rate = None
         try:
             self.download_time = int(download_time)
         except ValueError:
@@ -571,12 +573,16 @@ template')
         accumulated_buffer = 0.0
         block_size = 1024
         start = time.time()
+        buff_state_tracker = False
+        initial_data = 0
+        initial_rate = 0
         with tempfile.NamedTemporaryFile() as meta_file:
             # just to get a temporary file name in the current dir
             # cannot use the file stream directly because it is not permitted
             # to open a temporary file already open
             # and the delete parameter available in 2.7 only
             meta_file_name = meta_file.name
+
         while True:
             # Download and write
             before = time.time()
@@ -596,8 +602,16 @@ template')
             self.compute_interruptions(data_block_len, after)
             if self.state == PLAYING_STATE:
                 accumulated_playback += (after - before)
+                if not buff_state_tracker:
+                    initial_duration = accumulated_buffer
+                    initial_rate = initial_data * 8 / initial_duration / 1000
+                    buff_state_tracker = True
+
             elif self.state == BUFFERING_STATE:
                 accumulated_buffer += (after - before)
+                if not buff_state_tracker:
+                    initial_data += data_block_len
+
             else:
                 config_pytomo.LOG.error("Unexpected state case")
             byte_counter += data_block_len
@@ -626,6 +640,8 @@ template')
         self.set_total_bytes(byte_counter)
         self.accumulated_playback = accumulated_playback
         self.accumulated_buffer = accumulated_buffer
+        self.initial_data = initial_data
+        self.initial_rate = initial_rate
         config_pytomo.LOG.info("nb of interruptions: %d" % self.interruptions)
         return status_code, (after - start)
 
@@ -975,6 +991,8 @@ def get_download_stats(ip_address_uri,
                 file_downloader.encoding_rate,
                 file_downloader.get_total_bytes(),
                 file_downloader.interruptions,
+                file_downloader.initial_data,
+                file_downloader.initial_rate,
                 file_downloader.accumulated_buffer,
                 file_downloader.accumulated_playback,
                 file_downloader.current_buffer,
