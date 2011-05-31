@@ -148,7 +148,7 @@ class FileDownloader(object):
         self.accumulated_buffer = None
         self.current_buffer = 0.0
         self.interruptions = 0
-        self.seen_timestamp = None
+        self.previous_timestamp = None
         self.encoding_rate = None
         self.data_len = None
         self.data_duration = None
@@ -505,8 +505,8 @@ template')
         # block size is in Bytes and encoding in bits per seconds
         self.current_buffer += 8 * data_block_len / self.encoding_rate
         if self.state == PLAYING_STATE:
-            self.current_buffer -= (current_time - self.seen_timestamp)
-            self.seen_timestamp = current_time
+            self.current_buffer -= (current_time - self.previous_timestamp)
+            self.previous_timestamp = current_time
             if self.current_buffer < config_pytomo.MIN_PLAYOUT_BUFFER_SIZE:
                 self.interruptions += 1
                 self.state = BUFFERING_STATE
@@ -518,7 +518,7 @@ template')
                 "Entering playing state with %f sec buffered"
                 % self.current_buffer)
             self.state = PLAYING_STATE
-            self.seen_timestamp = current_time
+            self.previous_timestamp = current_time
             # do not update current time if not in playing state (or just
             # switched)
         else:
