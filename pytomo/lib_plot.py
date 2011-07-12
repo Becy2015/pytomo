@@ -15,8 +15,6 @@ from collections import defaultdict
 from itertools import cycle
 #from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import rcParams
-# force non-use of tex
-rcParams['text.usetex'] = False
 
 DNS_RESOLVERS = ['open', 'google', 'default']
 
@@ -48,52 +46,57 @@ UNITS = {
     'PingMax' : 'msec',
 }
 
-def plot_function(to_plot, db_file, image_file, cdf=False):
+def plot_function(to_plot, db_file, image_file, cdf_data=None):
     "Function to plot data"
+    old_rcParams = rcParams['text.usetex']
     fig = create_fig(os.path.basename(db_file))
     column_names = set()
     # finding the column names from the dict
     for key in to_plot.keys():
         column_names.add(key[0])
     for plot_nb, column_name in enumerate(to_plot, 1):
-        line_styles = cycle(['-', '--', ':'])
+        line_styles = cycle(['-'])
         axes = fig.add_subplot(len(to_plot), 1, plot_nb)
         fig.subplots_adjust(hspace=0.4)
         args = []
         for resolver, (dates, column_data) in to_plot[column_name].items():
             try:
-                axes.plot_date(dates, column_data, linestyle=line_styles.next(),
+                axes.plot_date(dates, column_data,
+                               linestyle=line_styles.next(),
                                markersize=2,
                                markeredgecolor=COLOR_DICT[resolver],
                                color=COLOR_DICT[resolver], label=resolver)
-                args.append((resolver, column_data))
+                if cdf_data:
+                    args.append((resolver, cdf_data[column_name][resolver]))
             except ValueError:
                 print ''.join(("No data in ", column_name))
-                return
-        if cdf:
+        if args:
             cdf_fig = cdfplot_new.cdfplotdata(args, loc='best',
                               title=column_name,
                               xlabel=('%s in %s'
                               % (column_name, UNITS[column_name])))
-
             cdf_file = os.path.join(os.path.dirname(image_file),
                                    '_'.join(('cdf', column_name.lower(),
                                    os.path.basename(image_file))))
-
             cdf_fig.savefig(cdf_file)
             print 'cdf of %s saved to %s' % (column_name, cdf_file)
         axes.legend()
         date_fmt = mpl.dates.DateFormatter('%Hh%M')
         axes.xaxis.set_major_formatter(date_fmt)
+        axes.autoscale_view()
         try:
             for label in axes.get_xticklabels():
                 label.set_rotation(30)
                 label.set_ha('right')
         except ValueError:
-            print 'Column ', column_name, 'is empty.'
+            print ' '.join(('Column', column_name, 'is empty.'))
         axes.set_ylabel(''.join((column_name, '(', UNITS[column_name],')')))
         axes.grid(True)
+    # force non-use of tex
+    rcParams['text.usetex'] = False
     fig.savefig(image_file)
+    # restore rcParams
+    rcParams['text.usetex'] = old_rcParams
 
 #    if not num % 5 :
 #        pdf.savefig()
@@ -133,6 +136,7 @@ def plot_data(column_names, image_file, db_file=None, cdf=False):
     user_table = cur.execute('select name from sqlite_master '
                              'where type = "table"').fetchall()[0][0]
     to_plot = defaultdict(dict)
+    cdf_data = defaultdict(dict)
     #find the number of resolvers used.
     for column_name in list(column_names):
         for resolver in DNS_RESOLVERS:
@@ -144,8 +148,15 @@ def plot_data(column_names, image_file, db_file=None, cdf=False):
                                 user_table,
                                 "where Resolver LIKE",
                                 ''.join(("'%", resolver, "%'")),
+                                "AND DownloadBytes != '' ",
                                 "group by strftime('%Y%m%d%H%M',ID)"
                                ))
+                cdf_cmd = ' '.join(("select 8*DownloadBytes/DownloadTime/1000",
+                                    "from", user_table,
+                                    "where Resolver LIKE",
+                                    ''.join(("'%", resolver, "%'")),
+                                    "AND DownloadBytes != '' "
+                                   ))
             else:
                 cmd = ' '.join(("select strftime('%Y-%m-%d %H:%M:%S', ID),",
                                 "AVG(", column_name, ")",
@@ -153,7 +164,16 @@ def plot_data(column_names, image_file, db_file=None, cdf=False):
                                 user_table,
                                 "where Resolver LIKE",
                                 ''.join(("'%", resolver, "%'")),
+                                "AND",
+                                column_name,
+                                "!= ''",
                                 "group by strftime('%Y%m%d%H%M',ID)"
+                               ))
+                cdf_cmd = ' '.join(("select ", column_name,
+                                "from", user_table,
+                                "where Resolver LIKE",
+                                ''.join(("'%", resolver, "%'")),
+                                "AND", column_name, "!= ''"
                                ))
             cmd += "/" + str(INTERVAL) + ";"
             cur.execute(cmd)
@@ -165,10 +185,11 @@ def plot_data(column_names, image_file, db_file=None, cdf=False):
             for _ in times_u:
                 dates.append(datetime.datetime.strptime(_,
                                                         '%Y-%m-%d %H:%M:%S'))
-            #data_list = (column_name, resolver, dates, column_data)
             to_plot[column_name][resolver] = (dates, column_data)
-    #import pdb; pdb.set_trace()
-    plot_function(to_plot, db_file, image_file, cdf)
+            if cdf:
+                cur.execute(cdf_cmd)
+                cdf_data[column_name][resolver] = cur.fetchall()
+    plot_function(to_plot, db_file, image_file, cdf_data)
 
 def create_options(parser):
     "Add the different options to parser"

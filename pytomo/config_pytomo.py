@@ -87,6 +87,7 @@ OPEN_DNS = ('open_dns', '208.67.220.220')
 # The lifetime of a DNS query(in seconds). The default is 30 seconds.
 DNS_TIMEOUT = 4.0
 EXTRA_NAME_SERVERS = [GOOGLE_PUBLIC_DNS, OPEN_DNS]
+#EXTRA_NAME_SERVERS = []
 EXTRA_NAME_SERVERS_CC = []
 
 # HTTP codes to check for redirects.
@@ -102,8 +103,11 @@ PING_PACKETS = 3
 ################################################################################
 # for lib_youtube_download.py
 DOWNLOAD_TIME = 30.0
-BUFFERING_VIDEO_DURATION = 3.0
-MIN_PLAYOUT_BUFFER_SIZE = 3.0
+INITIAL_BUFFER = 2.0
+MIN_PLAYOUT_BUFFER = 0.1
+MIN_PLAYOUT_RESTART = 1.0
+# Initial playback buffer duration in milliseconds
+INITIAL_PLAYBACK_DURATION = 2000
 
 # nb of tries for extracting metadata info from video
 MAX_NB_TRIES_ENCODING = 9
@@ -120,7 +124,7 @@ RTT = None
 SEP_LINE = 80 * '#'
 NB_IDENT_VALUES = 5
 NB_PING_VALUES = 3
-NB_DOWNLOAD_VALUES = 13
+NB_DOWNLOAD_VALUES = 14
 NB_REDIRECT_VALUES = 1
 NB_FIELDS = (NB_IDENT_VALUES + NB_PING_VALUES + NB_DOWNLOAD_VALUES
              + NB_REDIRECT_VALUES)

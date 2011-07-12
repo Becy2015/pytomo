@@ -22,10 +22,15 @@ import tempfile
 # only for logging
 import logging
 from time import strftime
-from os import sep, remove
+from os import sep
 
 from . import kaa_metadata
 from .kaa_metadata.core import ParseError
+
+#from .flvlib.scripts import debug_flv
+from .flvlib import tags
+
+
 
 # for python2.5 only
 from cgi import parse_qs
@@ -40,8 +45,9 @@ Gecko/20101028 Firefox/3.6.12',
    'Accept-Language': 'en-us,en;q=0.5',
 }
 
-PLAYING_STATE = True
-BUFFERING_STATE = False
+INITIAL_BUFFERING_STATE = 0
+PLAYING_STATE = 1
+BUFFERING_STATE = 2
 
 class DownloadError(Exception):
     """Download Error exception.
@@ -68,6 +74,18 @@ class ContentTooShortError(Exception):
     the connection was probably interrupted.
     """
     pass
+
+
+def get_video_type(meta_file_name):
+    "Determine the video type"
+    video_type = None
+    try:
+        info = kaa_metadata.parse(meta_file_name)
+        video_type = str(info.mime.split('/')[1])
+    except ParseError, mes:
+        config_pytomo.LOG.debug('Video type could not be determined: %s'
+                               % mes)
+    return video_type
 
 class FileDownloader(object):
     """File Downloader class.
@@ -144,11 +162,12 @@ class FileDownloader(object):
             # I don't like it this way...
             self._screen_file = open(config_pytomo.LOG_FILE_TIMESTAMP, 'a')
         self.state = BUFFERING_STATE
-        self.accumulated_playback = None
-        self.accumulated_buffer = None
+        self.accumulated_playback = 0.0
+        self.accumulated_buffer = 0.0
         self.current_buffer = 0.0
         self.interruptions = 0
-        self.previous_timestamp = None
+        self.current_time = None
+        self.start_playback = None
         self.encoding_rate = None
         self.data_len = None
         self.data_duration = None
@@ -157,6 +176,9 @@ class FileDownloader(object):
         self.redirect_url = None
         self.initial_data = None
         self.initial_rate = None
+        self.initial_playback_buffer = None
+        self.flv_timestamp = None
+        self.previous_timestamp = None
         try:
             self.download_time = int(download_time)
         except ValueError:
@@ -278,7 +300,6 @@ class FileDownloader(object):
     def calc_speed(start, now, byte_counter):
         """
         Computes download speed
-
        >>> start =  1302692811.61169
        >>> now = 1302692821.595638
        >>> byte_counter = 248000
@@ -368,7 +389,7 @@ class FileDownloader(object):
         """Report download progress."""
         self.to_screen('\r[download] %(percent_str)s of %(data_len_str)s at \
 %(speed_str)s ETA %(eta_str)s Bytes %(byte_counter)d Inst_thp \
-%(instant_thp)skb/s  Buf_dur %(accumulated_buffer)f' % progress_stats,
+%(instant_thp)skb/s  cur_buf %(current_buffer)f' % progress_stats,
                        skip_eol=True)
 
     def report_retry(self, count, retries):
@@ -458,7 +479,7 @@ template')
         basic_request = urllib2.Request(url, None, STD_HEADERS)
         request = urllib2.Request(url, None, STD_HEADERS)
         count = 0
-        retries = 0
+        retries = 3
         while count <= retries:
             # Establish connection
             try:
@@ -507,13 +528,13 @@ template')
         if self.state == PLAYING_STATE:
             self.current_buffer -= (current_time - self.previous_timestamp)
             self.previous_timestamp = current_time
-            if self.current_buffer < config_pytomo.MIN_PLAYOUT_BUFFER_SIZE:
+            if self.current_buffer < config_pytomo.MIN_PLAYOUT_BUFFER:
                 self.interruptions += 1
                 self.state = BUFFERING_STATE
                 config_pytomo.LOG.debug(
                     "Entering buffering state: %d itr and buffered %f"
                     % (self.interruptions, self.current_buffer))
-        elif self.current_buffer > config_pytomo.BUFFERING_VIDEO_DURATION:
+        elif self.current_buffer > config_pytomo.INITIAL_BUFFER:
             config_pytomo.LOG.debug(
                 "Entering playing state with %f sec buffered"
                 % self.current_buffer)
@@ -526,15 +547,14 @@ template')
             pass
         return True
 
-    def compute_encoding_rate(self, data_block, meta_file_name):
+
+    def compute_encoding_rate(self, meta_file_name):
         """Compute the encoding rate
         if found in the temp file, close the file and set the value in the
         object
         """
-        with open(meta_file_name, 'ab') as meta_file:
-            meta_file.write(data_block)
         try:
-            data_duration, self.video_type = get_data_duration(meta_file_name)
+            data_duration = get_data_duration(meta_file_name)
         except ParseError, mes:
             config_pytomo.LOG.debug('data duration not yet found: %s'
                                    % mes)
@@ -564,25 +584,120 @@ template')
             config_pytomo.LOG.info("URL redirected.")
             self.redirect_url = data.geturl()
             return status_code, None
-        # content-length in bytes
-        self.data_len = float(data.info().get('Content-length', None))
-        config_pytomo.LOG.debug('Content-length: %s' % self.data_len)
-        tries = 0
-        byte_counter = 0
-        accumulated_playback = 0.0
-        accumulated_buffer = 0.0
-        block_size = 1024
-        start = time.time()
-        buff_state_tracker = False
-        initial_data = 0
-        initial_rate = 0
+        duration = None
         with tempfile.NamedTemporaryFile() as meta_file:
             # just to get a temporary file name in the current dir
             # cannot use the file stream directly because it is not permitted
             # to open a temporary file already open
             # and the delete parameter available in 2.7 only
             meta_file_name = meta_file.name
+            try:
+                duration = self.process_download_flv(data, meta_file_name)
+            except tags.MalformedFLV:
+                config_pytomo.LOG.info("Not FLV.")
+            if duration:
+                self.video_type = 'FLV'
+            else :
+                self.video_type = get_video_type(meta_file_name)
+                try:
+                    duration = self.process_download_other(data, meta_file_name)
+                except OSError, mes:
+                    config_pytomo.LOG.exception(mes)
+            meta_file.close()
 
+        #self.set_total_bytes(byte_counter)
+        config_pytomo.LOG.info("nb of interruptions: %d" % self.interruptions)
+        return status_code, duration
+
+    def update_with_tags(self, flv_tags):
+        """Fills object informations with read tags
+        """
+        while True:
+            try:
+                tag = read_next_tag_or_seek(flv_tags)
+                if tag and (isinstance(tag, tags.ScriptTag)
+                            and tag.name == "onMetaData"):
+                    self.encoding_rate = tag.variable['totaldatarate']
+                    config_pytomo.LOG.debug('Encoding rate %s'
+                                            % self.encoding_rate)
+                if tag and (isinstance(tag, tags.AudioTag) or
+                            isinstance(tag, tags.VideoTag)):
+                    if tag.timestamp < self.flv_timestamp:
+                        config_pytomo.LOG.debug('decreasing timestamp found')
+                    self.flv_timestamp = float(max(self.flv_timestamp,
+                                                   tag.timestamp)) / 1000
+            except tags.EndOfFile:
+                break
+            except tags.EndOfTags:
+                break
+
+    def update_state(self, elapsed_time):
+        """Compute the state of the video playback (emulated) with the time
+        elapsed and the flv informations collected.
+        """
+        if self.state == INITIAL_BUFFERING_STATE:
+            if (self.flv_timestamp > config_pytomo.INITIAL_BUFFER):
+                self.state = PLAYING_STATE
+                self.start_playback = elapsed_time
+                self.initial_data = self._total_bytes
+                try:
+                    self.initial_rate = (self.initial_data * 8
+                                         / self.current_time / 1000)
+                except ZeroDivisionError:
+                    self.initial_rate = 0
+        elif self.state == PLAYING_STATE:
+            self.accumulated_playback += elapsed_time
+            video_playback_time = (self.current_time - self.start_playback -
+            self.accumulated_buffer)
+            #print ("PLaying state", self.flv_timestamp, video_playback_time,
+            #self.accumulated_buffer)
+            if ((self.flv_timestamp - video_playback_time)
+                < config_pytomo.MIN_PLAYOUT_BUFFER):
+                self.state = BUFFERING_STATE
+                self.interruptions += 1
+        elif self.state == BUFFERING_STATE:
+            self.accumulated_buffer += elapsed_time
+            video_playback_time = (self.current_time - self.start_playback -
+                                   self.accumulated_buffer)
+            #print "BUFFERING_STATE ", self.flv_timestamp, video_playback_time
+            if (self.flv_timestamp - video_playback_time
+                > config_pytomo.MIN_PLAYOUT_RESTART):
+                self.state = PLAYING_STATE
+
+#            self.compute_interruptions(data_block_len, after)
+#            if self.state == PLAYING_STATE:
+#                self.accumulated_playback += (after - before)
+#                if not buff_state_tracker:
+#                    #initial_duration = self.accumulated_buffer
+#                    try:
+#                        self.initial_rate = (self.initial_data * 8
+#                                             / self.accumulated_buffer / 1000)
+#                    except ZeroDivisionError:
+#                        self.initial_rate = 0
+#                    buff_state_tracker = True
+#            elif self.state == BUFFERING_STATE:
+#                self.accumulated_buffer += (after - before)
+#                if not buff_state_tracker:
+#                    self.initial_data += data_block_len
+#            else:
+#                config_pytomo.LOG.error("Unexpected state case")
+
+
+    def process_download_other(self, data, meta_file_name):
+        """Take care of downloading part. """
+        block_size = 1024
+        start = time.time()
+        # content-length in bytes
+        self.data_len = float(data.info().get('Content-length', None))
+        config_pytomo.LOG.debug('Content-length: %s' % self.data_len)
+        #meta_file = open(meta_file_name, 'ab')
+        meta_file = open(meta_file_name, 'ab+')
+        tries = 0
+        accumulated_playback = 0
+        buff_state_tracker = False
+        accumulated_buffer = 0.0
+        initial_data = 0
+        byte_counter = 0
         while True:
             # Download and write
             before = time.time()
@@ -593,7 +708,7 @@ template')
                 break
             if (not self.encoding_rate
                 and tries <= config_pytomo.MAX_NB_TRIES_ENCODING):
-                self.compute_encoding_rate(data_block, meta_file_name)
+                self.compute_encoding_rate(meta_file_name)
                 tries += 1
             data_block_len = len(data_block)
             if data_block_len == 0:
@@ -604,14 +719,17 @@ template')
                 accumulated_playback += (after - before)
                 if not buff_state_tracker:
                     initial_duration = accumulated_buffer
-                    initial_rate = initial_data * 8 / initial_duration / 1000
-                    buff_state_tracker = True
+                    try:
+                        initial_rate = (initial_data * 8 / initial_duration /
+                                        1000)
+                    except ZeroDivisionError:
+                        initial_rate = 0
 
+                    buff_state_tracker = True
             elif self.state == BUFFERING_STATE:
                 accumulated_buffer += (after - before)
                 if not buff_state_tracker:
                     initial_data += data_block_len
-
             else:
                 config_pytomo.LOG.error("Unexpected state case")
             byte_counter += data_block_len
@@ -622,28 +740,91 @@ template')
             if config_pytomo.LOG_LEVEL == config_pytomo.DEBUG:
                 # Progress message
                 progress_stats = {
-                    'percent_str': self.calc_percent(byte_counter,
+                    'percent_str': self.calc_percent(self._total_bytes,
                                                      self.data_len),
                     'data_len_str': self.format_bytes(self.data_len),
                     'eta_str': self.calc_eta(start, time.time(), self.data_len,
-                                             byte_counter),
+                                             self._total_bytes),
                     'speed_str': self.calc_speed(start, time.time(),
-                                                 byte_counter),
+                                                 self._total_bytes),
                     # in order to avoid None convertion to float in
                     # report_progress and still have information
                     'instant_thp': str(instant_thp),
-                    'byte_counter': byte_counter,
-                    'accumulated_buffer': accumulated_buffer,
+                    'byte_counter': self._total_bytes,
+                    'current_buffer': self.current_buffer,
                 }
                 self.report_progress(progress_stats)
-        remove(meta_file_name)
+        meta_file.close()
         self.set_total_bytes(byte_counter)
         self.accumulated_playback = accumulated_playback
         self.accumulated_buffer = accumulated_buffer
         self.initial_data = initial_data
         self.initial_rate = initial_rate
-        config_pytomo.LOG.info("nb of interruptions: %d" % self.interruptions)
-        return status_code, (after - start)
+        return after - start
+
+    def process_download_flv(self, data, meta_file_name):
+        """Take care of downloading part
+        """
+        block_size = 1024
+        start = time.time()
+        # content-length in bytes
+        self.data_len = float(data.info().get('Content-length', None))
+        config_pytomo.LOG.debug('Content-length: %s' % self.data_len)
+        #meta_file = open(meta_file_name, 'ab')
+        meta_file = open(meta_file_name, 'ab+')
+        flv_tags = tags.FLV(meta_file)
+        self._total_bytes = 0
+        self.state = INITIAL_BUFFERING_STATE
+        while True:
+            # Download and write
+            before = time.time()
+            if (before - start) > self.download_time:
+                break
+            # read in bytes
+            data_block = data.read(block_size)
+            data_block_len = len(data_block)
+            if data_block_len == 0:
+                break
+            write_no_seek(meta_file, data_block)
+            self._total_bytes += data_block_len
+            self.update_with_tags(flv_tags)
+            after = time.time()
+            self.current_time = after - start
+            self.update_state(after - before)
+            block_size = self.best_block_size(after - before, data_block_len)
+            instant_thp = (8e-3 * data_block_len / (after - before)
+                           if (after - before) != 0 else None)
+            self.max_instant_thp = max(self.max_instant_thp, instant_thp)
+            if config_pytomo.LOG_LEVEL == config_pytomo.DEBUG:
+                # Progress message
+                progress_stats = {
+                    'percent_str': self.calc_percent(self._total_bytes,
+                                                     self.data_len),
+                    'data_len_str': self.format_bytes(self.data_len),
+                    'eta_str': self.calc_eta(start, time.time(), self.data_len,
+                                             self._total_bytes),
+                    'speed_str': self.calc_speed(start, time.time(),
+                                                 self._total_bytes),
+                    # in order to avoid None convertion to float in
+                    # report_progress and still have information
+                    'instant_thp': str(instant_thp),
+                    'byte_counter': self._total_bytes,
+                    'current_buffer': self.current_buffer,
+                    # For videos with mp4 encodin
+                }
+                self.report_progress(progress_stats)
+        meta_file.close()
+        return after - start
+
+#def get_initial_playback_flv(flv_tags,
+#             initial_buff_duration=config_pytomo.INITIAL_PLAYBACK_DURATION):
+#    """Return the amount of bytes corresponding to the duration given by
+#    initial_buff_duration by reading the flv tags of the file given by its name
+#    """
+#    _, initial_playback_buffer = debug_flv.debug_file(meta_file_name,
+#                                        video_time=initial_buff_duration)
+#    #print "initial buff", initial_playback_buffer
+#    return initial_playback_buffer
 
 class InfoExtractor(object):
     """Information Extractor class.
@@ -909,6 +1090,31 @@ video info for unknown reason')
                 self._downloader.trouble(u'ERROR: unable to download video '
                                          '(format may not be available)')
 
+def write_no_seek(meta_file, data_block):
+    """Write the data block at the end of file but do not change position"""
+    position = meta_file.tell()
+    # seek 0 bytes from the end of file (2)
+    meta_file.seek(0, 2)
+    meta_file.write(data_block)
+    meta_file.seek(position)
+
+def read_next_tag_or_seek(flv_tags):
+    """Read the next flv tag and return it
+    in case of incomplete tag (not enough data) seek the file
+    """
+    # is this the good place to put?
+    if not flv_tags.version:
+        flv_tags.parse_header()
+    tag = None
+    position = flv_tags.f.tell()
+    try:
+        tag = flv_tags.get_next_tag()
+    except tags.EndOfFile:
+        flv_tags.f.seek(position)
+        raise tags.EndOfFile
+
+    return tag
+
 def get_data_duration(meta_file_name):
     """Return the length (duration) of data or None
     when found, close the file
@@ -916,8 +1122,7 @@ def get_data_duration(meta_file_name):
     info = kaa_metadata.parse(meta_file_name)
     if (info and 'length' in info):
         data_duration = info.length
-        video_type = str(info.mime.split('/')[1])
-        return data_duration, video_type
+        return data_duration
 
 def get_youtube_info_extractor(download_time=config_pytomo.DOWNLOAD_TIME):
     "Return an info extractor for YouTube with correct mocks"
@@ -993,6 +1198,7 @@ def get_download_stats(ip_address_uri,
                 file_downloader.interruptions,
                 file_downloader.initial_data,
                 file_downloader.initial_rate,
+                file_downloader.initial_playback_buffer,
                 file_downloader.accumulated_buffer,
                 file_downloader.accumulated_playback,
                 file_downloader.current_buffer,

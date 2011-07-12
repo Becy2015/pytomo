@@ -201,6 +201,7 @@ class PytomoDatabase:
                        DownloadInterruptions int,
                        InitialData real,
                        InitialRate real,
+                       InitialPlaybacKBuffer real,
                        BufferingDuration real,
                        PlaybackDuration real,
                        BufferDurationAtEnd real,

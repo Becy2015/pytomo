@@ -421,14 +421,14 @@ def create_options(parser):
                       help=("Download time for the video in seconds (default %f)"
                             % config_pytomo.DOWNLOAD_TIME),
                       default=config_pytomo.DOWNLOAD_TIME)
-    parser.add_option("-B", dest="BUFFERING_VIDEO_DURATION", type='float',
+    parser.add_option("-B", dest="INITIAL_PLAYBACK_DURATION ", type='float',
                       help=("Buffering video duration in seconds (default %f)"
-                            % config_pytomo.BUFFERING_VIDEO_DURATION),
-                      default=config_pytomo.BUFFERING_VIDEO_DURATION)
+                            % config_pytomo.INITIAL_PLAYBACK_DURATION),
+                      default=config_pytomo.INITIAL_PLAYBACK_DURATION )
     parser.add_option("-M", dest="MIN_PLAYOUT_BUFFER_SIZE", type='float',
                       help=("Minimum Playout Buffer Size in seconds (default %f)"
-                            % config_pytomo.MIN_PLAYOUT_BUFFER_SIZE),
-                      default=config_pytomo.MIN_PLAYOUT_BUFFER_SIZE)
+                            % config_pytomo.MIN_PLAYOUT_BUFFER),
+                      default=config_pytomo.MIN_PLAYOUT_BUFFER)
     parser.add_option("-x", dest="LOG_PUBLIC_IP", action="store_false",
                       help=("Do NOT store public IP address of the machine "
                             "in the logs"), default=config_pytomo.LOG_PUBLIC_IP)
