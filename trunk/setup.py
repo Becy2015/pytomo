@@ -37,7 +37,7 @@ You can configure options in the command line of start_crawl.py or in the
 pytomo/config_pytomo.py file.
 """
 
-VERSION = '0.9.9'
+VERSION = '1.0.1'
 
 LICENSE = 'GPLv2'
 

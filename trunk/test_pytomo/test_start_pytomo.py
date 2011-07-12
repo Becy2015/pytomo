@@ -296,10 +296,11 @@ Options:
                         'all_time' (default 'week')
   -n PING_PACKETS       Number of packets to be sent for each ping (default 3)
   -D DOWNLOAD_TIME      Download time for the video in seconds(default 30.000000)
-  -B BUFFERING_VIDEO_DURATION
-                        Buffering video duration in seconds (default 3.000000)
+  -B INITIAL_PLAYBACK_DURATION
+                        Buffering video duration in seconds (default
+                        2000.000000)
   -M MIN_PLAYOUT_BUFFER_SIZE
-                        Minimum Playout Buffer Size in seconds(default 1.000000)
+                        Minimum Playout Buffer Size in seconds(default 0.100000)
   -x                    Do NOT store public IP address of the machine in the
                         logs
   -L LOG_LEVEL          The log level setting for the Logging module.Choose
