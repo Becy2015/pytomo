@@ -1,7 +1,8 @@
-#labels Phase-Implementation
+#labels Phase-Design
 =PYTOMO=
 
-  * Authors: Louis Plissonneau, Parikshit Juluri, Mickaël Meulle
+  * Authors: Louis Plissonneau, Parikshit Juluri, Mickaël Meulle (Orange Labs)
+  * Research Collaborator: Ernst Biersack (Eurecom), Deep Medhi (UMKC)
   * Version: 0.4.0
   * Email : pytomo@gmail.com 
   * Copyright: GPLv2
