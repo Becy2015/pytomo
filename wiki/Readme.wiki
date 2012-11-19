@@ -104,7 +104,7 @@ page from your browser.
 = External Resources =
 
 We based the lib_youtube_download on `YouTube Download` script: we simplified
-it at most and include only the classes we needed (and only YouTube video
+it at most and include only the classes we needed (and only `YouTube` video
 retrieval).
 
 The dns module is taken from the `DNS Python Package`: we just modified rdata
