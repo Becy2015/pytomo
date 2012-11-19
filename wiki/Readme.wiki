@@ -95,7 +95,7 @@ You will then connect on the respective machine (you need to know its IP and
 make sure it allows external connections, otherwise you will only be able to
 see the graphs locally on that machine):<br>
     http://127.0.0.1:5555/          <= visualisation on local machine<br>
-    http://10.193.224.73:5555/      <= visualisation from remote host
+    http://192.168.11.18:5555/      <= visualisation from remote host
 By default, the graphs are collected with information from the latest database
 in the default database directory. If a new live crawl is started, it is
 recommended to stop and start again the graphical web interface and refresh the
