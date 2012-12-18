@@ -4,7 +4,7 @@
 = Introduction =
 
 Pytomo is a Python based tomographic tool to perform analysis of video download
-rates on websites that provide streaming services, like `YouTube` and `Dailymotion`.
+rates on websites that provide video streaming services: actually `YouTube` and `Dailymotion` are implemented.
 
 = Usage =
 
@@ -75,7 +75,6 @@ Options:
 
 In order to provide installation-free package, we provide binary stand-alone
 *executables for Windows* (32 bits). The binaries files were generated with Pyinstaller (version 1.5RC1).<br>
-We also provide binary stand-alone executables for *Linux* and *Mac OS X*, but for these OS the *python call is preferred*.
 
 If you have Python installed, you can directly run the 'start_crawl.py' script at
 root or the pytomo script in bin directory.
@@ -84,12 +83,12 @@ root or the pytomo script in bin directory.
 }}}
 
 If you have Python installed and the RRDtool python bindings, you can
-directly run the 'start_server.py' script at root - you need to specify a port
+directly run the 'start_server.py' script at root - you may to specify a port
 on which to start the server and then connect to that port on the respective
-host from your favourite browser. For example, you start the graphical web
-interface on port 5555:
+host from your favourite browser. By default, the graphical web
+interface will run on port 5555:
 {{{
-    python start_server.py 5555
+    python start_server.py
 }}}
 You will then connect on the respective machine (you need to know its IP and
 make sure it allows external connections, otherwise you will only be able to
@@ -103,20 +102,6 @@ page from your browser.
 
 = External Resources =
 
-We based the lib_youtube_download on `YouTube Download` script: we simplified
-it at most and include only the classes we needed (and only `YouTube` video
-retrieval).
-
-The dns module is taken from the `DNS Python Package`: we just modified rdata
-so that `Pyinstaller` includes all needed modules.
-
-The extraction of metadata out of video files is an adaptation of `Kaa Metadata
-Python Package`: it has been modified in order to be independent of Kaa-base
-(thus pure Python and portable).
-
-The web server necessary for the graphical web interface is based on `web.py`
-that is included in the Pytomo distribution sources.
-
 The `RRDtool` python binding necessary for the graphical web interface should
 be installed from the repository of your OS distribution:<br>
 - For Debian based OS:
@@ -127,6 +112,18 @@ be installed from the repository of your OS distribution:<br>
 {{{
     yum install python-rrdtool
 }}}
+
+The library for YouTube downloads is based on the `youtube_dl` script.
+
+The dns module is taken from the `DNS Python Package`: we just modified rdata
+so that `Pyinstaller` includes all needed modules.
+
+The extraction of metadata out of video files is an adaptation of `Kaa Metadata
+Python Package`: it has been modified in order to be independent of Kaa-base
+(thus pure Python and portable).
+
+The web server necessary for the graphical web interface is based on `web.py`
+that is included in the Pytomo distribution sources.
 
 == External Links ==
 
